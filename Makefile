@@ -1,4 +1,4 @@
-.PHONY: install seed serve test gifs
+.PHONY: install seed serve test gifs portal-gifs
 
 install:
 	pip install -r requirements.txt -r requirements-dev.txt
@@ -12,6 +12,10 @@ serve:
 test:
 	pytest test_api.py -v
 
-# Regenerate the showcase GIFs in docs/gifs/ (starts a temp server itself).
+# Regenerate the terminal-demo GIFs in docs/gifs/ (starts a temp server itself).
 gifs:
 	python scripts/make_gifs.py
+
+# Regenerate the researcher-portal workflow GIFs (needs Playwright + Chromium).
+portal-gifs:
+	python scripts/make_portal_gifs.py

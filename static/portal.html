@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Research Data Portal · Government Content Removals</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: #161b22; --panel2: #1c2230; --border: #30363d;
+    --fg: #e6edf3; --muted: #9aa7b4; --accent: #58a6ff; --accent2: #3fb950;
+    --mono: ui-monospace, SFMono-Regular, "DejaVu Sans Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: radial-gradient(1200px 600px at 50% -10%, #16203a 0%, var(--bg) 55%);
+    color: var(--fg); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh; padding: 32px 16px;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 28px; }
+  header .badge {
+    display: inline-block; font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--accent); border: 1px solid var(--border); border-radius: 999px;
+    padding: 3px 12px; background: var(--panel); margin-bottom: 14px;
+  }
+  header h1 { margin: 0 0 6px; font-size: 26px; }
+  header p { margin: 0; color: var(--muted); }
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    padding: 24px; margin: 0 0 20px; box-shadow: 0 8px 30px rgba(0,0,0,.25);
+  }
+  .card h2 { margin: 0 0 4px; font-size: 18px; }
+  .card .sub { color: var(--muted); margin: 0 0 18px; font-size: 14px; }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 14px 0 6px; }
+  input {
+    width: 100%; padding: 11px 13px; border-radius: 9px; border: 1px solid var(--border);
+    background: var(--panel2); color: var(--fg); font-size: 15px;
+  }
+  input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(88,166,255,.2); }
+  button {
+    margin-top: 20px; width: 100%; padding: 12px 16px; border: 0; border-radius: 9px;
+    background: var(--accent); color: #04101f; font-size: 15px; font-weight: 650; cursor: pointer;
+  }
+  button:hover { filter: brightness(1.07); }
+  button:disabled { opacity: .6; cursor: default; }
+  .hidden { display: none !important; }
+  .error { color: #ff7b72; font-size: 14px; margin-top: 12px; min-height: 18px; }
+  .keyrow { display: flex; gap: 10px; align-items: stretch; }
+  .keybox {
+    flex: 1; font-family: var(--mono); font-size: 14px; background: #0b1020; color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 9px; padding: 12px 14px; overflow-x: auto;
+    white-space: nowrap;
+  }
+  .copy { width: auto; margin: 0; padding: 0 16px; background: var(--panel2); color: var(--fg); border: 1px solid var(--border); }
+  .hint { color: var(--muted); font-size: 13px; margin-top: 12px; }
+  .hint code { font-family: var(--mono); color: var(--fg); background: var(--panel2); padding: 1px 6px; border-radius: 5px; }
+  .pill { display: inline-block; font-family: var(--mono); font-size: 12px; padding: 2px 8px; border-radius: 6px; border: 1px solid var(--border); margin: 0 6px 6px 0; }
+  .dim { color: var(--muted); }
+  .field-cat { margin: 6px 0 16px; }
+  .field-cat h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 8px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  .tbl { margin: 0 0 18px; }
+  .tbl > .name { font-family: var(--mono); color: var(--accent); font-size: 15px; margin-bottom: 6px; }
+  th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--border); font-size: 13.5px; }
+  th { color: var(--muted); font-weight: 600; }
+  td.type { font-family: var(--mono); color: var(--accent2); }
+  td.flag { color: var(--muted); font-family: var(--mono); }
+  footer { text-align: center; color: var(--muted); font-size: 13px; margin-top: 8px; }
+  footer a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="badge">Demo portal</span>
+    <h1>Research Data Portal</h1>
+    <p>Google Government Content Removals — request access and explore the schema.</p>
+  </header>
+
+  <!-- Step 1: sign in -->
+  <section class="card" id="login-card">
+    <h2>Request API access</h2>
+    <p class="sub">Sign in with your details to be issued an API key. (Demo — no real authentication.)</p>
+    <form id="login-form" autocomplete="off">
+      <label for="name">Full name</label>
+      <input id="name" name="name" placeholder="Dr. Ada Lovelace" />
+      <label for="email">Work email</label>
+      <input id="email" name="email" placeholder="ada@royalsociety.org" />
+      <button id="submit" type="submit">Request API key</button>
+      <div class="error" id="error"></div>
+    </form>
+  </section>
+
+  <!-- Step 2: issued key -->
+  <section class="card hidden" id="key-card">
+    <h2>Welcome, <span id="who">researcher</span> 👋</h2>
+    <p class="sub">Your API key has been issued. Keep it secret.</p>
+    <div class="keyrow">
+      <div class="keybox" id="apikey"></div>
+      <button class="copy" id="copy" type="button">Copy</button>
+    </div>
+    <p class="hint">Send it on every request as the <code>X-API-Key</code> header. Try it in the
+      <a href="/docs" target="_blank" rel="noopener">interactive API docs</a>.</p>
+  </section>
+
+  <!-- Step 3: schema -->
+  <section class="card hidden" id="schema-card">
+    <h2>Dataset schema</h2>
+    <p class="sub">Everything you can query, loaded with your new key.</p>
+
+    <div id="fields">
+      <div class="field-cat">
+        <h3>Dimensions <span class="dim">· filter / group / sort</span></h3>
+        <div id="dimensions"></div>
+      </div>
+      <div class="field-cat">
+        <h3>Measures <span class="dim">· filter / aggregate</span></h3>
+        <div id="measures"></div>
+      </div>
+    </div>
+
+    <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:18px 0 10px;">Tables</h3>
+    <div id="tables"></div>
+  </section>
+
+  <footer>Powered by the api-demo Structured Query API · <a href="/docs">Swagger UI</a></footer>
+</div>
+
+<script>
+const $ = (sel) => document.querySelector(sel);
+let apiKey = null;
+
+function show(el) { el.classList.remove("hidden"); }
+
+async function api(path, key) {
+  const res = await fetch(path, { headers: key ? { "X-API-Key": key } : {} });
+  if (!res.ok) throw new Error(`${path} → ${res.status}`);
+  return res.json();
+}
+
+function pills(target, names) {
+  $(target).innerHTML = names.map((n) => `<span class="pill">${n}</span>`).join("");
+}
+
+function renderTable(t) {
+  const rows = t.columns.map((c) => `
+    <tr>
+      <td>${c.name}</td>
+      <td class="type">${c.type}</td>
+      <td class="flag">${c.pk ? "PK" : (c.notnull ? "NOT NULL" : "")}</td>
+    </tr>`).join("");
+  return `<div class="tbl">
+    <div class="name">${t.table}</div>
+    <table><thead><tr><th>column</th><th>type</th><th></th></tr></thead><tbody>${rows}</tbody></table>
+  </div>`;
+}
+
+async function loadSchema() {
+  const fields = await api("/fields", apiKey);
+  pills("#dimensions", fields.dimensions.fields);
+  pills("#measures", fields.measures.fields);
+
+  const { tables } = await api("/tables", apiKey);
+  const details = [];
+  for (const name of tables) {
+    details.push(await api(`/schema/${name}`, apiKey));
+  }
+  $("#tables").innerHTML = details.map(renderTable).join("");
+  show($("#schema-card"));
+}
+
+$("#login-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  $("#error").textContent = "";
+  const name = $("#name").value.trim();
+  const email = $("#email").value.trim();
+  if (!name || !email) { $("#error").textContent = "Please fill in both fields."; return; }
+
+  const btn = $("#submit");
+  btn.disabled = true; btn.textContent = "Issuing key…";
+  try {
+    const res = await fetch("/portal/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Registration failed");
+
+    apiKey = data.api_key;
+    $("#who").textContent = data.name;
+    $("#apikey").textContent = apiKey;
+    show($("#key-card"));
+    await loadSchema();
+  } catch (err) {
+    $("#error").textContent = err.message;
+  } finally {
+    btn.disabled = false; btn.textContent = "Request API key";
+  }
+});
+
+$("#copy").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(apiKey || ""); } catch (_) {}
+  const b = $("#copy"); const t = b.textContent; b.textContent = "Copied!";
+  setTimeout(() => (b.textContent = t), 1200);
+});
+</script>
+</body>
+</html>

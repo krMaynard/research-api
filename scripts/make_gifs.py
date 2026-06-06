@@ -24,17 +24,15 @@ from __future__ import annotations
 import argparse
 import os
 import re
-import socket
 import subprocess
 import sys
-import time
-import urllib.request
 from pathlib import Path
 
 import pyte
 from PIL import Image, ImageDraw, ImageFont
 
-ROOT = Path(__file__).resolve().parent.parent
+from _demo_server import ROOT, running_server
+
 OUT_DIR = ROOT / "docs" / "gifs"
 
 # ── Terminal / rendering geometry ─────────────────────────────────────────────
@@ -87,40 +85,10 @@ def _strip_ansi(s: str) -> str:
     return _ANSI_RE.sub("", s)
 
 
-# ── Server lifecycle ──────────────────────────────────────────────────────────
+# ── Capture ───────────────────────────────────────────────────────────────────
 
-def _free_port() -> int:
-    with socket.socket() as s:
-        s.bind(("127.0.0.1", 0))
-        return s.getsockname()[1]
-
-
-def _ensure_db() -> None:
-    if not (ROOT / "demo.db").exists():
-        print("seeding demo.db …")
-        subprocess.run([sys.executable, "seed.py"], cwd=ROOT, check=True)
-
-
-def _start_server(port: int) -> subprocess.Popen:
-    proc = subprocess.Popen(
-        [sys.executable, "-m", "uvicorn", "main:app", "--port", str(port), "--log-level", "warning"],
-        cwd=ROOT,
-    )
-    base = f"http://127.0.0.1:{port}"
-    for _ in range(60):
-        if proc.poll() is not None:  # fail fast if uvicorn died (bad port, import error, …)
-            raise RuntimeError(f"uvicorn exited prematurely with code {proc.returncode}")
-        try:
-            urllib.request.urlopen(f"{base}/healthz", timeout=1)
-            return proc
-        except Exception:
-            time.sleep(0.25)
-    proc.terminate()
-    raise RuntimeError("server did not come up")
-
-
-def _capture_demo(port: int) -> str:
-    env = {**os.environ, "DEMO_BASE_URL": f"http://127.0.0.1:{port}"}
+def _capture_demo(base: str) -> str:
+    env = {**os.environ, "DEMO_BASE_URL": base}
     proc = subprocess.run(
         [sys.executable, "demo.py"], cwd=ROOT, env=env, capture_output=True, timeout=120
     )
@@ -252,17 +220,8 @@ def main() -> None:
     args = ap.parse_args()
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    _ensure_db()
-    port = _free_port()
-    server = _start_server(port)
-    try:
-        raw = _capture_demo(port)
-    finally:
-        server.terminate()
-        try:
-            server.wait(timeout=10)
-        except subprocess.TimeoutExpired:
-            server.kill()
+    with running_server() as base:
+        raw = _capture_demo(base)
 
     renderer = Renderer()
     clips = _segment(raw)

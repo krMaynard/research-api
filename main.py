@@ -45,13 +45,15 @@ from datetime import datetime, timezone
 from typing import Any, Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Response
-from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, PlainTextResponse
 from fastapi.security import APIKeyHeader
 from pydantic import BaseModel, ConfigDict, Field
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
-DB_PATH = os.getenv("DB_PATH", os.path.join(os.path.dirname(__file__), "demo.db"))
+HERE = os.path.dirname(__file__)
+STATIC_DIR = os.path.join(HERE, "static")
+DB_PATH = os.getenv("DB_PATH", os.path.join(HERE, "demo.db"))
 ROW_LIMIT = int(os.getenv("ROW_LIMIT", "100000"))
 WORKER_THREADS = int(os.getenv("WORKER_THREADS", "4"))
 QUERY_TIMEOUT_SECONDS = int(os.getenv("QUERY_TIMEOUT_SECONDS", "300"))
@@ -76,18 +78,34 @@ def _load_api_keys() -> dict[str, dict[str, str]]:
 
 API_KEYS = _load_api_keys()
 
+# Keys issued at runtime by the demo researcher portal (see /portal). Kept in a
+# separate in-memory map so they don't mutate the configured key set. Like the
+# in-memory job store, this is per-process — fine for the demo; a real portal
+# would persist these in the secret store / database.
+_issued_keys: dict[str, dict[str, str]] = {}
+_issued_lock = threading.Lock()
+
+
+def _lookup_principal(key: str) -> dict[str, str] | None:
+    if key in API_KEYS:
+        return API_KEYS[key]
+    with _issued_lock:
+        return _issued_keys.get(key)
+
+
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
 
 def require_api_key(key: str | None = Depends(api_key_header)) -> dict[str, str]:
-    if not key or key not in API_KEYS:
+    principal = _lookup_principal(key) if key else None
+    if principal is None:
         raise HTTPException(
             status_code=401,
             detail="Missing or invalid API key. Set header `X-API-Key: <key>`.",
         )
-    return {"key": key, **API_KEYS[key]}
+    return {"key": key, **principal}
 
 
 # ── Secure download URLs ──────────────────────────────────────────────────────
@@ -687,6 +705,8 @@ def root() -> dict[str, Any]:
         "query_style": "TikTok-Research-API-style structured parameters (no SQL accepted)",
         "auth": "X-API-Key header required for all endpoints except `/`, `/docs`, `/openapi.json`",
         "endpoints": {
+            "GET /portal": "Researcher portal (web UI: sign in, get a key, browse the schema)",
+            "POST /portal/register": "Issue a demo API key for a researcher",
             "POST /query": "Submit a structured query, returns 202 + job_id",
             "GET /jobs": "List your jobs",
             "GET /jobs/{job_id}": "Job status (your jobs only)",
@@ -703,6 +723,45 @@ def root() -> dict[str, Any]:
         "row_limit": ROW_LIMIT,
         "worker_threads": WORKER_THREADS,
         "store": "upstash" if UPSTASH_REDIS_REST_URL else ("redis" if REDIS_URL else "memory"),
+    }
+
+
+# ── Researcher portal ─────────────────────────────────────────────────────────
+#
+# A tiny self-service portal: a researcher "signs in" with a name + email and is
+# issued a working API key, then the page browses the schema. There is no real
+# auth here — it's a demo of the onboarding flow. In production this would sit
+# behind SSO and persist issued keys in a secret store / database.
+
+
+class RegisterRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=120, description="Researcher's name.")
+    email: str = Field(..., min_length=3, max_length=254, description="Contact email.")
+
+
+@app.get("/portal", response_class=HTMLResponse)
+def portal_page() -> FileResponse:
+    """Serve the researcher portal single-page app."""
+    path = os.path.join(STATIC_DIR, "portal.html")
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="Portal page not found.")
+    return FileResponse(path, media_type="text/html")
+
+
+@app.post("/portal/register", status_code=201)
+def portal_register(body: RegisterRequest) -> dict[str, Any]:
+    """Issue a demo API key for a researcher (no real authentication)."""
+    if "@" not in body.email:
+        raise HTTPException(status_code=400, detail="Please provide a valid email address.")
+    key = "rk_" + secrets.token_hex(16)
+    principal = {"name": body.name.strip(), "email": body.email.strip()}
+    with _issued_lock:
+        _issued_keys[key] = principal
+    return {
+        "api_key": key,
+        "name": principal["name"],
+        "header": "X-API-Key",
+        "note": "Pass this key in the X-API-Key header on every request. Demo key — not for production.",
     }
 
 

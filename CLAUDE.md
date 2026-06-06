@@ -26,7 +26,10 @@ Built to demonstrate two things:
 | `main.py` | FastAPI app — all endpoints, job runner, in-memory job registry |
 | `seed.py` | Build `demo.db` from the source JSON in `../krMaynard.github.io/data/` |
 | `demo.py` | Narrated walkthrough script (run after starting the server) |
-| `scripts/make_gifs.py` | Headless showcase-GIF generator (pyte + Pillow) → `docs/gifs/` |
+| `static/portal.html` | Researcher portal single-page app (served at `/portal`) |
+| `scripts/_demo_server.py` | Shared helper: seed DB + run a temp server (used by the GIF generators) |
+| `scripts/make_gifs.py` | Headless terminal-demo GIF generator (pyte + Pillow) → `docs/gifs/` |
+| `scripts/make_portal_gifs.py` | Portal-workflow GIF generator (Playwright + Pillow) → `docs/gifs/portal-*.gif` |
 | `requirements.txt` | `fastapi` + `uvicorn[standard]` |
 | `demo.db` | SQLite DB (git-ignored, produced by `seed.py`) |
 
@@ -97,6 +100,10 @@ bind with `?`).
 
 - **Structured params, not SQL**: the only way to query is the validated
   parameter model, compiled to one parameterised SELECT — no caller SQL runs.
+- **Researcher portal** (`/portal` + `POST /portal/register`): a demo onboarding
+  UI. Registration issues an ephemeral key into an in-memory `_issued_keys` map;
+  `require_api_key` accepts configured keys *or* issued ones (`_lookup_principal`).
+  Per-process, like the job store — production would persist keys + add real auth.
 - **202 + polling** instead of blocking HTTP: lets long queries run without
   tying up connections or timing out at proxies.
 - **Signed download URLs**: a done job exposes `download_urls` (json/csv) —
@@ -129,6 +136,8 @@ code-review comments** (`gemini-code-assist[bot]`) using the GitHub MCP tools:
 | Method | Path | Auth | Notes |
 |--------|------|------|-------|
 | GET | `/` | — | Service info |
+| GET | `/portal` | — | Researcher portal web UI (sign in → key → schema) |
+| POST | `/portal/register` | — | Issue a demo API key (`{name, email}`) |
 | GET | `/fields` | key | Queryable fields + operations |
 | GET | `/tables` | key | List tables |
 | GET | `/schema/{table}` | key | Column info |
