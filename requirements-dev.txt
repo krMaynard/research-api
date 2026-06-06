@@ -3,3 +3,6 @@ httpx>=0.27
 # Showcase GIF generation (scripts/make_gifs.py)
 pyte>=0.8
 Pillow>=10.0
+# Portal workflow GIFs (scripts/make_portal_gifs.py) — needs a Chromium too:
+#   python -m playwright install chromium
+playwright>=1.49

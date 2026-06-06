@@ -52,6 +52,41 @@ class TestInfra:
         assert client.get("/readyz").status_code == 200
 
 
+# ── Researcher portal ─────────────────────────────────────────────────────────
+
+class TestPortal:
+    def test_portal_page_served(self):
+        r = client.get("/portal")
+        assert r.status_code == 200
+        assert "text/html" in r.headers["content-type"]
+        assert "Research Data Portal" in r.text
+
+    def test_register_issues_working_key(self):
+        r = client.post("/portal/register", json={"name": "Ada Lovelace", "email": "ada@rs.org"})
+        assert r.status_code == 201
+        body = r.json()
+        key = body["api_key"]
+        assert key.startswith("rk_")
+        assert body["name"] == "Ada Lovelace"
+        # The issued key authenticates real API calls.
+        assert client.get("/fields", headers={"X-API-Key": key}).status_code == 200
+        assert client.get("/tables", headers={"X-API-Key": key}).status_code == 200
+
+    def test_register_bad_email_is_400(self):
+        r = client.post("/portal/register", json={"name": "Ada", "email": "not-an-email"})
+        assert r.status_code == 400
+
+    def test_register_whitespace_name_is_400(self):
+        r = client.post("/portal/register", json={"name": "   ", "email": "ada@rs.org"})
+        assert r.status_code == 400
+
+    def test_register_missing_field_is_422(self):
+        assert client.post("/portal/register", json={"name": "Ada"}).status_code == 422
+
+    def test_unknown_issued_key_rejected(self):
+        assert client.get("/fields", headers={"X-API-Key": "rk_deadbeef"}).status_code == 401
+
+
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
 class TestAuth:

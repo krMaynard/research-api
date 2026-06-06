@@ -26,6 +26,24 @@ result, secure download, validation, and isolation:
 A GIF for every step lives in [`docs/gifs/`](docs/gifs/). They're generated
 headlessly from `demo.py` — see [Regenerating the showcase GIFs](#regenerating-the-showcase-gifs).
 
+## Researcher portal
+
+A self-service web portal at **`/portal`**: a researcher signs in with their
+name and email, is issued a working API key, and the page browses the dataset
+schema (queryable fields + tables/columns) using that key.
+
+![Researcher portal workflow](docs/gifs/portal-full.gif)
+
+| Sign in | API key issued | Schema |
+|---|---|---|
+| ![Login](docs/gifs/portal-1-login.gif) | ![Key](docs/gifs/portal-2-key.gif) | ![Schema](docs/gifs/portal-3-schema.gif) |
+
+Open `http://127.0.0.1:8000/portal` after starting the server. It's a demo
+onboarding flow — there's no real authentication; `POST /portal/register`
+issues an ephemeral in-memory key (production would sit behind SSO and persist
+keys in a secret store). The issued key works on every API endpoint, exactly
+like the built-in `alice`/`bob` keys.
+
 ## No SQL — structured query parameters
 
 Clients never send SQL. They describe what they want with structured
@@ -223,6 +241,8 @@ curl -i -H 'X-API-Key: bob' "http://127.0.0.1:8000/jobs/$JOB"   # -> 404
 | Method | Path                                | Auth | Description                                    |
 |--------|-------------------------------------|------|------------------------------------------------|
 | GET    | `/`                                 | —    | Service info                                   |
+| GET    | `/portal`                           | —    | Researcher portal (web UI)                     |
+| POST   | `/portal/register`                  | —    | Issue a demo API key (`{name, email}`)         |
 | GET    | `/healthz`                          | —    | Liveness probe                                 |
 | GET    | `/readyz`                           | —    | Readiness probe (checks DB connection)         |
 | GET    | `/fields`                           | key  | List queryable fields and operations           |
@@ -410,6 +430,16 @@ python scripts/make_gifs.py --no-full    # per-step only
 Per-step clips are detected from the demo's `── Step N:` headers, so they stay
 in sync with the script automatically — add a step to `demo.py` and it gets its
 own GIF on the next run.
+
+The **portal** GIFs come from `scripts/make_portal_gifs.py`, which drives the
+real `/portal` page in headless Chromium (Playwright) and assembles the frames
+the same way:
+
+```bash
+pip install -r requirements-dev.txt
+python -m playwright install chromium   # one-time browser download
+make portal-gifs                        # → docs/gifs/portal-*.gif
+```
 
 ## Safety notes
 

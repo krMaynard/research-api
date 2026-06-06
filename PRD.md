@@ -123,6 +123,14 @@ queued → running → done
 | F-24 | A `done` job's status object includes `download_urls` (`json` and `csv`): signed, expiring **capability URLs** for the result. The signature is an HMAC-SHA256 over `job_id:format:expires` using `DOWNLOAD_URL_SECRET`. |
 | F-25 | `GET /jobs/{id}/download?format=…&expires=…&sig=…` serves the result as a file attachment **without an API key** — the valid signature is the authorisation. The signature is verified before any store lookup, so any invalid signature yields `403` regardless of whether the job id exists (no existence probing). An expired link yields `410`; a valid signature for a missing/expired job yields `404`; a not-yet-done job yields `409`. Link lifetime is `DOWNLOAD_URL_TTL_SECONDS` (default 3600). |
 
+### 3.7 Researcher Portal
+
+| ID | Requirement |
+|----|-------------|
+| F-26 | `GET /portal` serves a single-page web UI (no API key) where a researcher signs in with a name + email. |
+| F-27 | `POST /portal/register` (`{name, email}`) issues a working demo API key (`rk_…`) stored in an in-memory map; the key authenticates every other endpoint via the same `X-API-Key` mechanism. Invalid email → `400`; missing fields → `422`. This is a demo onboarding flow — no real authentication; production would use SSO and persist keys. |
+| F-28 | After issuing the key, the portal page loads and displays the dataset schema (queryable dimensions/measures from `/fields`, and each table's columns from `/tables` + `/schema/{table}`) using the issued key. |
+
 ---
 
 ## 4. Non-Functional Requirements
