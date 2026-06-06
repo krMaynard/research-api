@@ -108,6 +108,8 @@ def _start_server(port: int) -> subprocess.Popen:
     )
     base = f"http://127.0.0.1:{port}"
     for _ in range(60):
+        if proc.poll() is not None:  # fail fast if uvicorn died (bad port, import error, …)
+            raise RuntimeError(f"uvicorn exited prematurely with code {proc.returncode}")
         try:
             urllib.request.urlopen(f"{base}/healthz", timeout=1)
             return proc
@@ -151,12 +153,27 @@ def _segment(raw: str) -> list[tuple[str, str, str]]:
 
 # ── Rendering ─────────────────────────────────────────────────────────────────
 
+def _load_font(path: str, name: str, size: int):
+    """Load a mono TTF by absolute path, then by family name, then default.
+
+    The absolute paths are where DejaVu lives on Debian/Ubuntu; the name lets
+    Pillow find it via the OS font config on macOS / other distros; the default
+    bitmap font is a last resort so the script never hard-crashes.
+    """
+    for candidate in (path, name):
+        try:
+            return ImageFont.truetype(candidate, size)
+        except OSError:
+            continue
+    return ImageFont.load_default()
+
+
 class Renderer:
     def __init__(self) -> None:
-        self.font = ImageFont.truetype(FONT_REGULAR, FONT_SIZE)
-        self.font_bold = ImageFont.truetype(FONT_BOLD, FONT_SIZE)
-        bbox = self.font.getbbox("M")
-        self.cw = bbox[2] - bbox[0] + 1
+        self.font = _load_font(FONT_REGULAR, "DejaVuSansMono.ttf", FONT_SIZE)
+        self.font_bold = _load_font(FONT_BOLD, "DejaVuSansMono-Bold.ttf", FONT_SIZE)
+        # Cell width = the font's advance, so multi-cell runs stay column-aligned.
+        self.cw = max(1, round(self.font.getlength("M")))
         self.ch = int(FONT_SIZE * 1.45)
         self.w = COLS * self.cw + 2 * MARGIN
         self.h = ROWS * self.ch + 2 * MARGIN
@@ -169,16 +186,14 @@ class Renderer:
             col = 0
             while col < COLS:
                 cell = line[col]
-                ch = cell.data or " "
                 fg = PALETTE.get(cell.fg, DEFAULT_FG) if cell.fg != "default" else DEFAULT_FG
                 bold = bool(cell.bold)
-                # Greedy run of same-styled cells, skipping blanks.
-                run = ch
+                # Greedy run of same-styled cells. Spaces are kept in the run
+                # (the background is uniform) so each styled span is one draw call.
+                run = cell.data or " "
                 nxt = col + 1
                 while nxt < COLS:
                     c2 = line[nxt]
-                    if (c2.data or " ") == " ":
-                        break
                     if c2.fg != cell.fg or bool(c2.bold) != bold:
                         break
                     run += c2.data or " "
@@ -187,7 +202,7 @@ class Renderer:
                     x = MARGIN + col * self.cw
                     y = MARGIN + row * self.ch
                     draw.text((x, y), run, font=self.font_bold if bold else self.font, fill=fg)
-                col = nxt if nxt > col else col + 1
+                col = nxt
         return img
 
 
