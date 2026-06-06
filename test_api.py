@@ -558,3 +558,54 @@ class TestLogging:
     def test_request_emits_request_id_header(self):
         r = client.get("/healthz")
         assert re.fullmatch(r"[0-9a-f]{16}", r.headers["X-Request-ID"])
+
+    def test_formatter_uses_record_created_timestamp(self):
+        import logging
+
+        from main import JsonLogFormatter
+
+        rec = logging.LogRecord("api_demo", logging.INFO, __file__, 1, "e", None, None)
+        rec.created = 1577836800.0  # 2020-01-01T00:00:00Z
+        line = json.loads(JsonLogFormatter().format(rec))
+        assert line["ts"].startswith("2020-01-01T00:00:00")
+
+    def test_invalid_log_level_falls_back_to_info(self):
+        import logging
+
+        import main
+
+        original = main.LOG_LEVEL
+        main.LOG_LEVEL = "DEBUGGING"  # not a real level
+        try:
+            assert main._configure_logging().level == logging.INFO
+        finally:
+            main.LOG_LEVEL = original
+            main._configure_logging()  # restore real config on the shared logger
+
+    def test_unhandled_endpoint_exception_is_logged(self):
+        # Regression guard: confirm our @app.middleware("http") still catches
+        # unhandled endpoint exceptions (Starlette propagates them through
+        # BaseHTTPMiddleware), so they reach the structured "request_error" log.
+        import io
+        import logging
+
+        from fastapi import FastAPI
+        from starlette.middleware.base import BaseHTTPMiddleware
+
+        import main
+
+        probe = FastAPI()
+        probe.add_middleware(BaseHTTPMiddleware, dispatch=main.log_requests)
+
+        @probe.get("/boom")
+        def boom():
+            raise ValueError("kaboom")
+
+        buf = io.StringIO()
+        handler = logging.StreamHandler(buf)
+        main.logger.addHandler(handler)
+        try:
+            TestClient(probe, raise_server_exceptions=False).get("/boom")
+        finally:
+            main.logger.removeHandler(handler)
+        assert "request_error" in buf.getvalue()

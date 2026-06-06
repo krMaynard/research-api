@@ -99,7 +99,7 @@ LOG_FORMAT = os.getenv("LOG_FORMAT", "json").lower()
 class JsonLogFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         payload: dict[str, Any] = {
-            "ts": datetime.now(timezone.utc).isoformat(),
+            "ts": datetime.fromtimestamp(record.created, timezone.utc).isoformat(),
             "level": record.levelname,
             "event": record.getMessage(),
         }
@@ -119,7 +119,10 @@ def _configure_logging() -> logging.Logger:
         handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
     log = logging.getLogger("api_demo")
     log.handlers[:] = [handler]
-    log.setLevel(LOG_LEVEL)
+    try:
+        log.setLevel(LOG_LEVEL)
+    except ValueError:  # unknown LOG_LEVEL — don't crash startup
+        log.setLevel(logging.INFO)
     log.propagate = False  # don't double-emit through uvicorn's root handler
     return log
 
@@ -871,7 +874,8 @@ def _execute_job(job_id: str) -> None:
                 error=f"{type(exc).__name__}: {exc}",
                 finished_at=_now(),
             )
-            logger.warning(
+            # Unexpected failure — keep the traceback (JsonLogFormatter puts it in "exc").
+            logger.exception(
                 "job_failed",
                 extra={"data": {"job_id": job_id, "error": f"{type(exc).__name__}: {exc}", "duration_ms": _elapsed_ms()}},
             )
