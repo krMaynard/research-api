@@ -756,6 +756,7 @@ async def log_requests(request: Request, call_next):
     )
     response.headers["X-Request-ID"] = request_id
     response.headers["X-Version"] = APP_VERSION
+    response.headers["X-Content-Type-Options"] = "nosniff"
     return response
 
 

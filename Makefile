@@ -1,4 +1,4 @@
-.PHONY: install seed serve test gifs portal-gifs
+.PHONY: install seed serve test lint gifs portal-gifs
 
 install:
 	pip install -r requirements.txt -r requirements-dev.txt
@@ -11,6 +11,10 @@ serve:
 
 test:
 	pytest test_api.py -v
+
+# Same lint CI runs on every PR/push.
+lint:
+	python -m pyflakes main.py seed.py demo.py conftest.py test_api.py
 
 # Regenerate the terminal-demo GIFs in docs/gifs/ (starts a temp server itself).
 gifs:

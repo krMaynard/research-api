@@ -917,3 +917,7 @@ class TestVersion:
     def test_x_version_header_on_every_response(self):
         r = client.get("/healthz")
         assert r.headers.get("X-Version") == "dev"
+
+    def test_nosniff_header_on_every_response(self):
+        r = client.get("/healthz")
+        assert r.headers.get("X-Content-Type-Options") == "nosniff"
