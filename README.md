@@ -487,6 +487,7 @@ All tuneable values are read from environment variables at startup:
 | `ADMIN_EMAILS` | _(empty)_ | Comma-separated admin allowlist — implicitly approved, can approve/revoke others |
 | `GOOGLE_SESSION_TTL_SECONDS` | `604800` | Lifetime of a first-party session minted after Google sign-in (7 days) |
 | `ALLOW_DEMO_KEYS` | `1` | Demo `alice`/`bob` keys + open `/portal/register`; set `0` in production |
+| `ALLOWED_ORIGINS` | _(empty — same-origin only)_ | Comma-separated browser origins allowed for cross-origin API calls (CORS) |
 | `DOWNLOAD_URL_SECRET` | _(random per process)_ | HMAC secret for signing download URLs — set a stable value in production |
 | `DOWNLOAD_URL_TTL_SECONDS` | `3600` | How long a signed download URL stays valid |
 | `ISSUED_KEY_TTL_SECONDS` | `2592000` | Lifetime of a portal-issued API key (30 days) |
@@ -507,25 +508,50 @@ Copy `.env.example` to `.env` and edit before running Docker Compose.
 
 ## Deploying
 
-The service ships with a `Dockerfile` and `docker-compose.yml`. To run it
-with Redis-backed job persistence:
+The image is **self-contained**: `demo.db` is seeded at build time from the
+vendored dataset snapshot (`data/vlop-dsa.json`), so the running container needs
+no external data source. Refresh the snapshot with `scripts/refresh-dataset.sh`
+when the upstream dataset changes, then rebuild.
+
+### Docker Compose (with Redis)
 
 ```bash
-# 1. Build the database (once)
-python seed.py --db demo.db
+cp .env.example .env        # edit secrets (DOWNLOAD_URL_SECRET at minimum)
+docker-compose up --build   # web on :8000 (container $PORT 8080) + Redis
 
-# 2. Configure
-cp .env.example .env   # edit API_KEYS_JSON at minimum
-
-# 3. Start
-docker-compose up --build
-
-# Verify
 curl http://localhost:8000/readyz
 ```
 
-For HTTPS and a public domain, see `PRODUCTIONIZE.md` — Railway and Fly.io
-are the fastest paths (automatic HTTPS, managed Redis, ~1 hour to live).
+### Deploy to Cloud Run
+
+Production config: Google sign-in only (`ALLOW_DEMO_KEYS=0`), a stable
+`DOWNLOAD_URL_SECRET`, and Redis for cross-instance job/session/registration
+state. A ready-to-edit `service.yaml` (Knative manifest with startup/liveness
+probes) is included.
+
+```bash
+PROJECT_ID=your-project; REGION=us-central1
+
+# 1. Build & push the image (Cloud Build → Artifact Registry)
+gcloud artifacts repositories create api-demo --repository-format=docker --location="$REGION" 2>/dev/null || true
+gcloud builds submit --tag "$REGION-docker.pkg.dev/$PROJECT_ID/api-demo/api-demo:latest"
+
+# 2. Create the secrets it references
+printf '%s' "$(openssl rand -hex 32)" | gcloud secrets create api-demo-download-secret --data-file=- 2>/dev/null || true
+printf '%s' "redis://default:PASSWORD@HOST:6379" | gcloud secrets create api-demo-redis-url --data-file=- 2>/dev/null || true
+
+# 3. Edit service.yaml — image, GOOGLE_CLIENT_ID, ADMIN_EMAILS, PUBLIC_BASE_URL — then deploy
+gcloud run services replace service.yaml --region "$REGION"
+gcloud run services add-iam-policy-binding api-demo --region "$REGION" \
+  --member=allUsers --role=roles/run.invoker        # public; omit for IAM-gated
+```
+
+Then create an **OAuth 2.0 Web client ID** in Google Cloud and add the Cloud Run
+URL (and any custom domain) to its *Authorized JavaScript origins* — that's the
+value of `GOOGLE_CLIENT_ID`. Sign in at `/portal`; the first `ADMIN_EMAILS`
+account is auto-approved and can approve others.
+
+For other targets (Railway, Fly.io) and deeper hardening, see `PRODUCTIONIZE.md`.
 
 ## Running the tests
 

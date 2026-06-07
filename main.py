@@ -60,6 +60,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, PlainTextResponse
 from fastapi.security import APIKeyHeader
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest
@@ -689,6 +690,25 @@ app = FastAPI(
     ),
     version="0.5.0",
 )
+
+
+def _cors_origins() -> list[str]:
+    """Allowed browser origins for cross-origin API calls, from ALLOWED_ORIGINS
+    (comma-separated). Empty by default: the bundled portal is same-origin, so no
+    CORS headers are emitted unless a separate frontend origin is configured."""
+    return [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
+
+
+_CORS_ORIGINS = _cors_origins()
+if _CORS_ORIGINS:
+    # Auth is via the X-API-Key header (no cookies), so credentials aren't needed.
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=_CORS_ORIGINS,
+        allow_methods=["*"],
+        allow_headers=["*"],
+        allow_credentials=False,
+    )
 
 
 @app.middleware("http")

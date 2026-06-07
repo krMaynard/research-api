@@ -27,9 +27,13 @@ Built to demonstrate two things:
 | File | Purpose |
 |------|---------|
 | `main.py` | FastAPI app — all endpoints, job runner, in-memory job registry |
-| `seed.py` | Build `demo.db` from `../krMaynard.github.io/data/vlop-dsa.json` (`build_db()` is reused by `conftest.py`) |
+| `seed.py` | Build `demo.db` from a `vlop-dsa.json` (`--source`/`SEED_SOURCE_JSON`; default = sibling repo) — `build_db()` is reused by `conftest.py` |
+| `data/vlop-dsa.json` | Vendored dataset snapshot — what the Docker image is seeded from (refresh via `scripts/refresh-dataset.sh`) |
 | `demo.py` | Narrated walkthrough script (run after starting the server) |
-| `static/portal.html` | Researcher portal single-page app (served at `/portal`) |
+| `static/portal.html` | Researcher portal single-page app (served at `/portal`) — Google sign-in + demo fallback |
+| `Dockerfile` | Self-contained image: installs deps, seeds `demo.db` at build time, runs uvicorn on `$PORT` as non-root |
+| `service.yaml` | Cloud Run (Knative) manifest — prod env + startup/liveness probes |
+| `scripts/refresh-dataset.sh` | Re-vendor `data/vlop-dsa.json` from the canonical sibling-repo dataset |
 | `scripts/_demo_server.py` | Shared helper: seed DB + run a temp server (used by the GIF generators) |
 | `scripts/make_gifs.py` | Headless terminal-demo GIF generator (pyte + Pillow) → `docs/gifs/` |
 | `scripts/make_portal_gifs.py` | Portal-workflow GIF generator (Playwright + Pillow) → `docs/gifs/portal-*.gif` |

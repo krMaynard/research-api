@@ -2,15 +2,13 @@ services:
   web:
     build: .
     ports:
-      - "8000:8000"
+      - "8000:8080"           # host 8000 → container $PORT (8080)
     env_file: .env
     environment:
       - REDIS_URL=redis://redis:6379/0
     depends_on:
       - redis
-    volumes:
-      # Seed demo.db locally first: python seed.py --db demo.db
-      - ./demo.db:/app/demo.db:ro
+    # The image seeds demo.db at build time — no host volume / pre-seed needed.
     restart: unless-stopped
 
   redis:

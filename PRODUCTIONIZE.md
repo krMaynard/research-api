@@ -11,12 +11,14 @@ The following items are **complete** — no further code changes required:
 |------|-------------|
 | Config from env vars | `DB_PATH`, `ROW_LIMIT`, `WORKER_THREADS`, `QUERY_TIMEOUT_SECONDS`, `REDIS_URL`, `JOB_TTL_SECONDS`, `API_KEYS_JSON` — all read from environment with safe defaults |
 | Persistent job storage | `RedisJobStore` used automatically when `REDIS_URL` is set; `MemoryJobStore` is the fallback for local dev |
-| Dockerfile | Python 3.12-slim image, `uvicorn` entrypoint, ready to push to any registry |
-| docker-compose | Wires web + Redis together; mounts `demo.db` as read-only volume |
+| Dockerfile | Python 3.12-slim, **seeds `demo.db` at build time** from the vendored snapshot, runs `uvicorn` on `$PORT` as a non-root user — self-contained, ready for any registry |
+| Cloud Run | `service.yaml` (Knative) with prod env (`ALLOW_DEMO_KEYS=0`, secrets) + startup/liveness probes; see README → "Deploy to Cloud Run" |
+| docker-compose | Wires web + Redis together (image self-seeds — no volume / pre-seed) |
 | Health endpoints | `GET /healthz` (liveness) and `GET /readyz` (checks DB connection) |
-| Smoke tests | 19 tests covering auth, query lifecycle, job isolation, write rejection, and delete. Run with `pytest` — no Redis required |
-| seed.py data path | `--source` / `--db` flags so seeding works outside the sibling-repo layout |
-| Portal key handling | Portal-issued keys (`/portal/register`) persist in Redis when configured (survive restarts, shared across workers), expire after `ISSUED_KEY_TTL_SECONDS`, are registration-rate-limited per IP/email, and are revocable via `DELETE /portal/key`. Open registration still needs real auth (SSO) before public exposure. |
+| Smoke tests | 85 tests covering auth (incl. Google sign-in + admin approval), query lifecycle, job isolation, write rejection, CORS, and delete. Run with `pytest` — no Redis required |
+| seed.py data path | `--source` / `--db` flags (and `SEED_SOURCE_JSON` / `DB_PATH`) so seeding works outside the sibling-repo layout |
+| Authentication | **Google sign-in** (GIS/FedCM) with admin approval: `POST /auth/google` verifies ID tokens, new accounts await `ADMIN_EMAILS` approval, approved logins mint revocable session keys. Demo keys gated behind `ALLOW_DEMO_KEYS`. |
+| Portal key handling | Portal-issued keys (`/portal/register`) persist in Redis when configured (survive restarts, shared across workers), expire after `ISSUED_KEY_TTL_SECONDS`, are registration-rate-limited per IP/email, and are revocable via `DELETE /portal/key`. Disabled in production via `ALLOW_DEMO_KEYS=0`. |
 | `.env.example` | Documents every config variable |
 
 ---
@@ -117,9 +119,16 @@ path, status, `duration_ms`, and a `request_id` (also returned as the
 
 ### Priority 2 — Once you have users
 
-#### Enable SQLite WAL mode
+#### Enable SQLite WAL mode (writable-DB deployments only)
 
-Allows multiple uvicorn workers to read simultaneously without blocking:
+The connection is opened `mode=ro`, and the Cloud Run image bakes the DB in as
+a read-only, root-owned file (so a compromised app can't modify it). Concurrent
+**reads** already work fine in that setup — WAL is not needed and would not apply,
+since `mode=ro` never creates `-wal`/`-shm` files.
+
+WAL is only relevant if you switch to a **writable** database (e.g. a mounted
+volume rather than the baked image). In that case set it once after seeding, and
+make the DB directory writable by the runtime user:
 
 ```bash
 # Run once after seeding, before starting the service
@@ -210,7 +219,7 @@ Deprecate old versions with a `Sunset` response header.
 | **Railway** | Fastest to ship | Push-to-deploy, managed Redis, free tier available |
 | **Fly.io** | Low-latency, multi-region | Built-in secrets, automatic HTTPS, good free tier |
 | **AWS ECS + ElastiCache** | Existing AWS footprint | More ops overhead, more control |
-| **GCP Cloud Run** | Serverless | Cold starts can affect polling UX |
+| **GCP Cloud Run** | Serverless | Ships with `service.yaml` + Dockerfile (self-seeding image). Set `minScale: 1` to avoid cold starts affecting polling UX |
 | **Hetzner VPS + Caddy** | Lowest cost, full control | Single server, fine until you need HA |
 
 **Railway** and **Fly.io** are the fastest paths: push the repo, set the env vars in their dashboard, provision a Redis add-on, and you have HTTPS + a domain in under an hour.

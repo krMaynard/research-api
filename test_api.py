@@ -886,3 +886,17 @@ class TestGoogleAuth:
         r = client.post("/admin/registrations/admin@example.com/revoke",
                         headers={"X-API-Key": admin_key})
         assert r.status_code == 400
+
+
+# ── CORS (configurable cross-origin access) ──────────────────────────────────
+
+class TestCORS:
+    def test_disabled_by_default(self):
+        # No ALLOWED_ORIGINS in the test env → no CORS headers emitted.
+        r = client.get("/", headers={"Origin": "https://evil.example"})
+        assert "access-control-allow-origin" not in {k.lower() for k in r.headers}
+
+    def test_origin_parsing(self, monkeypatch):
+        import main
+        monkeypatch.setenv("ALLOWED_ORIGINS", " https://a.example , https://b.example ,")
+        assert main._cors_origins() == ["https://a.example", "https://b.example"]

@@ -1,0 +1,28 @@
+# Keep the build context small and the image clean. The DB is seeded at build
+# time, so never copy a local demo.db in.
+.git
+.gitignore
+.github
+.venv
+venv
+__pycache__
+**/__pycache__
+*.pyc
+.pytest_cache
+.mypy_cache
+.ruff_cache
+demo.db
+*.sqlite
+*.db
+
+# Dev/demo/test assets not needed at runtime
+test_api.py
+conftest.py
+demo.py
+scripts/
+docs/
+*.md
+.env
+.dockerignore
+Dockerfile
+service.yaml
