@@ -34,4 +34,10 @@ USER appuser
 # Cloud Run sends traffic to $PORT (default 8080) and terminates TLS at its front
 # end, setting forwarded headers — trust them for correct client IP / scheme.
 EXPOSE 8080
+
+# Container-level health for docker-compose / non-Cloud-Run runtimes (Cloud Run
+# uses its own probes from service.yaml). Pure-Python so no extra packages.
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD ["python", "-c", "import os,urllib.request,sys; port=os.getenv('PORT') or '8080'; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:'+port+'/healthz', timeout=2).status==200 else 1)"]
+
 CMD ["sh", "-c", "exec uvicorn main:app --host 0.0.0.0 --port ${PORT:-8080} --proxy-headers --forwarded-allow-ips='*'"]
