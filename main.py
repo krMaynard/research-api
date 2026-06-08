@@ -1442,8 +1442,12 @@ def _serve_page(filename: str, label: str, **csp_hosts) -> FileResponse:
         raise HTTPException(status_code=404, detail=f"{label} not found.")
     csp = _csp_cache.get(filename)
     if csp is None:
-        with open(path, encoding="utf-8") as f:
-            csp = _page_csp(f.read(), **csp_hosts)
+        # Read raw bytes (not text mode) so the hash is over exactly what
+        # FileResponse streams — text-mode newline translation (CRLF→LF) would
+        # otherwise produce a hash that doesn't match the served bytes on a
+        # CRLF checkout (Windows / git autocrlf), silently breaking the page.
+        with open(path, "rb") as f:
+            csp = _page_csp(f.read().decode("utf-8"), **csp_hosts)
         _csp_cache[filename] = csp
     return FileResponse(path, media_type="text/html", headers={"Content-Security-Policy": csp})
 
