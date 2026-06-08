@@ -47,6 +47,7 @@
   .card h2 { margin: 0 0 4px; font-size: 17px; }
   .card .sub { color: var(--muted); margin: 0 0 16px; font-size: 13px; }
   .error { color: #ff7b72; font-size: 14px; }
+  .hidden { display: none !important; }
   .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 14px; }
   .controls label { display: flex; flex-direction: column; font-size: 12px; color: var(--muted); gap: 4px; }
   select {
@@ -103,6 +104,22 @@
 
   <div class="error" id="error"></div>
 
+  <section class="card hidden" id="ask-card">
+    <h2>Ask in plain English ✨</h2>
+    <p class="sub">An LLM turns your question into the <em>structured</em> query (never SQL),
+      which runs through the same validated <code>/api/explore</code> path.</p>
+    <div class="controls">
+      <input id="ask-q" type="text" placeholder="e.g. Which platforms received the most Article 16 notices?"
+             style="flex:1 1 320px; min-width:240px; background:var(--panel2); color:var(--fg);
+                    border:1px solid var(--border); border-radius:8px; padding:9px 12px; font-size:14px;" />
+      <button id="ask-run" type="button">Ask</button>
+    </div>
+    <div class="error" id="ask-error"></div>
+    <canvas id="ask-chart" height="150"></canvas>
+    <div id="ask-out"></div>
+    <details><summary>Generated query</summary><pre id="ask-json"></pre></details>
+  </section>
+
   <section class="card" id="explore-card">
     <h2>Explore the data</h2>
     <p class="sub">Build a query against any DSA report table — it runs live through the same
@@ -136,6 +153,7 @@ const fmt = (n) => (n ?? 0).toLocaleString();
 // the dataset is trusted today, but never render unescaped data into the DOM).
 const esc = (s) => String(s).replace(/[&<>'"]/g, (m) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#039;", '"': "&quot;" }[m]));
+const show = (el) => el.classList.remove("hidden");
 
 function stat(num, lbl) {
   return `<div class="stat"><div class="num">${num}</div><div class="lbl">${lbl}</div></div>`;
@@ -266,7 +284,67 @@ async function setupExplore() {
   runExplore();  // show an initial result
 }
 
-document.addEventListener("DOMContentLoaded", () => { load(); setupExplore(); });
+// ── Natural-language query (POST /api/ask) ───────────────────────────────────
+let askChart = null;
+
+function renderRows(d, chartSel, outSel, legend) {
+  const out = $(outSel);
+  if (d.columns.length === 2 && d.rows.length) {
+    if (askChart && chartSel === "#ask-chart") askChart.destroy();
+    const c = new Chart($(chartSel), {
+      type: "bar",
+      data: { labels: d.rows.map(r => r[0]), datasets: [{ label: legend, data: d.rows.map(r => r[1]), backgroundColor: "#a371f7", borderRadius: 4 }] },
+      options: { indexAxis: "y", plugins: { legend: { display: false } },
+        scales: { x: { ticks: { color: "#9aa7b4" }, grid: { color: "#30363d" } },
+                  y: { ticks: { color: "#e6edf3" }, grid: { display: false } } } },
+    });
+    if (chartSel === "#ask-chart") askChart = c;
+    $(chartSel).style.display = "";
+  } else {
+    $(chartSel).style.display = "none";
+  }
+  const head = `<tr>${d.columns.map(c => `<th>${esc(c)}</th>`).join("")}</tr>`;
+  const body = d.rows.map(r =>
+    `<tr>${r.map((v) => typeof v === "number" ? `<td class="num">${fmt(v)}</td>` : `<td>${esc(v)}</td>`).join("")}</tr>`
+  ).join("");
+  out.innerHTML = d.rows.length ? `<table class="restable">${head}${body}</table>` : "<p class='sub'>No rows.</p>";
+}
+
+async function runAsk() {
+  const q = $("#ask-q").value.trim();
+  if (!q) return;
+  $("#ask-error").textContent = "";
+  const btn = $("#ask-run"); btn.disabled = true; btn.textContent = "Asking…";
+  try {
+    const res = await fetch("/api/ask", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: q }),
+    });
+    const d = await res.json();
+    if (!res.ok) {
+      const msg = (d.detail && d.detail.error) || d.detail || `HTTP ${res.status}`;
+      if (d.detail && d.detail.generated) $("#ask-json").textContent = JSON.stringify(d.detail.generated, null, 2);
+      throw new Error(msg);
+    }
+    $("#ask-json").textContent = JSON.stringify(d.query, null, 2);
+    const legend = d.columns[1] || "value";
+    renderRows(d, "#ask-chart", "#ask-out", legend);
+  } catch (err) {
+    $("#ask-error").textContent = "" + err.message;
+  } finally {
+    btn.disabled = false; btn.textContent = "Ask";
+  }
+}
+
+async function setupAsk() {
+  let cfg = {};
+  try { cfg = await (await fetch("/api")).json(); } catch (_) { return; }
+  if (!(cfg.features && cfg.features.nl_query)) return;  // feature off — leave hidden
+  show($("#ask-card"));
+  $("#ask-run").addEventListener("click", runAsk);
+  $("#ask-q").addEventListener("keydown", (e) => { if (e.key === "Enter") runAsk(); });
+}
+
+document.addEventListener("DOMContentLoaded", () => { load(); setupExplore(); setupAsk(); });
 </script>
 </body>
 </html>

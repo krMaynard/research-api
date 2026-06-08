@@ -64,7 +64,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, PlainTextResponse
 from fastapi.security import APIKeyHeader
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
@@ -123,6 +123,14 @@ QUERY_RATE_WINDOW = int(os.getenv("QUERY_RATE_WINDOW_SECONDS", "60"))
 EXPLORE_MAX_ROWS = int(os.getenv("EXPLORE_MAX_ROWS", "500"))
 EXPLORE_RATE_MAX = int(os.getenv("EXPLORE_RATE_MAX_PER_WINDOW", "60"))
 EXPLORE_RATE_WINDOW = int(os.getenv("EXPLORE_RATE_WINDOW_SECONDS", "60"))
+# Natural-language → structured-query (POST /api/ask). An LLM (Claude) translates
+# a question into the validated QueryRequest model — never SQL — which then runs
+# through the same compile_query path as /api/explore. Off unless ANTHROPIC_API_KEY
+# is set (LLM calls cost money); IP-rate-limited more tightly than /api/explore.
+ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-opus-4-8")
+NL_QUERY_ENABLED = bool(os.getenv("ANTHROPIC_API_KEY"))
+ASK_RATE_MAX = int(os.getenv("ASK_RATE_MAX_PER_WINDOW", "10"))
+ASK_RATE_WINDOW = int(os.getenv("ASK_RATE_WINDOW_SECONDS", "60"))
 # Structured logging: JSON lines by default, or LOG_FORMAT=text for humans.
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 LOG_FORMAT = os.getenv("LOG_FORMAT", "json").lower()
@@ -1300,6 +1308,7 @@ def root() -> dict[str, Any]:
             "GET /api/overview": "Public headline aggregates powering the dashboard (no auth)",
             "GET /api/explore/options": "Public: tables + their dimensions/measures for the query builder",
             "POST /api/explore": "Public: run a bounded structured query inline (no auth, row-capped, rate-limited)",
+            "POST /api/ask": "Public: ask in natural language — an LLM writes the structured query (if enabled)",
             "GET /portal": "Researcher portal (web UI: sign in, get a key, browse the schema)",
             "POST /api/auth/google": "Sign in with a Google ID token (FedCM/GIS) → session key, or pending approval",
             "POST /api/portal/register": "Demo: issue an API key without auth (disabled when ALLOW_DEMO_KEYS=0)",
@@ -1331,6 +1340,7 @@ def root() -> dict[str, Any]:
             "google_client_id": GOOGLE_CLIENT_ID or None,
             "demo_keys": ALLOW_DEMO_KEYS,
         },
+        "features": {"nl_query": NL_QUERY_ENABLED},
     }
 
 
@@ -1487,6 +1497,156 @@ def explore_options() -> dict[str, Any]:
     }
 
 
+class AskRequest(BaseModel):
+    question: str = Field(
+        ..., min_length=1, max_length=500,
+        description="A natural-language question about the DSA VLOP data.",
+    )
+
+
+# JSON schema the LLM must fill — a constrained, flat projection of QueryRequest.
+# Strict so structured outputs reliably return a valid object; compile_query still
+# does the real validation against the table registry afterward.
+_ASK_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "table": {"type": "string", "enum": list(TABLES)},
+        "filters": {
+            "type": "array",
+            "items": {
+                "type": "object", "additionalProperties": False,
+                "properties": {
+                    "field": {"type": "string"},
+                    "op": {"type": "string", "enum": ["EQ", "IN", "GT", "GTE", "LT", "LTE"]},
+                    "values": {"type": "array", "items": {"type": "string"}},
+                },
+                "required": ["field", "op", "values"],
+            },
+        },
+        "group_by": {"type": "array", "items": {"type": "string"}},
+        "aggregates": {
+            "type": "array",
+            "items": {
+                "type": "object", "additionalProperties": False,
+                "properties": {
+                    "function": {"type": "string", "enum": ["SUM", "AVG", "MIN", "MAX", "COUNT"]},
+                    "field": {"type": "string"},
+                    "alias": {"type": "string"},
+                },
+                "required": ["function", "field", "alias"],
+            },
+        },
+        "sort": {
+            "type": "array",
+            "items": {
+                "type": "object", "additionalProperties": False,
+                "properties": {
+                    "field": {"type": "string"},
+                    "order": {"type": "string", "enum": ["asc", "desc"]},
+                },
+                "required": ["field", "order"],
+            },
+        },
+        "max_count": {"type": "integer"},
+    },
+    "required": ["table", "filters", "group_by", "aggregates", "sort", "max_count"],
+}
+
+
+def _ask_system_prompt() -> str:
+    """Describe the queryable tables/fields so the model picks valid ones."""
+    lines = [
+        "You translate a user's natural-language question into a structured query over "
+        "the EU DSA VLOP transparency dataset. Output ONLY the structured query object — "
+        "never SQL.",
+        "",
+        "Choose exactly one table and use ONLY that table's listed fields. Tables:",
+    ]
+    for name, spec in TABLES.items():
+        dims = ", ".join(spec.dimensions) or "(none)"
+        meas = ", ".join(spec.measures) or "(none)"
+        lines.append(f"- {name}: {spec.description}")
+        lines.append(f"    dimensions (text; EQ/IN): {dims}")
+        lines.append(f"    measures (numeric; SUM/AVG/MIN/MAX + GT/GTE/LT/LTE): {meas}")
+    lines += [
+        "",
+        "Guidance:",
+        "- For 'top/most/by/total' questions: SUM a measure, group_by the relevant "
+        "dimension, and sort desc by the aggregate's alias.",
+        '- Use COUNT with field "*" to count rows (e.g. t11, which has no measures).',
+        "- Put constraints (a specific platform, category, scope…) in `filters`.",
+        "- service_name and platform exist on every table; platform is the parent company.",
+        "- Default max_count to 10 unless the question implies otherwise.",
+        "- Aggregate aliases must be letters, digits, or underscores.",
+    ]
+    return "\n".join(lines)
+
+
+_anthropic_client = None
+
+
+def _translate_question(question: str) -> dict[str, Any]:
+    """Call Claude to turn a question into an AskQuery dict (constrained JSON).
+    `anthropic` is imported lazily (only needed when the feature is enabled);
+    monkeypatched in tests so the suite never makes a network call. The client is
+    cached so its HTTP connection pool is reused across requests."""
+    global _anthropic_client
+    import anthropic
+
+    if _anthropic_client is None:
+        _anthropic_client = anthropic.Anthropic()
+    resp = _anthropic_client.messages.create(
+        model=ANTHROPIC_MODEL,
+        max_tokens=1024,
+        system=_ask_system_prompt(),
+        messages=[{"role": "user", "content": question}],
+        output_config={"format": {"type": "json_schema", "schema": _ASK_SCHEMA}},
+    )
+    text = next(b.text for b in resp.content if b.type == "text")
+    return json.loads(text)
+
+
+def _askquery_to_request(aq: dict[str, Any]) -> QueryRequest:
+    """Map the LLM's constrained AskQuery dict onto the real QueryRequest model.
+    QueryRequest construction + compile_query perform the actual validation."""
+    conditions = [
+        {"operation": f["op"], "field_name": f["field"], "field_values": f["values"]}
+        for f in aq.get("filters", [])
+    ]
+    aggregates = []
+    for a in aq.get("aggregates", []):
+        is_count_star = a["function"] == "COUNT" and a.get("field", "*") in ("", "*", "rows", "(rows)")
+        aggregates.append({
+            "function": a["function"],
+            "field_name": "*" if is_count_star else a["field"],
+            "alias": a["alias"],
+        })
+    return QueryRequest(
+        table=aq.get("table"),
+        query={"and": conditions},
+        group_by=aq.get("group_by", []),
+        aggregates=aggregates,
+        sort=[{"field_name": s["field"], "order": s["order"]} for s in aq.get("sort", [])],
+        max_count=aq.get("max_count") or 10,
+    )
+
+
+def _run_query_bounded(body: QueryRequest) -> dict[str, Any]:
+    """Compile + run a structured query synchronously with the public row cap and
+    no webhook — the shared trust boundary for /api/explore and /api/ask. Raises
+    QueryCompileError if any field/operation is invalid for the table."""
+    capped = min(body.max_count, EXPLORE_MAX_ROWS)
+    safe = body.model_copy(update={"max_count": capped, "callback_url": None})
+    sql, params, columns = compile_query(safe)  # validates against the registry
+    conn = _connect_ro()
+    try:
+        rows = [list(r) for r in conn.execute(sql, params).fetchall()]
+    finally:
+        conn.close()
+    return {"columns": columns, "rows": rows, "row_count": len(rows)}
+
+
 @api_router.post("/explore")
 def explore(body: QueryRequest, request: Request) -> dict[str, Any]:
     """Public, synchronous, bounded query for the interactive dashboard.
@@ -1501,19 +1661,50 @@ def explore(body: QueryRequest, request: Request) -> dict[str, Any]:
             detail="Too many queries from here. Please slow down.",
             headers={"Retry-After": str(EXPLORE_RATE_WINDOW)},
         )
-    # Force the public row cap and drop any webhook regardless of what was sent.
-    capped = min(body.max_count, EXPLORE_MAX_ROWS)
-    safe = body.model_copy(update={"max_count": capped, "callback_url": None})
     try:
-        sql, params, columns = compile_query(safe)
+        return _run_query_bounded(body)
     except QueryCompileError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
-    conn = _connect_ro()
+
+
+@api_router.post("/ask")
+def ask(body: AskRequest, request: Request) -> dict[str, Any]:
+    """Public natural-language query: an LLM translates the question into the
+    *structured* QueryRequest (never SQL), which is then run through the exact same
+    compile_query trust boundary as /api/explore. The model only proposes — a bad
+    field is a 400, and no model-authored SQL can reach the database.
+
+    Disabled (503) unless ANTHROPIC_API_KEY is set; IP-rate-limited (LLM calls
+    cost money) on the same limiter as /api/explore."""
+    if not NL_QUERY_ENABLED:
+        raise HTTPException(
+            status_code=503,
+            detail="Natural-language queries aren't enabled on this server (set ANTHROPIC_API_KEY).",
+        )
+    if _key_store.incr(f"ask:{_client_ip(request)}", ASK_RATE_WINDOW) > ASK_RATE_MAX:
+        raise HTTPException(
+            status_code=429,
+            detail="Too many questions from here. Please slow down.",
+            headers={"Retry-After": str(ASK_RATE_WINDOW)},
+        )
+    question = body.question.strip()
+    if not question:
+        raise HTTPException(status_code=400, detail="Question cannot be empty.")
     try:
-        rows = [list(r) for r in conn.execute(sql, params).fetchall()]
-    finally:
-        conn.close()
-    return {"columns": columns, "rows": rows, "row_count": len(rows)}
+        ask_query = _translate_question(question)  # LLM → constrained dict
+    except Exception:
+        logger.exception("nl_translate_failed")
+        raise HTTPException(status_code=502, detail="The language model could not translate that question.")
+    try:
+        req = _askquery_to_request(ask_query)
+        result = _run_query_bounded(req)
+    except (QueryCompileError, ValidationError, ValueError, KeyError, TypeError, AttributeError) as exc:
+        # Surface the model's attempt so the user sees what it produced.
+        raise HTTPException(
+            status_code=422,
+            detail={"error": f"Couldn't run that as a query: {exc}", "generated": ask_query},
+        )
+    return {"question": question, "query": ask_query, **result}
 
 
 @api_router.post("/portal/register", status_code=201)
