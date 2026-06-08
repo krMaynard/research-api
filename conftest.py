@@ -54,6 +54,9 @@ os.environ.setdefault("API_KEYS_JSON", '{"alice":{"name":"alice"},"bob":{"name":
 # Google sign-in config for the auth tests (token verification is monkeypatched).
 os.environ.setdefault("GOOGLE_CLIENT_ID", "test-client-id.apps.googleusercontent.com")
 os.environ.setdefault("ADMIN_EMAILS", "admin@example.com")
+# Enables POST /api/ask; the LLM translation call itself is monkeypatched in tests,
+# so no real Anthropic request is ever made.
+os.environ.setdefault("ANTHROPIC_API_KEY", "sk-ant-test-not-real")
 # Don't let the rate limiters interfere with the HTTP tests (they share one
 # TestClient IP / API key). The 429 paths are exercised with isolated stores.
 os.environ.setdefault("PORTAL_REGISTER_MAX_PER_WINDOW", "10000")

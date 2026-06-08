@@ -30,7 +30,7 @@ Built to demonstrate two things:
 | `seed.py` | Build `demo.db` from a `vlop-dsa.json` (`--source`/`SEED_SOURCE_JSON`; default = sibling repo) — `build_db()` is reused by `conftest.py` |
 | `data/vlop-dsa.json` | Vendored dataset snapshot — what the Docker image is seeded from (refresh via `scripts/refresh-dataset.sh`) |
 | `demo.py` | Narrated walkthrough script (run after starting the server) |
-| `static/index.html` | Public VLOP dashboard (served at `/`) — Chart.js overview + interactive query builder (`GET /api/overview`, `POST /api/explore`) |
+| `static/index.html` | Public VLOP dashboard (served at `/`) — Chart.js overview + interactive query builder + NL "Ask" box (`GET /api/overview`, `POST /api/explore`, `POST /api/ask`) |
 | `static/portal.html` | Researcher portal single-page app (served at `/portal`) — Google sign-in + demo fallback |
 | `Dockerfile` | Self-contained image: installs deps, seeds `demo.db` at build time, runs uvicorn on `$PORT` as non-root |
 | `service.yaml` | Cloud Run (Knative) manifest — prod env + startup/liveness probes |
@@ -38,7 +38,7 @@ Built to demonstrate two things:
 | `scripts/_demo_server.py` | Shared helper: seed DB + run a temp server (used by the GIF generators) |
 | `scripts/make_gifs.py` | Headless terminal-demo GIF generator (pyte + Pillow) → `docs/gifs/` |
 | `scripts/make_portal_gifs.py` | Portal-workflow GIF generator (Playwright + Pillow) → `docs/gifs/portal-*.gif` |
-| `requirements.txt` | `fastapi` + `uvicorn[standard]` |
+| `requirements.txt` | `fastapi` + `uvicorn[standard]` + `anthropic` (NL queries) |
 | `demo.db` | SQLite DB (git-ignored, produced by `seed.py`) |
 | `.github/workflows/ci.yml` | CI: `pyflakes` lint + `pytest` on every PR/push (Python 3.11 & 3.12) |
 | `.github/workflows/deploy.yml` | CD: build/push image + deploy to Cloud Run on push to `main` (WIF; skips until configured) |
@@ -147,6 +147,15 @@ Never build SQL by interpolating user values (always bind with `?`).
 
 - **Structured params, not SQL**: the only way to query is the validated
   parameter model, compiled to one parameterised SELECT — no caller SQL runs.
+- **NL→query via LLM, same trust boundary** (`POST /api/ask`): an LLM (Claude;
+  `ANTHROPIC_MODEL`, default `claude-opus-4-8`) translates a question into the
+  *structured* `QueryRequest` using JSON-schema structured outputs — never SQL —
+  which then goes through the exact same `compile_query` validation as everything
+  else. The model only proposes; `compile_query` disposes (bad field → `422`).
+  `_translate_question` is the single, lazily-imported, monkeypatchable seam (tests
+  never call the API); off unless `ANTHROPIC_API_KEY` is set; IP-rate-limited.
+  Before changing the LLM call, confirm the current model ID + Messages API schema
+  (use the `claude-api` skill) — never hardcode a model ID from memory.
 - **Researcher portal** (`/portal` + `POST /portal/register`): a demo onboarding
   UI. Registration mints a key into the **issued-key store** (`_key_store`:
   Redis-backed when configured, else in-memory — shares `_redis` with the job
@@ -228,6 +237,7 @@ root. The API endpoints are registered on an `APIRouter` included with
 | GET | `/api/overview` | — | Public headline aggregates powering the dashboard |
 | GET | `/api/explore/options` | — | Public: tables + dimensions/measures for the query builder |
 | POST | `/api/explore` | — | Public: run a bounded structured query inline (row-capped, IP-rate-limited) |
+| POST | `/api/ask` | — | Public: NL→query via an LLM (Claude) → structured `QueryRequest` → `compile_query`; off unless `ANTHROPIC_API_KEY` set |
 | GET | `/api` | — | API service info |
 | GET | `/portal` | — | Researcher portal web UI (sign in → key → schema) |
 | POST | `/api/auth/google` | — | Verify a Google ID token → session key, or `202` pending approval |

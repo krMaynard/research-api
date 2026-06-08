@@ -988,3 +988,77 @@ class TestExplore:
             "aggregates": [{"function": "SUM", "field_name": "notices", "alias": "value"}],
             "max_count": 3, "callback_url": "http://169.254.169.254/latest/meta-data"})
         assert r.status_code == 200
+
+
+# ── Natural-language query (POST /api/ask) ───────────────────────────────────
+
+class TestAsk:
+    @pytest.fixture(autouse=True)
+    def _mock_llm(self, monkeypatch):
+        # Stand in for the Claude call: return a fixed AskQuery for "top platforms
+        # by notices". No network, deterministic.
+        def fake_translate(question):
+            assert isinstance(question, str) and question
+            return {
+                "table": "t4_notices",
+                "filters": [],
+                "group_by": ["platform"],
+                "aggregates": [{"function": "SUM", "field": "notices", "alias": "notices"}],
+                "sort": [{"field": "notices", "order": "desc"}],
+                "max_count": 5,
+            }
+        import main
+        monkeypatch.setattr(main, "_translate_question", fake_translate)
+        yield
+
+    def test_ask_runs_generated_query(self):
+        r = client.post("/api/ask", json={"question": "top platforms by notices?"})
+        assert r.status_code == 200
+        d = r.json()
+        assert d["question"] == "top platforms by notices?"
+        assert d["query"]["table"] == "t4_notices"
+        assert d["columns"] == ["platform", "notices"]
+        assert 0 < len(d["rows"]) <= 5
+        assert [row[1] for row in d["rows"]] == sorted([row[1] for row in d["rows"]], reverse=True)
+
+    def test_ask_caps_rows(self, monkeypatch):
+        import main
+        monkeypatch.setattr(main, "_translate_question", lambda q: {
+            "table": "t4_notices", "filters": [], "group_by": [],
+            "aggregates": [], "sort": [], "max_count": 100000,
+        })
+        r = client.post("/api/ask", json={"question": "everything"})
+        # raw (non-aggregated) query, capped at EXPLORE_MAX_ROWS
+        assert r.status_code == 200 and r.json()["row_count"] <= 500
+
+    def test_ask_invalid_generated_query_is_422_with_generated(self, monkeypatch):
+        import main
+        bad = {"table": "t4_notices", "filters": [], "group_by": ["not_a_field"],
+               "aggregates": [], "sort": [], "max_count": 10}
+        monkeypatch.setattr(main, "_translate_question", lambda q: bad)
+        r = client.post("/api/ask", json={"question": "huh"})
+        assert r.status_code == 422
+        assert r.json()["detail"]["generated"] == bad  # surfaces the model's attempt
+
+    def test_ask_llm_failure_is_502(self, monkeypatch):
+        import main
+        def boom(q):
+            raise RuntimeError("model unavailable")
+        monkeypatch.setattr(main, "_translate_question", boom)
+        assert client.post("/api/ask", json={"question": "x"}).status_code == 502
+
+    def test_ask_disabled_is_503(self, monkeypatch):
+        import main
+        monkeypatch.setattr(main, "NL_QUERY_ENABLED", False)
+        assert client.post("/api/ask", json={"question": "x"}).status_code == 503
+
+
+def test_askquery_to_request_maps_count_star():
+    import main
+    req = main._askquery_to_request({
+        "table": "t11_qualitative", "filters": [], "group_by": ["indicator"],
+        "aggregates": [{"function": "COUNT", "field": "(rows)", "alias": "n"}],
+        "sort": [{"field": "n", "order": "desc"}], "max_count": 3,
+    })
+    assert req.aggregates[0].field_name == "*"  # COUNT (rows) → COUNT(*)
+    assert req.table == "t11_qualitative"
