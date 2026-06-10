@@ -44,7 +44,10 @@ jobs:
           IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO}/research-api"
           echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
           # Immutable, traceable tag = the commit SHA; also move :latest.
-          gcloud builds submit --quiet --tag "${IMAGE}:${GITHUB_SHA}" .
+          # Regional, project-owned logs bucket — the global default logs bucket
+          # isn't usable on this project, which fails `builds submit` otherwise.
+          gcloud builds submit --quiet --tag "${IMAGE}:${GITHUB_SHA}" \
+            --default-buckets-behavior=REGIONAL_USER_OWNED_BUCKET .
           gcloud artifacts docker tags add "${IMAGE}:${GITHUB_SHA}" "${IMAGE}:latest" --quiet
 
       - name: Deploy new revision (no traffic)
