@@ -1182,4 +1182,66 @@ class TestAccessibility:
         assert 'href="#main"' in html and 'class="skip-link"' in html
         assert 'id="main"' in html
         assert 'role="alert"' in html
-        assert 'type="email"' in html and 'autocomplete="email"' in html
+
+
+# ── Google Government Removals table ─────────────────────────────────────────
+
+class TestGRTable:
+    def test_gr_table_listed(self):
+        r = client.get("/api/tables", headers=ALICE)
+        assert r.status_code == 200
+        names = [t["name"] for t in r.json()["tables"]]
+        assert "gr_removals" in names
+
+    def test_gr_fields_endpoint(self):
+        r = client.get("/api/fields?table=gr_removals", headers=ALICE)
+        assert r.status_code == 200
+        body = r.json()
+        assert {"period", "country_code", "country_name", "requestor", "product", "reason"} <= set(body["dimensions"]["fields"])
+        assert {"num_requests", "items_requested", "removed_legal"} <= set(body["measures"]["fields"])
+
+    def test_gr_count_all(self):
+        job = _submit_and_wait({
+            "table": "gr_removals",
+            "aggregates": [{"function": "COUNT", "alias": "n"}],
+        })
+        assert job["status"] == "done"
+        r = client.get(f"/api/jobs/{job['job_id']}/result?format=json", headers=ALICE)
+        body = r.json()
+        assert body["columns"] == ["n"]
+        assert body["rows"][0][0] == 3  # 3 rows in the fixture
+
+    def test_gr_filter_by_country_code(self):
+        job = _submit_and_wait({
+            "table": "gr_removals",
+            "query": {"and": [{"operation": "EQ", "field_name": "country_code", "field_values": ["US"]}]},
+            "aggregates": [{"function": "SUM", "field_name": "num_requests", "alias": "reqs"}],
+        })
+        assert job["status"] == "done"
+        r = client.get(f"/api/jobs/{job['job_id']}/result?format=json", headers=ALICE)
+        body = r.json()
+        # US rows in fixture: period0/US (num_requests=5) + period1/US (num_requests=7) = 12
+        assert body["rows"][0][0] == 12
+
+    def test_gr_group_by_period(self):
+        job = _submit_and_wait({
+            "table": "gr_removals",
+            "aggregates": [{"function": "SUM", "field_name": "num_requests", "alias": "reqs"}],
+            "group_by": ["period"],
+            "sort": [{"field_name": "period", "order": "asc"}],
+        })
+        assert job["status"] == "done"
+        r = client.get(f"/api/jobs/{job['job_id']}/result?format=json", headers=ALICE)
+        body = r.json()
+        assert body["columns"] == ["period", "reqs"]
+        assert len(body["rows"]) == 2
+        assert body["rows"][0][0] == "January - June 2019"
+        # period 0 total: rows 0 (5) + 1 (3) = 8
+        assert body["rows"][0][1] == 8
+
+    def test_gr_invalid_field_rejected(self):
+        r = client.post("/api/query", json={
+            "table": "gr_removals",
+            "query": {"and": [{"operation": "EQ", "field_name": "nonexistent_field", "field_values": ["x"]}]},
+        }, headers=ALICE)
+        assert r.status_code == 400

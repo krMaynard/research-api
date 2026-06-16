@@ -49,6 +49,21 @@ _FIXTURE = {
 
 seed.build_db(_FIXTURE, _DB)
 
+_GR_FIXTURE = {
+    "periods": ["January - June 2019", "July - December 2019"],
+    "countries": ["US", "DE"],
+    "country_names": ["United States", "Germany"],
+    "requestors": ["Government Officials", "Court Order directed at Google"],
+    "products": ["Web Search", "YouTube"],
+    "reasons": ["Defamation", "National security"],
+    "rows": [
+        [0, 0, 0, 0, 0, 5, 100, 80, 5, 10, 3, 2, 0],
+        [0, 1, 1, 1, 1, 3, 50, 40, 2, 5, 2, 1, 0],
+        [1, 0, 0, 0, 0, 7, 120, 90, 8, 12, 5, 5, 0],
+    ],
+}
+seed.build_gr_db(_GR_FIXTURE, _DB)
+
 os.environ.setdefault("DB_PATH", _DB)
 os.environ.setdefault("API_KEYS_JSON", '{"alice":{"name":"alice"},"bob":{"name":"bob"}}')
 # Google sign-in config for the auth tests (token verification is monkeypatched).

@@ -24,6 +24,12 @@ _DEFAULT_SOURCE = os.getenv(
     "SEED_SOURCE_JSON",
     os.path.normpath(os.path.join(HERE, "..", "krMaynard.github.io", "data", "vlop-dsa.json")),
 )
+_DEFAULT_GR_SOURCE = os.getenv(
+    "SEED_GR_SOURCE_JSON",
+    os.path.normpath(
+        os.path.join(HERE, "..", "krMaynard.github.io", "data", "google-government-removals.json")
+    ),
+)
 _DEFAULT_DB = os.getenv("DB_PATH", os.path.join(HERE, "demo.db"))
 
 SCHEMA = """
@@ -107,6 +113,32 @@ CREATE INDEX idx_t8_service  ON t8_automated_means(service_id);
 CREATE INDEX idx_t9_service  ON t9_human_resources(service_id);
 CREATE INDEX idx_t10_service ON t10_amar(service_id);
 CREATE INDEX idx_t11_service ON t11_qualitative(service_id);
+
+-- Google Government Removal Requests (2019–2025)
+CREATE TABLE gr_periods    (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
+CREATE TABLE gr_countries  (id INTEGER PRIMARY KEY, code TEXT NOT NULL, name TEXT NOT NULL);
+CREATE TABLE gr_requestors (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
+CREATE TABLE gr_products   (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
+CREATE TABLE gr_reasons    (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
+
+CREATE TABLE gr_removals (
+    period_id       INTEGER NOT NULL,
+    country_id      INTEGER NOT NULL,
+    requestor_id    INTEGER NOT NULL,
+    product_id      INTEGER NOT NULL,
+    reason_id       INTEGER NOT NULL,
+    num_requests    INTEGER,
+    items_requested INTEGER,
+    removed_legal   INTEGER,
+    removed_policy  INTEGER,
+    not_found       INTEGER,
+    not_enough_info INTEGER,
+    no_action       INTEGER,
+    already_removed INTEGER
+);
+
+CREATE INDEX idx_gr_period  ON gr_removals(period_id);
+CREATE INDEX idx_gr_country ON gr_removals(country_id);
 """
 
 # fact table name → (number of columns, source JSON key)
@@ -174,9 +206,49 @@ def build_db(data: dict[str, Any], db_path: str) -> dict[str, int]:
         conn.close()
 
 
+def build_gr_db(data: dict[str, Any], db_path: str) -> int:
+    """Populate Google Government Removal tables in an existing DB at db_path.
+
+    The DB must already contain the gr_* tables (created by SCHEMA above, i.e.
+    build_db() must have been called first). Returns the number of fact rows inserted.
+    """
+    countries = data["countries"]
+    country_names = data["country_names"]
+    conn = sqlite3.connect(db_path)
+    try:
+        conn.executemany(
+            "INSERT INTO gr_periods (id, name) VALUES (?, ?)",
+            list(enumerate(data["periods"])),
+        )
+        conn.executemany(
+            "INSERT INTO gr_countries (id, code, name) VALUES (?, ?, ?)",
+            [(i, countries[i], country_names[i]) for i in range(len(countries))],
+        )
+        conn.executemany(
+            "INSERT INTO gr_requestors (id, name) VALUES (?, ?)",
+            list(enumerate(data["requestors"])),
+        )
+        conn.executemany(
+            "INSERT INTO gr_products (id, name) VALUES (?, ?)",
+            list(enumerate(data["products"])),
+        )
+        conn.executemany(
+            "INSERT INTO gr_reasons (id, name) VALUES (?, ?)",
+            list(enumerate(data["reasons"])),
+        )
+        rows = data["rows"]
+        conn.executemany("INSERT INTO gr_removals VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
+        conn.commit()
+        return len(rows)
+    finally:
+        conn.close()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Seed demo.db from the VLOP DSA dataset.")
     parser.add_argument("--source", default=_DEFAULT_SOURCE, help="Path to vlop-dsa.json")
+    parser.add_argument("--gr-source", default=_DEFAULT_GR_SOURCE,
+                        help="Path to google-government-removals.json")
     parser.add_argument("--db", default=_DEFAULT_DB, help="Output SQLite database path")
     args = parser.parse_args()
 
@@ -192,6 +264,18 @@ def main() -> None:
     )
     for table, n in summary.items():
         print(f"  {table}: {n}")
+
+    if os.path.exists(args.gr_source):
+        with open(args.gr_source, "r", encoding="utf-8") as f:
+            gr_data = json.load(f)
+        gr_rows = build_gr_db(gr_data, args.db)
+        print(
+            f"  gr_removals: {gr_rows} rows across "
+            f"{len(gr_data['periods'])} periods, "
+            f"{len(gr_data['countries'])} countries"
+        )
+    else:
+        print(f"  (skipping Google removals — not found: {args.gr_source})")
 
 
 if __name__ == "__main__":

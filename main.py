@@ -854,6 +854,12 @@ _J_SCOPE = "JOIN scopes sc ON sc.id = f.scope_id"
 _J_SURF = "JOIN surfaces su ON su.id = f.surface_id"
 _CAT_DIMS = {"category_code": "c.code", "category_label": "c.label"}
 
+_J_GR_PER = "JOIN gr_periods    per ON per.id = f.period_id"
+_J_GR_CTY = "JOIN gr_countries  cty ON cty.id = f.country_id"
+_J_GR_REQ = "JOIN gr_requestors req ON req.id = f.requestor_id"
+_J_GR_PRD = "JOIN gr_products   prd ON prd.id = f.product_id"
+_J_GR_RSN = "JOIN gr_reasons    rsn ON rsn.id = f.reason_id"
+
 TABLES: dict[str, TableSpec] = {
     "t3_member_state_orders": TableSpec(
         "Member-State orders to act on illegal content / to provide information (Art. 9 & 10), by category and scope.",
@@ -912,6 +918,28 @@ TABLES: dict[str, TableSpec] = {
         f"FROM t11_qualitative f {_J_SVC} {_J_IND}",
         {**_SVC, "indicator": "i.name", "qualitative_text": "f.value_text"},
         {},
+    ),
+    "gr_removals": TableSpec(
+        "Google Government Removal Requests — requests from governments worldwide to remove content from Google products (2019–2025), by period × country × requestor type × product × reason.",
+        f"FROM gr_removals f {_J_GR_PER} {_J_GR_CTY} {_J_GR_REQ} {_J_GR_PRD} {_J_GR_RSN}",
+        {
+            "period":       "per.name",
+            "country_code": "cty.code",
+            "country_name": "cty.name",
+            "requestor":    "req.name",
+            "product":      "prd.name",
+            "reason":       "rsn.name",
+        },
+        {
+            "num_requests":    "f.num_requests",
+            "items_requested": "f.items_requested",
+            "removed_legal":   "f.removed_legal",
+            "removed_policy":  "f.removed_policy",
+            "not_found":       "f.not_found",
+            "not_enough_info": "f.not_enough_info",
+            "no_action":       "f.no_action",
+            "already_removed": "f.already_removed",
+        },
     ),
 }
 
