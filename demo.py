@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Walkthrough of the Transparency Reports API.
+Walkthrough of the Transparency Report API.
 
 Start the server first (in a separate terminal):
     uvicorn main:app --port 8000
@@ -129,7 +129,7 @@ def _check_server() -> None:
 
 def main() -> None:
     mode = "pause mode — press Enter to advance" if PAUSE else "auto mode — use --pause for live demos"
-    print(f"\n{BOLD}Transparency Reports API walkthrough{RESET}  {DIM}({mode}){RESET}")
+    print(f"\n{BOLD}Transparency Report API walkthrough{RESET}  {DIM}({mode}){RESET}")
     print("=" * 60)
     _check_server()
 

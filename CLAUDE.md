@@ -1,4 +1,4 @@
-# transparency-reports-api — Claude context
+# transparency-report-api — Claude context
 
 ## What this is
 
@@ -78,7 +78,7 @@ uvicorn main:app --port 8000
 Repos are expected as siblings:
 ```
 parent/
-  transparency-reports-api/  ← this repo
+  transparency-report-api/  ← this repo
   krMaynard.github.io/ ← source data lives at data/vlop-dsa.json
 ```
 

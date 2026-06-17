@@ -752,7 +752,7 @@ def _openapi_servers() -> list[dict[str, str]]:
 
 
 app = FastAPI(
-    title="Transparency Reports API (async jobs)",
+    title="Transparency Report API (async jobs)",
     description=(
         "Query public transparency reports — the aggregated EU Digital Services "
         "Act VLOP content-moderation reports (tables 3–11) and Google Government "
