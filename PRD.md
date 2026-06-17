@@ -1,4 +1,4 @@
-# Product Requirements Document — transparency-reports-api
+# Product Requirements Document — transparency-report-api
 
 **Version:** 1.0  
 **Date:** 2026-05-26  
@@ -11,7 +11,7 @@
 
 ### 1.1 Purpose
 
-`transparency-reports-api` is a FastAPI service that exposes a read-only SQLite database (seeded from transparency-reporting datasets: the aggregated EU DSA VLOP transparency reports, tables 3–11, and Google Government content-removal requests) as a queryable HTTP API. Queries are described with **structured parameters** (a TikTok-Research-API-style boolean query, not SQL) and compiled server-side into a single parameterised SELECT. It is designed to demonstrate the **async-job / poll pattern** for long-running queries without tying up HTTP connections, behind a query interface that never executes caller-authored SQL.
+`transparency-report-api` is a FastAPI service that exposes a read-only SQLite database (seeded from transparency-reporting datasets: the aggregated EU DSA VLOP transparency reports, tables 3–11, and Google Government content-removal requests) as a queryable HTTP API. Queries are described with **structured parameters** (a TikTok-Research-API-style boolean query, not SQL) and compiled server-side into a single parameterised SELECT. It is designed to demonstrate the **async-job / poll pattern** for long-running queries without tying up HTTP connections, behind a query interface that never executes caller-authored SQL.
 
 ### 1.2 Problem Statement
 
@@ -20,7 +20,7 @@ Analysts and researchers who need to run ad-hoc queries against shared datasets 
 1. **Blocking HTTP** — long queries time out at proxies, load balancers, or client libraries before they complete.
 2. **No isolation** — without per-user job scoping, users can see (or interfere with) each other's work.
 
-`transparency-reports-api` solves both by introducing an asynchronous job model backed by a thread pool and a per-key access control layer.
+`transparency-report-api` solves both by introducing an asynchronous job model backed by a thread pool and a per-key access control layer.
 
 ### 1.3 Goals
 

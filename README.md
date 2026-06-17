@@ -1,6 +1,6 @@
-# transparency-reports-api
+# transparency-report-api
 
-[![CI](https://github.com/krMaynard/transparency-reports-api/actions/workflows/ci.yml/badge.svg)](https://github.com/krMaynard/transparency-reports-api/actions/workflows/ci.yml)
+[![CI](https://github.com/krMaynard/transparency-report-api/actions/workflows/ci.yml/badge.svg)](https://github.com/krMaynard/transparency-report-api/actions/workflows/ci.yml)
 
 A FastAPI service that lets a researcher describe a query with **structured
 parameters** (no SQL), runs it asynchronously on a worker thread, and serves the
@@ -267,8 +267,8 @@ manager rather than using the demo fallback. See `PRODUCTIONIZE.md`.
 
 ```bash
 # 1. Install and seed
-git clone https://github.com/krMaynard/transparency-reports-api.git
-cd transparency-reports-api
+git clone https://github.com/krMaynard/transparency-report-api.git
+cd transparency-report-api
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
