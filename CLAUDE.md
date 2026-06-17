@@ -1,13 +1,15 @@
-# research-api — Claude context
+# transparency-reports-api — Claude context
 
 ## What this is
 
 A FastAPI service that accepts **structured query parameters** (not SQL) via
 HTTP, runs the resulting query asynchronously on background worker threads, and
 returns results as JSON or CSV. Backed by a read-only SQLite database seeded from
-the aggregated **EU Digital Services Act (DSA) VLOP transparency reports** —
-content-moderation statistics for 33 designated Very Large Online Platforms /
-Search Engines (H2 2025), tables 3–11 of the DSA Implementing Regulation template.
+transparency-reporting datasets: the aggregated **EU Digital Services Act (DSA)
+VLOP transparency reports** (content-moderation statistics for 33 designated Very
+Large Online Platforms / Search Engines, H2 2025, tables 3–11 of the DSA
+Implementing Regulation template) and **Google Government content-removal
+requests**.
 
 Built to demonstrate two things:
 
@@ -76,7 +78,7 @@ uvicorn main:app --port 8000
 Repos are expected as siblings:
 ```
 parent/
-  research-api/            ← this repo
+  transparency-reports-api/  ← this repo
   krMaynard.github.io/ ← source data lives at data/vlop-dsa.json
 ```
 

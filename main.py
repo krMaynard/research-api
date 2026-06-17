@@ -752,13 +752,15 @@ def _openapi_servers() -> list[dict[str, str]]:
 
 
 app = FastAPI(
-    title="DSA VLOP Transparency Query API (async jobs)",
+    title="Transparency Reports API (async jobs)",
     description=(
-        "Query the aggregated EU Digital Services Act VLOP transparency reports "
-        "(tables 3–11) with structured parameters (no SQL). Pick a `table` "
-        "(GET /tables), describe filters/group_by/aggregates, get a job id, then "
-        "poll for results as JSON or CSV. Query syntax follows the TikTok Research "
-        "API: boolean and/or/not clauses of {operation, field_name, field_values}."
+        "Query public transparency reports — the aggregated EU Digital Services "
+        "Act VLOP content-moderation reports (tables 3–11) and Google Government "
+        "content-removal requests — with structured parameters (no SQL). Pick a "
+        "`table` (GET /tables), describe filters/group_by/aggregates, get a job "
+        "id, then poll for results as JSON or CSV. Query syntax follows the "
+        "TikTok Research API: boolean and/or/not clauses of {operation, "
+        "field_name, field_values}."
     ),
     version="0.5.0",
     servers=_openapi_servers(),
