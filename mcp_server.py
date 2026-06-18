@@ -33,26 +33,37 @@ Register with an MCP host (e.g. Claude Desktop) — see docs/MCP.md.
 from __future__ import annotations
 
 import os
+import threading
 from typing import Any
 
 import httpx
 
 SERVER_NAME = "transparency-report-api"
 
-API_URL = os.getenv("TRANSPARENCY_API_URL", "http://127.0.0.1:8000").rstrip("/")
+# `... or default` (not getenv's default arg) so an explicitly empty value
+# (e.g. `TRANSPARENCY_API_URL=`) falls back instead of becoming "".
+API_URL = (os.getenv("TRANSPARENCY_API_URL") or "http://127.0.0.1:8000").rstrip("/")
 API_KEY = os.getenv("TRANSPARENCY_API_KEY") or None
-API_TIMEOUT = float(os.getenv("TRANSPARENCY_API_TIMEOUT", "30"))
+try:
+    API_TIMEOUT = float(os.getenv("TRANSPARENCY_API_TIMEOUT") or "30")
+except ValueError:
+    API_TIMEOUT = 30.0
 
 # Lazily-built shared HTTP client. Tests inject their own (e.g. an ASGI transport
 # bound to the app) by assigning to this module global before calling a tool.
 _session: httpx.Client | None = None
+_session_lock = threading.Lock()
 
 
 def _client() -> httpx.Client:
     global _session
+    # Double-checked locking: tools may run on concurrent threads, so guard the
+    # one-time client build to avoid creating orphaned, unclosed clients.
     if _session is None:
-        headers = {"X-API-Key": API_KEY} if API_KEY else {}
-        _session = httpx.Client(base_url=API_URL, headers=headers, timeout=API_TIMEOUT)
+        with _session_lock:
+            if _session is None:
+                headers = {"X-API-Key": API_KEY} if API_KEY else {}
+                _session = httpx.Client(base_url=API_URL, headers=headers, timeout=API_TIMEOUT)
     return _session
 
 
@@ -78,7 +89,15 @@ def _request(method: str, path: str, **kwargs: Any) -> Any:
         except ValueError:
             detail = resp.text
         raise ApiError(f"API {method} {path} failed ({resp.status_code}): {detail}")
-    return resp.json()
+    # A 2xx with a non-JSON body (empty response, or an HTML error page injected
+    # by a proxy/gateway) would otherwise surface as a raw traceback.
+    try:
+        return resp.json()
+    except ValueError as exc:
+        raise ApiError(
+            f"API {method} {path} returned invalid JSON "
+            f"(status {resp.status_code}): {resp.text[:200]}"
+        ) from exc
 
 
 # ── Tool implementations ─────────────────────────────────────────────────────

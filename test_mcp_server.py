@@ -124,6 +124,20 @@ def test_unreachable_api_raises_friendly_error(monkeypatch):
     assert "Could not reach the transparency API" in str(exc.value)
 
 
+def test_non_json_2xx_raises_friendly_error(monkeypatch):
+    # A 2xx with a non-JSON body (e.g. a proxy's HTML error page) surfaces a
+    # clean ApiError rather than a raw JSONDecodeError traceback.
+    def _html(*a, **k):
+        return httpx.Response(200, text="<html>not json</html>")
+
+    client = httpx.Client(base_url="http://test")
+    monkeypatch.setattr(client, "request", _html)
+    monkeypatch.setattr(mcp_server, "_session", client)
+    with pytest.raises(mcp_server.ApiError) as exc:
+        mcp_server.list_tables()
+    assert "returned invalid JSON" in str(exc.value)
+
+
 def test_build_server_registers_all_tools():
     pytest.importorskip("mcp")
     import asyncio
