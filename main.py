@@ -1998,6 +1998,12 @@ def dashboard_page() -> FileResponse:
     return _serve_page("index.html", "Dashboard page")
 
 
+@app.get("/removals", response_class=HTMLResponse)
+def removals_page() -> FileResponse:
+    """Serve the Google Government Removals dashboard."""
+    return _serve_page("removals.html", "Removals page")
+
+
 @app.get("/portal", response_class=HTMLResponse)
 def portal_page() -> FileResponse:
     """Serve the researcher portal single-page app."""
@@ -2065,6 +2071,59 @@ def overview() -> dict[str, Any]:
             if _overview_cache is None:
                 _overview_cache = _compute_overview()
     return _overview_cache
+
+
+_gr_overview_cache: dict[str, Any] | None = None
+_gr_overview_cache_lock = threading.Lock()
+
+
+def _compute_gr_overview() -> dict[str, Any]:
+    conn = _connect_ro()
+    try:
+        total_requests, total_items, country_count = conn.execute(
+            "SELECT COALESCE(SUM(num_requests), 0), COALESCE(SUM(items_requested), 0), COUNT(DISTINCT country_id) FROM gr_removals"
+        ).fetchone()
+        periods = [r[0] for r in conn.execute(
+            "SELECT name FROM gr_periods ORDER BY id"
+        ).fetchall()]
+        countries = [{"code": r[0], "name": r[1]} for r in conn.execute(
+            "SELECT code, name FROM gr_countries ORDER BY name"
+        ).fetchall()]
+        requestors = [r[0] for r in conn.execute(
+            "SELECT name FROM gr_requestors ORDER BY name"
+        ).fetchall()]
+        products = [r[0] for r in conn.execute(
+            "SELECT name FROM gr_products ORDER BY name"
+        ).fetchall()]
+        reasons = [r[0] for r in conn.execute(
+            "SELECT name FROM gr_reasons ORDER BY name"
+        ).fetchall()]
+        return {
+            "total_requests": total_requests,
+            "total_items": total_items,
+            "country_count": country_count,
+            "period_count": len(periods),
+            "periods": periods,
+            "countries": countries,
+            "requestors": requestors,
+            "products": products,
+            "reasons": reasons,
+        }
+    finally:
+        conn.close()
+
+
+@api_router.get("/overview/removals")
+def overview_removals() -> dict[str, Any]:
+    """Public headline stats and filter options for the Government Removals dataset — no auth.
+    Returns totals, the ordered period list (chronological), and dimension value lists for
+    populating filter dropdowns. Memoised like /overview."""
+    global _gr_overview_cache
+    if _gr_overview_cache is None:
+        with _gr_overview_cache_lock:
+            if _gr_overview_cache is None:
+                _gr_overview_cache = _compute_gr_overview()
+    return _gr_overview_cache
 
 
 @api_router.get("/explore/options")

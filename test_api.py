@@ -1520,3 +1520,25 @@ class TestGRTable:
             "query": {"and": [{"operation": "EQ", "field_name": "nonexistent_field", "field_values": ["x"]}]},
         }, headers=ALICE)
         assert r.status_code == 400
+
+    def test_gr_overview_removals(self):
+        r = client.get("/api/overview/removals")
+        assert r.status_code == 200
+        d = r.json()
+        assert "total_requests" in d and "total_items" in d
+        assert "country_count" in d and "period_count" in d
+        assert isinstance(d["periods"], list) and len(d["periods"]) >= 1
+        assert isinstance(d["countries"], list) and isinstance(d["countries"][0], dict)
+        assert "code" in d["countries"][0] and "name" in d["countries"][0]
+        assert isinstance(d["requestors"], list)
+        assert isinstance(d["products"], list)
+        assert isinstance(d["reasons"], list)
+        # Fixture has 3 rows: spot-check totals are non-negative integers
+        assert d["total_requests"] >= 0
+        assert d["total_items"] >= 0
+
+    def test_removals_page_served(self):
+        r = client.get("/removals")
+        assert r.status_code == 200 and "text/html" in r.headers["content-type"]
+        assert "/api/overview/removals" in r.text
+        assert "Government Requests" in r.text

@@ -1,0 +1,887 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Government Removals — Transparency Report API</title>
+<meta name="description" content="Government requests to remove content from Google products — 160 countries, 13 reporting periods, 42 products, 22 reasons." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="/static/vendor/chart.umd.js" defer></script>
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem('theme');
+      if (!t) t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); }
+  })();
+</script>
+<style>
+  :root {
+    --bg: #f2f2f2; --panel: #fff; --panel2: #f5f5f5; --border: #e8e8e8;
+    --fg: #333; --muted: #666; --accent: #2a9d8f; --accent-dark: #1e7268; --accent2: #1e7268;
+    --on-accent: #fff; --shadow: rgba(0,0,0,.07);
+    --mono: ui-monospace, SFMono-Regular, "DejaVu Sans Mono", Menlo, monospace;
+    --topbar-h: 52px; --sidebar-w: 220px;
+  }
+  [data-theme="dark"] {
+    --bg: #15181c; --panel: #1d2025; --panel2: #2a2f35; --border: #2c3138;
+    --fg: #e8e8e8; --muted: #b0b0b0; --accent: #4ec1b1; --accent-dark: #6ed3c4; --accent2: #6ed3c4;
+    --on-accent: #08110f; --shadow: rgba(0,0,0,.45);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 15px/1.6 'Open Sans', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+  }
+  /* ── Site banner ─────────────────────────────────────────────── */
+  .site-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.9rem 1.5rem; background: var(--panel); border-bottom: 1px solid var(--border);
+  }
+  .site-nav .nav-name { font-weight: 700; font-size: 1rem; color: var(--fg); text-decoration: none; }
+  .site-nav .nav-links { display: flex; gap: 1.4rem; align-items: center; }
+  .site-nav .nav-links a { color: var(--muted); text-decoration: none; font-size: .9rem; }
+  .site-nav .nav-links a:hover { color: var(--accent); }
+  .topbar {
+    position: sticky; top: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: space-between;
+    height: var(--topbar-h); padding: 0 1rem;
+    background: var(--panel); border-bottom: 1px solid var(--border);
+  }
+  .topbar-left { display: flex; align-items: center; gap: 0.6rem; }
+  .topbar-brand { font-weight: 700; font-size: 0.95rem; color: var(--fg); text-decoration: none; white-space: nowrap; }
+  .topbar-brand:hover { color: var(--accent); }
+  .topbar-right { display: flex; align-items: center; gap: 0.5rem; }
+  .hamburger {
+    display: none; align-items: center; justify-content: center;
+    background: none; border: 0; color: var(--fg); cursor: pointer; padding: 6px;
+    border-radius: 6px; width: auto; margin: 0;
+  }
+  .hamburger:hover { color: var(--accent); background: var(--panel2); }
+  .hamburger svg { width: 20px; height: 20px; display: block; }
+  .theme-toggle {
+    background: none; border: 0; color: var(--muted); cursor: pointer; padding: 4px;
+    display: inline-flex; width: auto; margin: 0; border-radius: 6px;
+  }
+  .theme-toggle:hover { color: var(--accent); }
+  .theme-toggle svg { width: 20px; height: 20px; }
+  .theme-icon-light { display: none; }
+  [data-theme="dark"] .theme-toggle .theme-icon-light { display: block; }
+  [data-theme="dark"] .theme-toggle .theme-icon-dark { display: none; }
+  .app-body { display: flex; min-height: calc(100vh - var(--topbar-h)); }
+  .sidebar {
+    width: var(--sidebar-w); flex-shrink: 0;
+    position: sticky; top: var(--topbar-h); height: calc(100vh - var(--topbar-h));
+    overflow-y: auto; background: var(--panel); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; transition: transform 0.22s ease;
+  }
+  .sidebar nav { flex: 1; padding: 0.75rem 0.5rem; }
+  .nav-section {
+    font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); padding: 0.55rem 0.75rem 0.25rem;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 0.55rem;
+    padding: 0.45rem 0.75rem; border-radius: 7px;
+    color: var(--fg); text-decoration: none; font-size: 13.5px; margin: 1px 0; position: relative;
+  }
+  .nav-item svg { flex-shrink: 0; color: var(--muted); }
+  .nav-item:hover { background: var(--panel2); color: var(--accent); }
+  .nav-item:hover svg { color: var(--accent); }
+  .nav-item.is-active { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent-dark); font-weight: 600; }
+  [data-theme="dark"] .nav-item.is-active { color: var(--accent); }
+  .nav-item.is-active svg { color: var(--accent); }
+  .nav-item.is-active::before {
+    content: ''; position: absolute; left: 0; top: 20%; bottom: 20%;
+    width: 3px; border-radius: 2px; background: var(--accent);
+  }
+  .nav-item.is-soon { color: var(--muted); cursor: default; }
+  .nav-item.is-soon:hover { background: none; color: var(--muted); }
+  .nav-item.is-soon svg { opacity: 0.5; }
+  .soon-badge {
+    margin-left: auto; font-size: 10px; font-weight: 700; letter-spacing: .05em;
+    background: var(--panel2); color: var(--muted); border: 1px solid var(--border);
+    border-radius: 999px; padding: 1px 7px;
+  }
+  .nav-item.is-ext { color: var(--muted); font-size: 12.5px; }
+  .nav-item.is-ext:hover { color: var(--accent); }
+  .nav-hr { border: none; border-top: 1px solid var(--border); margin: 0.5rem 0.75rem; }
+  .sidebar-footer { padding: 0.75rem 1rem; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+  .sidebar-footer a { color: var(--muted); text-decoration: none; }
+  .sidebar-footer a:hover { color: var(--accent); }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; z-index: 150; background: rgba(0,0,0,.4); }
+  .sidebar-overlay.is-open { display: block; }
+  .main-area { flex: 1; min-width: 0; }
+  .wrap { max-width: 960px; padding: 28px 2rem; }
+  header { margin-bottom: 16px; }
+  header .badge {
+    display: inline-block; font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--accent); border: 1px solid var(--border); border-radius: 999px;
+    padding: 3px 12px; background: var(--panel); margin-bottom: 14px;
+  }
+  header h1 { margin: 0 0 6px; font-size: 26px; }
+  header p { margin: 0; color: var(--muted); max-width: 680px; }
+  .stats { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 22px; }
+  .stat {
+    flex: 1 1 130px; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px 18px;
+  }
+  .stat .num { font-size: 24px; font-weight: 700; color: var(--accent2); font-family: var(--mono); }
+  .stat .lbl { color: var(--muted); font-size: 13px; margin-top: 3px; }
+
+  /* ── Filters ─────────────────────────────────────────────────── */
+  .filters {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 18px; margin-bottom: 18px;
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;
+  }
+  .filter-group { display: flex; flex-direction: column; gap: 4px; }
+  .filter-group label { font-size: 11.5px; color: var(--muted); font-weight: 600; }
+  select {
+    background: var(--panel2); color: var(--fg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 10px; font-size: 13.5px; min-width: 110px; cursor: pointer;
+  }
+  .filter-reset {
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    border-radius: 8px; padding: 7px 14px; font-size: 13px; cursor: pointer;
+    white-space: nowrap; width: auto; margin: 0;
+  }
+  .filter-reset:hover { color: var(--accent); border-color: var(--accent); }
+  .filter-summary { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+  .filter-summary strong { color: var(--fg); }
+
+  /* ── Chart grid ──────────────────────────────────────────────── */
+  .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .chart-card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    padding: 20px 22px;
+  }
+  .chart-card.wide { grid-column: 1 / -1; }
+  .chart-card h3 { margin: 0 0 4px; font-size: 15px; }
+  .chart-card .chart-sub { color: var(--muted); font-size: 12.5px; margin: 0 0 14px; }
+  .chart-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .chart-card-head h3 { margin: 0; font-size: 15px; }
+  canvas { width: 100% !important; }
+  .chart-loading { color: var(--muted); font-size: 13px; text-align: center; padding: 40px 0; }
+
+  /* ── Breakdown selector ──────────────────────────────────────── */
+  .breakdown-wrap { display: flex; align-items: center; gap: 8px; }
+  .breakdown-wrap label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .breakdown-wrap select { min-width: 120px; font-size: 12.5px; padding: 5px 8px; }
+
+  /* ── Data table ──────────────────────────────────────────────── */
+  .table-card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    padding: 20px 22px; margin-bottom: 20px;
+  }
+  .table-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .table-card-head h3 { margin: 0; font-size: 15px; }
+  .row-count { font-size: 12.5px; color: var(--muted); }
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; white-space: nowrap; }
+  td.num { font-family: var(--mono); color: var(--accent2); text-align: right; }
+  tr:last-child td { border-bottom: none; }
+
+  /* ── Utils ───────────────────────────────────────────────────── */
+  .error { color: #c0392b; font-size: 13px; padding: 8px 0; }
+  [data-theme="dark"] .error { color: #ff7b72; }
+  .hidden { display: none !important; }
+  a:focus-visible, button:focus-visible, select:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px;
+  }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  .skip-link {
+    position: absolute; left: 8px; top: -48px; z-index: 999;
+    background: var(--accent); color: var(--on-accent); padding: 8px 14px;
+    border-radius: 8px; font-weight: 700; transition: top .15s;
+  }
+  .skip-link:focus { top: 8px; }
+  footer { color: var(--muted); font-size: 13px; margin-top: 8px; padding-bottom: 2rem; }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 720px) {
+    .hamburger { display: flex; }
+    .sidebar { position: fixed; left: 0; top: var(--topbar-h); bottom: 0; z-index: 190; transform: translateX(calc(-1 * var(--sidebar-w))); }
+    .sidebar.is-open { transform: translateX(0); }
+    .wrap { padding: 20px 1rem; }
+    .chart-grid { grid-template-columns: 1fr; }
+    .chart-card.wide { grid-column: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- ── Site banner ──────────────────────────────────────────────────────── -->
+<nav class="site-nav" aria-label="Site">
+  <a href="https://kieranmaynard.com/" class="nav-name">Kieran Maynard</a>
+  <div class="nav-links">
+    <a href="https://kieranmaynard.com/work.html">Work</a>
+    <a href="https://kieranmaynard.com/transparency.html">Products</a>
+    <a href="https://kieranmaynard.com/consulting.html">Consulting</a>
+    <a href="https://kieranmaynard.com/blog.html">Blog</a>
+    <a href="mailto:kieranmaynard@gmail.com">Contact</a>
+  </div>
+</nav>
+
+<header class="topbar">
+  <div class="topbar-left">
+    <button type="button" class="hamburger" id="hamburger" aria-label="Toggle navigation" aria-expanded="false" aria-controls="sidebar">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <line x1="3" y1="5" x2="17" y2="5"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="15" x2="17" y2="15"/>
+      </svg>
+    </button>
+    <a href="/" class="topbar-brand">Transparency Report API</a>
+  </div>
+  <div class="topbar-right">
+    <button type="button" class="theme-toggle" aria-label="Toggle dark mode" data-theme-toggle>
+      <svg class="theme-icon-dark" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+      <svg class="theme-icon-light" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="app-body">
+
+<aside class="sidebar" id="sidebar" aria-label="Application navigation">
+  <nav>
+    <div class="nav-section">Datasets</div>
+
+    <a href="/reports" class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <rect x="1" y="9" width="3" height="6" rx="1"/><rect x="6" y="5" width="3" height="10" rx="1"/><rect x="11" y="1" width="3" height="14" rx="1"/>
+      </svg>
+      DSA Reports
+    </a>
+
+    <a href="/removals" class="nav-item is-active" aria-current="page">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <circle cx="8" cy="8" r="6.25"/>
+        <path d="M5.5 10.5l5-5M5.5 5.5l5 5" stroke-linecap="round"/>
+      </svg>
+      Government Removals
+    </a>
+
+    <a href="#" class="nav-item is-soon" aria-disabled="true" tabindex="-1">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <path d="M2 12l4-4 3 3 5-7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      SoR Analysis
+      <span class="soon-badge">Soon</span>
+    </a>
+
+    <hr class="nav-hr">
+    <div class="nav-section">Tools</div>
+
+    <a href="/portal" class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <path d="M8 1a3.5 3.5 0 1 0 0 7A3.5 3.5 0 0 0 8 1zM8 9C4.5 9 1.5 10.6 1.5 12.5v1a.5.5 0 0 0 .5.5h12a.5.5 0 0 0 .5-.5v-1C14.5 10.6 11.5 9 8 9z"/>
+      </svg>
+      Researcher Portal
+    </a>
+
+    <a href="/docs" class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <path d="M3 1h8l3 3v11H3V1zm7 .5V4.5H12.5L10 1.5zM4 6h8v1H4zm0 2.5h8v1H4zm0 2.5h5v1H4z"/>
+      </svg>
+      API Docs
+    </a>
+
+    <a href="/api" class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+        <path d="M5 4L1.5 8 5 12M11 4l3.5 4L11 12M9 3l-2 10"/>
+      </svg>
+      API Reference
+    </a>
+
+    <hr class="nav-hr">
+
+    <a href="https://kieranmaynard.com/" class="nav-item is-ext" target="_blank" rel="noopener noreferrer">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <path d="M9 1h6v6l-2-2-5 5-1.5-1.5 5-5L9 1zM2 5h4v1.5H3.5v7h7V10H12v4H2V5z"/>
+      </svg>
+      kieranmaynard.com
+    </a>
+
+    <a href="https://github.com/krMaynard/transparency-report-api" class="nav-item is-ext" target="_blank" rel="noopener noreferrer">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <path d="M8 .5a7.5 7.5 0 0 0-2.371 14.617c.375.069.512-.163.512-.362 0-.178-.006-.651-.01-1.278-2.086.454-2.526-1.006-2.526-1.006-.341-.866-.832-1.097-.832-1.097-.68-.465.051-.456.051-.456.752.053 1.147.772 1.147.772.668 1.145 1.753.814 2.18.623.068-.484.261-.814.475-1.001-1.665-.19-3.416-.833-3.416-3.707 0-.819.293-1.488.772-2.013-.077-.19-.334-.952.074-1.986 0 0 .629-.201 2.061.768a7.182 7.182 0 0 1 1.876-.252c.637.003 1.278.086 1.876.252 1.431-.969 2.059-.768 2.059-.768.409 1.034.152 1.796.075 1.986.481.525.771 1.194.771 2.013 0 2.882-1.754 3.516-3.424 3.702.269.232.508.69.508 1.39 0 1.003-.009 1.813-.009 2.059 0 .201.135.435.516.361A7.501 7.501 0 0 0 8 .5z"/>
+      </svg>
+      GitHub
+    </a>
+  </nav>
+  <div class="sidebar-footer">By <a href="https://kieranmaynard.com/">Kieran Maynard</a></div>
+</aside>
+
+<div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
+
+<div class="main-area">
+<div class="wrap">
+
+<main id="main" tabindex="-1">
+
+  <header>
+    <span class="badge">Google · 2019–2025</span>
+    <h1>Government Requests to Remove Content</h1>
+    <p>Government requests to remove content from Google products, across 13 reporting periods, 160 countries, 42 products, and 22 stated reasons. Built around multi-period trends — every filter becomes a time series.</p>
+  </header>
+
+  <!-- Headline stats -->
+  <div class="stats" id="stats" aria-busy="true">
+    <div class="stat"><div class="num" id="stat-requests">—</div><div class="lbl">Government requests</div></div>
+    <div class="stat"><div class="num" id="stat-items">—</div><div class="lbl">Items targeted for removal</div></div>
+    <div class="stat"><div class="num" id="stat-countries">—</div><div class="lbl">Countries represented</div></div>
+    <div class="stat"><div class="num" id="stat-periods">—</div><div class="lbl">Reporting periods</div></div>
+  </div>
+
+  <div class="error hidden" id="load-error" role="alert"></div>
+
+  <div id="dashboard" class="hidden">
+
+    <!-- Filters -->
+    <div class="filters" role="region" aria-label="Dashboard filters">
+      <div class="filter-group">
+        <label for="f-from">From</label>
+        <select id="f-from"></select>
+      </div>
+      <div class="filter-group">
+        <label for="f-to">To</label>
+        <select id="f-to"></select>
+      </div>
+      <div class="filter-group">
+        <label for="f-country">Country</label>
+        <select id="f-country"></select>
+      </div>
+      <div class="filter-group">
+        <label for="f-requestor">Requestor</label>
+        <select id="f-requestor"></select>
+      </div>
+      <div class="filter-group">
+        <label for="f-product">Product</label>
+        <select id="f-product"></select>
+      </div>
+      <div class="filter-group">
+        <label for="f-reason">Reason</label>
+        <select id="f-reason"></select>
+      </div>
+      <button type="button" class="filter-reset" id="f-reset">Reset</button>
+    </div>
+
+    <p class="filter-summary" id="filter-summary" aria-live="polite"></p>
+    <div class="error hidden" id="chart-error" role="alert"></div>
+
+    <!-- Charts -->
+    <div class="chart-grid">
+
+      <div class="chart-card wide">
+        <div class="chart-card-head">
+          <h3>Items targeted for removal, by period</h3>
+          <div class="breakdown-wrap">
+            <label for="f-breakdown">Break down by</label>
+            <select id="f-breakdown">
+              <option value="">None (total)</option>
+              <option value="country_name">Country</option>
+              <option value="requestor">Requestor type</option>
+              <option value="product">Google product</option>
+              <option value="reason">Reason</option>
+            </select>
+          </div>
+        </div>
+        <div class="chart-loading" id="ts-loading">Loading…</div>
+        <canvas id="chart-ts" height="160" aria-hidden="true" class="hidden"></canvas>
+        <div id="chart-ts-table" class="hidden sr-only"></div>
+      </div>
+
+      <div class="chart-card wide">
+        <h3>Removal rate over time</h3>
+        <p class="chart-sub">Share of targeted items Google actually removed (legal + policy + already removed).</p>
+        <div class="chart-loading" id="rate-loading">Loading…</div>
+        <canvas id="chart-rate" height="120" aria-hidden="true" class="hidden"></canvas>
+      </div>
+
+      <div class="chart-card">
+        <h3>Top 10 countries by items targeted</h3>
+        <div class="chart-loading" id="cty-loading">Loading…</div>
+        <canvas id="chart-countries" height="200" aria-hidden="true" class="hidden"></canvas>
+      </div>
+
+      <div class="chart-card">
+        <h3>Top reasons cited</h3>
+        <div class="chart-loading" id="rsn-loading">Loading…</div>
+        <canvas id="chart-reasons" height="200" aria-hidden="true" class="hidden"></canvas>
+      </div>
+
+      <div class="chart-card">
+        <h3>Top Google products targeted</h3>
+        <div class="chart-loading" id="prd-loading">Loading…</div>
+        <canvas id="chart-products" height="200" aria-hidden="true" class="hidden"></canvas>
+      </div>
+
+      <div class="chart-card">
+        <h3>How Google responded</h3>
+        <div class="chart-loading" id="cmp-loading">Loading…</div>
+        <canvas id="chart-compliance" height="200" aria-hidden="true" class="hidden"></canvas>
+      </div>
+
+    </div>
+
+    <!-- Data table -->
+    <div class="table-card">
+      <div class="table-card-head">
+        <h3>Records (top 50 by items targeted)</h3>
+        <span class="row-count" id="row-count"></span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Period</th><th>Country</th><th>Requestor</th><th>Product</th><th>Reason</th>
+              <th class="num">Requests</th><th class="num">Items targeted</th><th class="num">Items removed</th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /#dashboard -->
+
+</main>
+
+<footer>
+  <p>Source: <a href="https://transparencyreport.google.com/government-removals/overview" target="_blank" rel="noopener noreferrer">Google Transparency Report</a> — detailed government removal requests (2019–H1 2025). Data via <a href="/api">Transparency Report API</a> · <a href="/portal">Researcher access</a></p>
+</footer>
+
+</div>
+</div><!-- /.main-area -->
+</div><!-- /.app-body -->
+
+<script>
+(function () {
+  'use strict';
+
+  // ── Dark mode + hamburger ─────────────────────────────────────────────────
+  var themeBtn = document.querySelector('[data-theme-toggle]');
+  if (themeBtn) {
+    themeBtn.addEventListener('click', function () {
+      var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('theme', next); } catch (e) {}
+    });
+  }
+  var hamburger = document.getElementById('hamburger');
+  var sidebar   = document.getElementById('sidebar');
+  var overlay   = document.getElementById('sidebar-overlay');
+  function openSidebar()  { sidebar.classList.add('is-open'); overlay.classList.add('is-open'); hamburger.setAttribute('aria-expanded','true'); overlay.removeAttribute('aria-hidden'); }
+  function closeSidebar() { sidebar.classList.remove('is-open'); overlay.classList.remove('is-open'); hamburger.setAttribute('aria-expanded','false'); overlay.setAttribute('aria-hidden','true'); }
+  hamburger.addEventListener('click', function () { sidebar.classList.contains('is-open') ? closeSidebar() : openSidebar(); });
+  overlay.addEventListener('click', closeSidebar);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && sidebar.classList.contains('is-open')) closeSidebar(); });
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function fmt(n) {
+    if (n == null) return '—';
+    return Number(n).toLocaleString('en-US');
+  }
+  function fmtPct(n) { return n == null ? '—' : (n * 100).toFixed(1) + '%'; }
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function chartReady() { return typeof Chart !== 'undefined'; }
+
+  var PALETTE = [
+    '#2a9d8f','#e76f51','#264653','#e9c46a','#a8dadc','#f4a261','#457b9d','#1d3557',
+    '#6a994e','#bc4749','#a7c957','#386641','#c9d6df','#52796f','#84a98c','#cad2c5'
+  ];
+
+  // ── State ─────────────────────────────────────────────────────────────────
+  var allPeriods = [], fromIdx = 0, toIdx = 0;
+  var charts = {};
+  var debounceTimer = null;
+
+  // ── API calls ─────────────────────────────────────────────────────────────
+  async function explore(body) {
+    var r = await fetch('/api/explore', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    var d = await r.json();
+    if (!r.ok) throw new Error(d.detail || 'HTTP ' + r.status);
+    return d;
+  }
+
+  function buildConditions() {
+    var conds = [];
+    var from = allPeriods[fromIdx], to = allPeriods[toIdx];
+    if (fromIdx > 0 || toIdx < allPeriods.length - 1) {
+      conds.push({ operation: 'IN', field_name: 'period', field_values: allPeriods.slice(fromIdx, toIdx + 1) });
+    }
+    var selCountry   = document.getElementById('f-country').value;
+    var selRequestor = document.getElementById('f-requestor').value;
+    var selProduct   = document.getElementById('f-product').value;
+    var selReason    = document.getElementById('f-reason').value;
+    if (selCountry)   conds.push({ operation: 'EQ', field_name: 'country_name', field_values: [selCountry] });
+    if (selRequestor) conds.push({ operation: 'EQ', field_name: 'requestor',    field_values: [selRequestor] });
+    if (selProduct)   conds.push({ operation: 'EQ', field_name: 'product',      field_values: [selProduct] });
+    if (selReason)    conds.push({ operation: 'EQ', field_name: 'reason',       field_values: [selReason] });
+    return conds.length ? { and: conds } : undefined;
+  }
+
+  function q(table, group_by, aggregates, sort, max_count) {
+    var body = { table: table, group_by: group_by, aggregates: aggregates };
+    if (sort)      body.sort = sort;
+    if (max_count) body.max_count = max_count;
+    var cond = buildConditions();
+    if (cond) body.conditions = cond;
+    return body;
+  }
+
+  // ── Chart helpers ─────────────────────────────────────────────────────────
+  function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+  function showChart(canvasId, loadingId) {
+    document.getElementById(loadingId).classList.add('hidden');
+    document.getElementById(canvasId).classList.remove('hidden');
+  }
+
+  function barChart(id, loadId, labels, values, label) {
+    destroyChart(id);
+    showChart(id, loadId);
+    if (!chartReady()) return;
+    charts[id] = new Chart(document.getElementById(id), {
+      type: 'bar',
+      data: { labels: labels, datasets: [{ label: label, data: values, backgroundColor: PALETTE[0], borderRadius: 4 }] },
+      options: {
+        indexAxis: 'y', responsive: true, plugins: { legend: { display: false } },
+        scales: { x: { ticks: { callback: function(v) { return fmt(v); } } } },
+      },
+    });
+  }
+
+  function lineChart(id, loadId, labels, datasets) {
+    destroyChart(id);
+    showChart(id, loadId);
+    if (!chartReady()) return;
+    charts[id] = new Chart(document.getElementById(id), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: datasets.map(function(ds, i) {
+          return {
+            label: ds.label, data: ds.data,
+            borderColor: PALETTE[i % PALETTE.length],
+            backgroundColor: PALETTE[i % PALETTE.length] + '22',
+            borderWidth: 2, pointRadius: 3, tension: 0.3, fill: false,
+          };
+        }),
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: datasets.length > 1, position: 'bottom' } },
+        scales: { y: { ticks: { callback: function(v) { return fmt(v); } } } },
+      },
+    });
+  }
+
+  function doughnutChart(id, loadId, labels, values) {
+    destroyChart(id);
+    showChart(id, loadId);
+    if (!chartReady()) return;
+    charts[id] = new Chart(document.getElementById(id), {
+      type: 'doughnut',
+      data: { labels: labels, datasets: [{ data: values, backgroundColor: PALETTE.slice(0, labels.length) }] },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'right' },
+          tooltip: { callbacks: { label: function(ctx) { return ctx.label + ': ' + fmt(ctx.raw); } } },
+        },
+      },
+    });
+  }
+
+  function pctLineChart(id, loadId, labels, values) {
+    destroyChart(id);
+    showChart(id, loadId);
+    if (!chartReady()) return;
+    charts[id] = new Chart(document.getElementById(id), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{ label: 'Removal rate', data: values, borderColor: PALETTE[0], backgroundColor: PALETTE[0] + '22', borderWidth: 2, pointRadius: 3, tension: 0.3, fill: true }],
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { min: 0, max: 1, ticks: { callback: function(v) { return (v*100).toFixed(0)+'%'; } } } },
+      },
+    });
+  }
+
+  // ── Render functions ──────────────────────────────────────────────────────
+  function renderTimeSeries(rows, breakdown) {
+    if (!breakdown) {
+      var labels = rows.map(function(r){ return r[0]; });
+      var values = rows.map(function(r){ return r[1]; });
+      lineChart('chart-ts', 'ts-loading', labels, [{ label: 'Items targeted', data: values }]);
+    } else {
+      // rows = [period, breakdown_val, items] — pivot into per-breakdown datasets
+      var periodSet = [], seriesMap = {};
+      rows.forEach(function(r) {
+        var period = r[0], bval = r[1], items = r[2];
+        if (!periodSet.includes(period)) periodSet.push(period);
+        if (!seriesMap[bval]) seriesMap[bval] = {};
+        seriesMap[bval][period] = items;
+      });
+      // Top 8 series by total
+      var totals = Object.keys(seriesMap).map(function(k) {
+        var t = periodSet.reduce(function(s,p){ return s + (seriesMap[k][p] || 0); }, 0);
+        return { key: k, total: t };
+      }).sort(function(a,b){ return b.total - a.total; }).slice(0, 8);
+      var datasets = totals.map(function(entry) {
+        return { label: entry.key, data: periodSet.map(function(p){ return seriesMap[entry.key][p] || 0; }) };
+      });
+      lineChart('chart-ts', 'ts-loading', periodSet, datasets);
+    }
+  }
+
+  function renderRate(rows) {
+    // rows = [period, items, legal, policy, already]
+    var labels = rows.map(function(r){ return r[0]; });
+    var rates  = rows.map(function(r){
+      var items = r[1], removed = (r[2]||0) + (r[3]||0) + (r[4]||0);
+      return items > 0 ? removed / items : null;
+    });
+    pctLineChart('chart-rate', 'rate-loading', labels, rates);
+  }
+
+  function renderTopCountries(rows) {
+    var labels = rows.map(function(r){ return r[0]; }).reverse();
+    var values = rows.map(function(r){ return r[1]; }).reverse();
+    barChart('chart-countries', 'cty-loading', labels, values, 'Items targeted');
+  }
+
+  function renderTopReasons(rows) {
+    var labels = rows.map(function(r){ return r[0]; });
+    var values = rows.map(function(r){ return r[1]; });
+    doughnutChart('chart-reasons', 'rsn-loading', labels, values);
+  }
+
+  function renderTopProducts(rows) {
+    var labels = rows.map(function(r){ return r[0]; }).reverse();
+    var values = rows.map(function(r){ return r[1]; }).reverse();
+    barChart('chart-products', 'prd-loading', labels, values, 'Items targeted');
+  }
+
+  function renderCompliance(rows) {
+    if (!rows.length) {
+      destroyChart('chart-compliance');
+      var loadingEl = document.getElementById('cmp-loading');
+      if (loadingEl) loadingEl.classList.add('hidden');
+      return;
+    }
+    var r = rows[0];
+    // cols: removed_legal, removed_policy, already_removed, not_found, not_enough_info, no_action
+    var labels = ['Removed (legal)', 'Removed (policy)', 'Already removed', 'Not found', 'Not enough info', 'No action'];
+    var values = [r[0]||0, r[1]||0, r[2]||0, r[3]||0, r[4]||0, r[5]||0];
+    doughnutChart('chart-compliance', 'cmp-loading', labels, values);
+  }
+
+  function renderTable(rows) {
+    var tbody = document.getElementById('table-body');
+    var count = document.getElementById('row-count');
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="8" style="color:var(--muted);text-align:center;padding:20px">No records match the current filters.</td></tr>';
+      count.textContent = '';
+      return;
+    }
+    count.textContent = rows.length + ' rows';
+    tbody.innerHTML = rows.map(function(r) {
+      var removed = (r[5]||0) + (r[6]||0) + (r[7]||0);
+      return '<tr>'
+        + '<td>' + esc(r[0]) + '</td>'
+        + '<td>' + esc(r[1]) + '</td>'
+        + '<td>' + esc(r[2]) + '</td>'
+        + '<td>' + esc(r[3]) + '</td>'
+        + '<td>' + esc(r[4]) + '</td>'
+        + '<td class="num">' + fmt(r[8]) + '</td>'
+        + '<td class="num">' + fmt(r[9]) + '</td>'
+        + '<td class="num">' + fmt(removed) + '</td>'
+        + '</tr>';
+    }).join('');
+  }
+
+  function updateFilterSummary() {
+    var from = allPeriods[fromIdx], to = allPeriods[toIdx];
+    var parts = [from === to ? from : from + ' → ' + to];
+    var country   = document.getElementById('f-country').value;
+    var requestor = document.getElementById('f-requestor').value;
+    var product   = document.getElementById('f-product').value;
+    var reason    = document.getElementById('f-reason').value;
+    if (country)   parts.push('Country: ' + country);
+    if (requestor) parts.push('Requestor: ' + requestor);
+    if (product)   parts.push('Product: ' + product);
+    if (reason)    parts.push('Reason: ' + reason);
+    document.getElementById('filter-summary').innerHTML = 'Showing: <strong>' + parts.map(esc).join(' · ') + '</strong>';
+  }
+
+  // ── Main refresh ──────────────────────────────────────────────────────────
+  async function refresh() {
+    updateFilterSummary();
+    var breakdown = document.getElementById('f-breakdown').value;
+    var errEl = document.getElementById('chart-error');
+    errEl.classList.add('hidden'); errEl.textContent = '';
+
+    // Show loading indicators
+    ['ts-loading','rate-loading','cty-loading','rsn-loading','prd-loading','cmp-loading'].forEach(function(id) {
+      var el = document.getElementById(id); if (el) { el.classList.remove('hidden'); el.textContent = 'Loading…'; }
+    });
+    ['chart-ts','chart-rate','chart-countries','chart-reasons','chart-products','chart-compliance'].forEach(function(id) {
+      var el = document.getElementById(id); if (el) el.classList.add('hidden');
+    });
+
+    var grp = breakdown ? ['period', breakdown] : ['period'];
+    var tsAggs = [{ function: 'SUM', field_name: 'items_requested', alias: 'items' }];
+    var tsSort = [{ field_name: 'period', order: 'asc' }];
+
+    try {
+      var results = await Promise.all([
+        explore(q('gr_removals', grp, tsAggs, tsSort, 200)),
+        explore(q('gr_removals', ['period'], [
+          { function: 'SUM', field_name: 'items_requested', alias: 'items' },
+          { function: 'SUM', field_name: 'removed_legal',   alias: 'legal' },
+          { function: 'SUM', field_name: 'removed_policy',  alias: 'policy' },
+          { function: 'SUM', field_name: 'already_removed', alias: 'already' },
+        ], [{ field_name: 'period', order: 'asc' }], 20)),
+        explore(q('gr_removals', ['country_name'], [{ function: 'SUM', field_name: 'items_requested', alias: 'items' }], [{ field_name: 'items', order: 'desc' }], 10)),
+        explore(q('gr_removals', ['reason'],       [{ function: 'SUM', field_name: 'items_requested', alias: 'items' }], [{ field_name: 'items', order: 'desc' }], 10)),
+        explore(q('gr_removals', ['product'],      [{ function: 'SUM', field_name: 'items_requested', alias: 'items' }], [{ field_name: 'items', order: 'desc' }], 10)),
+        explore(q('gr_removals', [], [
+          { function: 'SUM', field_name: 'removed_legal',   alias: 'legal' },
+          { function: 'SUM', field_name: 'removed_policy',  alias: 'policy' },
+          { function: 'SUM', field_name: 'already_removed', alias: 'already' },
+          { function: 'SUM', field_name: 'not_found',       alias: 'not_found' },
+          { function: 'SUM', field_name: 'not_enough_info', alias: 'not_info' },
+          { function: 'SUM', field_name: 'no_action',       alias: 'no_action' },
+        ], [], 1)),
+        explore(q('gr_removals',
+          ['period','country_name','requestor','product','reason'],
+          [
+            { function: 'SUM', field_name: 'num_requests',    alias: 'reqs' },
+            { function: 'SUM', field_name: 'items_requested', alias: 'items' },
+            { function: 'SUM', field_name: 'removed_legal',   alias: 'legal' },
+            { function: 'SUM', field_name: 'removed_policy',  alias: 'policy' },
+            { function: 'SUM', field_name: 'already_removed', alias: 'already' },
+          ],
+          [{ field_name: 'items', order: 'desc' }], 50
+        )),
+      ]);
+
+      // Sort chronologically using allPeriods order (avoids lexicographic sorting bugs)
+      results[0].rows.sort(function(a, b) { return allPeriods.indexOf(a[0]) - allPeriods.indexOf(b[0]); });
+      results[1].rows.sort(function(a, b) { return allPeriods.indexOf(a[0]) - allPeriods.indexOf(b[0]); });
+      renderTimeSeries(results[0].rows, breakdown);
+      renderRate(results[1].rows);
+      renderTopCountries(results[2].rows);
+      renderTopReasons(results[3].rows);
+      renderTopProducts(results[4].rows);
+      renderCompliance(results[5].rows);
+      renderTable(results[6].rows);
+
+    } catch (err) {
+      errEl.textContent = 'Failed to load charts: ' + err.message;
+      errEl.classList.remove('hidden');
+    }
+  }
+
+  function scheduleRefresh() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(refresh, 180);
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  async function init() {
+    var errEl = document.getElementById('load-error');
+    try {
+      var d = await (await fetch('/api/overview/removals')).json();
+
+      // Headline stats
+      document.getElementById('stat-requests').textContent = fmt(d.total_requests);
+      document.getElementById('stat-items').textContent    = fmt(d.total_items);
+      document.getElementById('stat-countries').textContent = d.country_count;
+      document.getElementById('stat-periods').textContent  = d.period_count;
+      document.getElementById('stats').removeAttribute('aria-busy');
+
+      allPeriods = d.periods;
+      fromIdx = 0; toIdx = allPeriods.length - 1;
+
+      // Populate period selects
+      ['f-from','f-to'].forEach(function(id, isTo) {
+        var sel = document.getElementById(id);
+        allPeriods.forEach(function(p, i) {
+          var opt = document.createElement('option');
+          opt.value = i; opt.textContent = p;
+          if ((!isTo && i === 0) || (isTo && i === allPeriods.length - 1)) opt.selected = true;
+          sel.appendChild(opt);
+        });
+      });
+
+      // Populate dimension selects
+      function populateSelect(id, items, placeholder) {
+        var sel = document.getElementById(id);
+        var all = document.createElement('option'); all.value = ''; all.textContent = placeholder; sel.appendChild(all);
+        items.forEach(function(v) {
+          var opt = document.createElement('option'); opt.value = v; opt.textContent = v; sel.appendChild(opt);
+        });
+      }
+      populateSelect('f-country',   d.countries.map(function(c){ return c.name; }), 'All countries');
+      populateSelect('f-requestor', d.requestors, 'All requestor types');
+      populateSelect('f-product',   d.products,   'All products');
+      populateSelect('f-reason',    d.reasons,    'All reasons');
+
+      // Wire up filter events
+      document.getElementById('f-from').addEventListener('change', function () {
+        fromIdx = parseInt(this.value, 10);
+        if (fromIdx > toIdx) { toIdx = fromIdx; document.getElementById('f-to').value = toIdx; }
+        scheduleRefresh();
+      });
+      document.getElementById('f-to').addEventListener('change', function () {
+        toIdx = parseInt(this.value, 10);
+        if (toIdx < fromIdx) { fromIdx = toIdx; document.getElementById('f-from').value = fromIdx; }
+        scheduleRefresh();
+      });
+      ['f-country','f-requestor','f-product','f-reason','f-breakdown'].forEach(function(id) {
+        document.getElementById(id).addEventListener('change', scheduleRefresh);
+      });
+      document.getElementById('f-reset').addEventListener('click', function () {
+        fromIdx = 0; toIdx = allPeriods.length - 1;
+        document.getElementById('f-from').value = 0;
+        document.getElementById('f-to').value   = allPeriods.length - 1;
+        ['f-country','f-requestor','f-product','f-reason','f-breakdown'].forEach(function(id) {
+          document.getElementById(id).value = '';
+        });
+        scheduleRefresh();
+      });
+
+      document.getElementById('dashboard').classList.remove('hidden');
+      refresh();
+
+    } catch (err) {
+      errEl.textContent = 'Failed to load dataset: ' + err.message;
+      errEl.classList.remove('hidden');
+    }
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
