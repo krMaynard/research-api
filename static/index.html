@@ -39,6 +39,16 @@
     min-height: 100vh;
   }
 
+  /* ── Site banner ─────────────────────────────────────────────── */
+  .site-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.9rem 1.5rem; background: var(--panel); border-bottom: 1px solid var(--border);
+  }
+  .site-nav .nav-name { font-weight: 700; font-size: 1rem; color: var(--fg); text-decoration: none; }
+  .site-nav .nav-links { display: flex; gap: 1.4rem; align-items: center; }
+  .site-nav .nav-links a { color: var(--muted); text-decoration: none; font-size: .9rem; }
+  .site-nav .nav-links a:hover { color: var(--accent); }
+
   /* ── Top bar ────────────────────────────────────────────────── */
   .topbar {
     position: sticky; top: 0; z-index: 200;
@@ -239,6 +249,18 @@
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
+
+<!-- ── Site banner ──────────────────────────────────────────────────────── -->
+<nav class="site-nav" aria-label="Site">
+  <a href="https://kieranmaynard.com/" class="nav-name">Kieran Maynard</a>
+  <div class="nav-links">
+    <a href="https://kieranmaynard.com/work.html">Work</a>
+    <a href="https://kieranmaynard.com/transparency.html">Products</a>
+    <a href="https://kieranmaynard.com/consulting.html">Consulting</a>
+    <a href="https://kieranmaynard.com/blog.html">Blog</a>
+    <a href="mailto:kieranmaynard@gmail.com">Contact</a>
+  </div>
+</nav>
 
 <!-- ── Top bar ──────────────────────────────────────────────────────────── -->
 <header class="topbar">
