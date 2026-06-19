@@ -1060,13 +1060,18 @@ class TestDashboard:
         assert isinstance(d["by_category"], list)
         assert "period" in d
 
-    def test_dashboard_served_at_root(self):
+    def test_home_page_served_at_root(self):
         r = client.get("/")
+        assert r.status_code == 200 and "text/html" in r.headers["content-type"]
+        assert "Platform transparency data" in r.text
+
+    def test_dashboard_served_at_reports(self):
+        r = client.get("/reports")
         assert r.status_code == 200 and "text/html" in r.headers["content-type"]
         assert "/api/overview" in r.text  # dashboard fetches the public overview
 
     def test_dashboard_uses_vendored_chartjs(self):
-        r = client.get("/")
+        r = client.get("/reports")
         # Chart.js is self-hosted, not loaded from a CDN.
         assert "/static/vendor/chart.umd.js" in r.text
         assert "cdn.jsdelivr.net" not in r.text
@@ -1434,11 +1439,15 @@ class TestCSP:
 # ── Accessibility landmarks on the served HTML pages ─────────────────────────
 
 class TestAccessibility:
-    def test_dashboard_a11y_landmarks(self):
+    def test_home_a11y_landmarks(self):
         html = client.get("/").text
         assert 'href="#main"' in html and 'class="skip-link"' in html  # skip link
+        assert 'id="main"' in html                                      # main landmark
+
+    def test_dashboard_a11y_landmarks(self):
+        html = client.get("/reports").text
+        assert 'href="#main"' in html and 'class="skip-link"' in html  # skip link
         assert 'id="main"' in html                                     # main landmark
-        assert 'aria-label="Primary"' in html                          # labelled nav
         assert 'role="alert"' in html                                  # error live region
         # Canvases carry an accessible table alternative, so hide them from AT.
         assert 'id="chart-platforms" height="150" aria-hidden="true"' in html

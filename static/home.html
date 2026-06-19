@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Transparency Report API</title>
+<meta name="description" content="Platform transparency data, made useful. Independent analysis and queryable APIs for regulatory disclosures from the world's largest online platforms." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem('theme');
+      if (!t) t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); }
+  })();
+</script>
+<style>
+  :root {
+    --bg: #f2f2f2; --panel: #fff; --panel2: #f5f5f5; --border: #e8e8e8;
+    --fg: #333; --muted: #666; --accent: #2a9d8f; --accent-dark: #1e7268; --accent2: #1e7268;
+    --on-accent: #fff; --shadow: rgba(0,0,0,.07);
+    --mono: ui-monospace, SFMono-Regular, "DejaVu Sans Mono", Menlo, monospace;
+    --topbar-h: 52px;
+    --sidebar-w: 220px;
+  }
+  [data-theme="dark"] {
+    --bg: #15181c; --panel: #1d2025; --panel2: #2a2f35; --border: #2c3138;
+    --fg: #e8e8e8; --muted: #b0b0b0; --accent: #4ec1b1; --accent-dark: #6ed3c4; --accent2: #6ed3c4;
+    --on-accent: #08110f; --shadow: rgba(0,0,0,.45);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg);
+    color: var(--fg); font: 15px/1.6 'Open Sans', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── Top bar ────────────────────────────────────────────────── */
+  .topbar {
+    position: sticky; top: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: space-between;
+    height: var(--topbar-h); padding: 0 1rem;
+    background: var(--panel); border-bottom: 1px solid var(--border);
+  }
+  .topbar-left { display: flex; align-items: center; gap: 0.6rem; }
+  .topbar-brand {
+    font-weight: 700; font-size: 0.95rem; color: var(--fg); text-decoration: none;
+    white-space: nowrap;
+  }
+  .topbar-brand:hover { color: var(--accent); }
+  .topbar-right { display: flex; align-items: center; gap: 0.5rem; }
+  .hamburger {
+    display: none; align-items: center; justify-content: center;
+    background: none; border: 0; color: var(--fg); cursor: pointer; padding: 6px;
+    border-radius: 6px; width: auto; margin: 0;
+  }
+  .hamburger:hover { color: var(--accent); background: var(--panel2); }
+  .hamburger svg { width: 20px; height: 20px; display: block; }
+  .theme-toggle {
+    background: none; border: 0; color: var(--muted); cursor: pointer; padding: 4px;
+    display: inline-flex; width: auto; margin: 0; border-radius: 6px;
+  }
+  .theme-toggle:hover { color: var(--accent); }
+  .theme-toggle svg { width: 20px; height: 20px; }
+  .theme-icon-light { display: none; }
+  [data-theme="dark"] .theme-toggle .theme-icon-light { display: block; }
+  [data-theme="dark"] .theme-toggle .theme-icon-dark { display: none; }
+
+  /* ── App body (sidebar + main) ──────────────────────────────── */
+  .app-body { display: flex; min-height: calc(100vh - var(--topbar-h)); }
+
+  /* ── Sidebar ────────────────────────────────────────────────── */
+  .sidebar {
+    width: var(--sidebar-w); flex-shrink: 0;
+    position: sticky; top: var(--topbar-h);
+    height: calc(100vh - var(--topbar-h));
+    overflow-y: auto;
+    background: var(--panel); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    transition: transform 0.22s ease;
+  }
+  .sidebar nav { flex: 1; padding: 0.75rem 0.5rem; }
+  .nav-section {
+    font-size: 10.5px; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--muted);
+    padding: 0.55rem 0.75rem 0.25rem;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 0.55rem;
+    padding: 0.45rem 0.75rem; border-radius: 7px;
+    color: var(--fg); text-decoration: none; font-size: 13.5px;
+    margin: 1px 0; position: relative;
+  }
+  .nav-item svg { flex-shrink: 0; color: var(--muted); }
+  .nav-item:hover { background: var(--panel2); color: var(--accent); }
+  .nav-item:hover svg { color: var(--accent); }
+  .nav-item.is-active {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent-dark); font-weight: 600;
+  }
+  [data-theme="dark"] .nav-item.is-active { color: var(--accent); }
+  .nav-item.is-active svg { color: var(--accent); }
+  .nav-item.is-active::before {
+    content: ''; position: absolute; left: 0; top: 20%; bottom: 20%;
+    width: 3px; border-radius: 2px; background: var(--accent);
+  }
+  .nav-item.is-soon { color: var(--muted); cursor: default; }
+  .nav-item.is-soon:hover { background: none; color: var(--muted); }
+  .nav-item.is-soon svg { opacity: 0.5; }
+  .soon-badge {
+    margin-left: auto; font-size: 10px; font-weight: 700; letter-spacing: .05em;
+    background: var(--panel2); color: var(--muted); border: 1px solid var(--border);
+    border-radius: 999px; padding: 1px 7px;
+  }
+  .nav-item.is-ext { color: var(--muted); font-size: 12.5px; }
+  .nav-item.is-ext:hover { color: var(--accent); }
+  .nav-hr {
+    border: none; border-top: 1px solid var(--border);
+    margin: 0.5rem 0.75rem;
+  }
+  .sidebar-footer {
+    padding: 0.75rem 1rem; border-top: 1px solid var(--border);
+    font-size: 12px; color: var(--muted);
+  }
+  .sidebar-footer a { color: var(--muted); text-decoration: none; }
+  .sidebar-footer a:hover { color: var(--accent); }
+
+  /* ── Mobile sidebar overlay ─────────────────────────────────── */
+  .sidebar-overlay {
+    display: none; position: fixed; inset: 0; z-index: 150;
+    background: rgba(0,0,0,.4);
+  }
+  .sidebar-overlay.is-open { display: block; }
+
+  /* ── Main content area ──────────────────────────────────────── */
+  .main-area { flex: 1; min-width: 0; }
+  .wrap { max-width: 860px; padding: 32px 2rem; }
+
+  /* ── Hero ───────────────────────────────────────────────────── */
+  .hero {
+    background: var(--accent-dark); border-radius: 16px;
+    padding: 40px 40px 36px; margin-bottom: 28px;
+    position: relative; overflow: hidden;
+  }
+  [data-theme="dark"] .hero { background: #163530; }
+  .hero-eyebrow {
+    display: inline-block; font-size: 11.5px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: rgba(255,255,255,.65); margin-bottom: 12px;
+  }
+  .hero h1 {
+    margin: 0 0 12px; font-size: 28px; line-height: 1.25;
+    color: #fff; max-width: 560px;
+  }
+  [data-theme="dark"] .hero h1 { color: #e8f5f3; }
+  .hero p {
+    margin: 0 0 28px; color: rgba(255,255,255,.75); font-size: 15px;
+    max-width: 520px; line-height: 1.6;
+  }
+  [data-theme="dark"] .hero p { color: rgba(200,240,235,.7); }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--accent); color: #fff; text-decoration: none;
+    font-weight: 700; font-size: 14px; padding: 10px 22px;
+    border-radius: 9px; transition: background .15s;
+  }
+  .btn-primary:hover { background: #21877a; }
+  [data-theme="dark"] .btn-primary { background: #2a9d8f; color: #08110f; }
+  [data-theme="dark"] .btn-primary:hover { background: #4ec1b1; }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,.12); color: rgba(255,255,255,.9);
+    text-decoration: none; font-weight: 600; font-size: 14px;
+    padding: 10px 22px; border-radius: 9px; transition: background .15s;
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,.2); }
+
+  /* ── Feature cards ──────────────────────────────────────────── */
+  .feature-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 640px) { .feature-grid { grid-template-columns: 1fr; } }
+  .feature-card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 14px; padding: 22px 20px;
+    text-decoration: none; color: var(--fg);
+    display: flex; flex-direction: column; gap: 8px;
+    transition: border-color .15s, box-shadow .15s;
+    position: relative;
+  }
+  .feature-card:hover {
+    border-color: var(--accent); box-shadow: 0 4px 20px var(--shadow);
+  }
+  .feature-card.is-soon { cursor: default; }
+  .feature-card.is-soon:hover { border-color: var(--border); box-shadow: none; }
+  .feature-card-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent); margin-bottom: 4px;
+  }
+  .feature-card h3 {
+    margin: 0; font-size: 15px; font-weight: 700;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .feature-card p {
+    margin: 0; font-size: 13px; color: var(--muted); line-height: 1.5;
+    flex: 1;
+  }
+  .feature-card-meta {
+    font-size: 12px; color: var(--accent-dark); font-weight: 600;
+    display: flex; align-items: center; gap: 4px; margin-top: 4px;
+  }
+  [data-theme="dark"] .feature-card-meta { color: var(--accent); }
+  .feature-card.is-soon .feature-card-meta { color: var(--muted); }
+  .card-soon-badge {
+    font-size: 10px; font-weight: 700; letter-spacing: .05em;
+    background: var(--panel2); color: var(--muted);
+    border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px;
+  }
+
+  /* ── Latest analysis strip ──────────────────────────────────── */
+  .section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+  }
+  .analysis-card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 14px; padding: 22px 24px;
+    display: flex; align-items: flex-start; gap: 20px;
+  }
+  .analysis-card-body { flex: 1; min-width: 0; }
+  .analysis-card-eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 6px;
+  }
+  .analysis-card h3 { margin: 0 0 6px; font-size: 16px; font-weight: 700; }
+  .analysis-card p { margin: 0 0 14px; font-size: 13.5px; color: var(--muted); line-height: 1.55; }
+  .analysis-link {
+    display: inline-flex; align-items: center; gap: 5px;
+    color: var(--accent); font-size: 13.5px; font-weight: 600;
+    text-decoration: none;
+  }
+  .analysis-link:hover { text-decoration: underline; }
+  .analysis-stat-pill {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    border-radius: 12px; padding: 14px 20px; min-width: 100px; text-align: center;
+    flex-shrink: 0;
+  }
+  .analysis-stat-pill .num {
+    font-size: 26px; font-weight: 700; color: var(--accent2);
+    font-family: var(--mono); line-height: 1.1;
+  }
+  [data-theme="dark"] .analysis-stat-pill .num { color: var(--accent); }
+  .analysis-stat-pill .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* ── Keyboard focus + utils ─────────────────────────────────── */
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px;
+  }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+  .skip-link {
+    position: absolute; left: 8px; top: -48px; z-index: 999;
+    background: var(--accent); color: var(--on-accent); padding: 8px 14px;
+    border-radius: 8px; font-weight: 700; transition: top .15s;
+  }
+  .skip-link:focus { top: 8px; }
+  footer { color: var(--muted); font-size: 13px; margin-top: 8px; padding-bottom: 2rem; }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  /* ── Mobile ─────────────────────────────────────────────────── */
+  @media (max-width: 720px) {
+    .hamburger { display: flex; }
+    .sidebar {
+      position: fixed; left: 0; top: var(--topbar-h); bottom: 0; z-index: 190;
+      transform: translateX(calc(-1 * var(--sidebar-w)));
+    }
+    .sidebar.is-open { transform: translateX(0); }
+    .wrap { padding: 20px 1rem; }
+    .hero { padding: 28px 24px; }
+    .hero h1 { font-size: 22px; }
+    .analysis-card { flex-direction: column; }
+    .analysis-stat-pill { flex-direction: row; gap: 12px; width: 100%; justify-content: flex-start; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- ── Top bar ──────────────────────────────────────────────────────────── -->
+<header class="topbar">
+  <div class="topbar-left">
+    <button type="button" class="hamburger" id="hamburger"
+            aria-label="Toggle navigation" aria-expanded="false" aria-controls="sidebar">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <line x1="3" y1="5" x2="17" y2="5"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="15" x2="17" y2="15"/>
+      </svg>
+    </button>
+    <a href="/" class="topbar-brand">Transparency Report API</a>
+  </div>
+  <div class="topbar-right">
+    <button type="button" class="theme-toggle" aria-label="Toggle dark mode" data-theme-toggle>
+      <svg class="theme-icon-dark" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+      </svg>
+      <svg class="theme-icon-light" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<div class="app-body">
+
+<!-- ── Sidebar ──────────────────────────────────────────────────────────── -->
+<aside class="sidebar" id="sidebar" aria-label="Application navigation">
+  <nav>
+    <div class="nav-section">Datasets</div>
+
+    <a href="/reports" class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <rect x="1" y="9" width="3" height="6" rx="1"/>
+        <rect x="6" y="5" width="3" height="10" rx="1"/>
+        <rect x="11" y="1" width="3" height="14" rx="1"/>
+      </svg>
+      DSA Reports
+    </a>
+
+    <a href="#" class="nav-item is-soon" aria-disabled="true" tabindex="-1">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <circle cx="8" cy="8" r="6.25"/>
+        <path d="M5.5 10.5l5-5M5.5 5.5l5 5" stroke-linecap="round"/>
+      </svg>
+      Government Removals
+      <span class="soon-badge">Soon</span>
+    </a>
+
+    <a href="#" class="nav-item is-soon" aria-disabled="true" tabindex="-1">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <path d="M2 8h12M8 2l4 6-4 6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      SoR Analysis
+      <span class="soon-badge">Soon</span>
+    </a>
+
+    <hr class="nav-hr">
+    <div class="nav-section">Tools</div>
+
+    <a href="/portal" class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <path d="M8 1a3.5 3.5 0 1 0 0 7A3.5 3.5 0 0 0 8 1zM8 9C4.5 9 1.5 10.6 1.5 12.5v1a.5.5 0 0 0 .5.5h12a.5.5 0 0 0 .5-.5v-1C14.5 10.6 11.5 9 8 9z"/>
+      </svg>
+      Researcher Portal
+    </a>
+
+    <a href="/docs" class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <path d="M3 1h8l3 3v11H3V1zm7 .5V4.5H12.5L10 1.5zM4 6h8v1H4zm0 2.5h8v1H4zm0 2.5h5v1H4z"/>
+      </svg>
+      API Docs
+    </a>
+
+    <a href="/api" class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+        <path d="M5 4L1.5 8 5 12M11 4l3.5 4L11 12M9 3l-2 10"/>
+      </svg>
+      API Reference
+    </a>
+
+    <hr class="nav-hr">
+
+    <a href="https://kieranmaynard.com/" class="nav-item is-ext" target="_blank" rel="noopener noreferrer">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <path d="M9 1h6v6l-2-2-5 5-1.5-1.5 5-5L9 1zM2 5h4v1.5H3.5v7h7V10H12v4H2V5z"/>
+      </svg>
+      kieranmaynard.com
+    </a>
+
+    <a href="https://github.com/krMaynard/transparency-report-api" class="nav-item is-ext" target="_blank" rel="noopener noreferrer">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <path d="M8 .5a7.5 7.5 0 0 0-2.371 14.617c.375.069.512-.163.512-.362 0-.178-.006-.651-.01-1.278-2.086.454-2.526-1.006-2.526-1.006-.341-.866-.832-1.097-.832-1.097-.68-.465.051-.456.051-.456.752.053 1.147.772 1.147.772.668 1.145 1.753.814 2.18.623.068-.484.261-.814.475-1.001-1.665-.19-3.416-.833-3.416-3.707 0-.819.293-1.488.772-2.013-.077-.19-.334-.952.074-1.986 0 0 .629-.201 2.061.768a7.182 7.182 0 0 1 1.876-.252c.637.003 1.278.086 1.876.252 1.431-.969 2.059-.768 2.059-.768.409 1.034.152 1.796.075 1.986.481.525.771 1.194.771 2.013 0 2.882-1.754 3.516-3.424 3.702.269.232.508.69.508 1.39 0 1.003-.009 1.813-.009 2.059 0 .201.135.435.516.361A7.501 7.501 0 0 0 8 .5z"/>
+      </svg>
+      GitHub
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    By <a href="https://kieranmaynard.com/">Kieran Maynard</a>
+  </div>
+</aside>
+
+<!-- Mobile overlay -->
+<div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
+
+<!-- ── Main content ──────────────────────────────────────────────────────── -->
+<div class="main-area">
+<div class="wrap">
+
+  <main id="main" tabindex="-1">
+
+    <!-- Hero -->
+    <section class="hero" aria-labelledby="hero-heading">
+      <span class="hero-eyebrow">Platform transparency</span>
+      <h1 id="hero-heading">Platform transparency data,<br>made useful.</h1>
+      <p>Independent analysis and queryable APIs for regulatory disclosures from the world's largest online platforms.</p>
+      <div class="hero-actions">
+        <a href="/reports" class="btn-primary">
+          Explore the data
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M2 7h10M8 3l4 4-4 4"/>
+          </svg>
+        </a>
+        <a href="/api" class="btn-ghost">API reference</a>
+      </div>
+    </section>
+
+    <!-- Feature cards -->
+    <p class="section-label">What's here</p>
+    <div class="feature-grid" role="list">
+
+      <a href="/reports" class="feature-card" role="listitem">
+        <div class="feature-card-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+            <rect x="1" y="9" width="3" height="6" rx="1"/>
+            <rect x="6" y="5" width="3" height="10" rx="1"/>
+            <rect x="11" y="1" width="3" height="14" rx="1"/>
+          </svg>
+        </div>
+        <h3>DSA Reports</h3>
+        <p>Content-moderation statistics for 33 designated Very Large Online Platforms, from EU Digital Services Act transparency reports.</p>
+        <span class="feature-card-meta">
+          Explore charts &amp; query
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M2 6h8M6 2l4 4-4 4"/>
+          </svg>
+        </span>
+      </a>
+
+      <div class="feature-card is-soon" role="listitem" aria-label="Government Removals — coming soon">
+        <div class="feature-card-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="8" cy="8" r="6.25"/>
+            <path d="M5.5 10.5l5-5M5.5 5.5l5 5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>Government Removals <span class="card-soon-badge">Soon</span></h3>
+        <p>Government requests for content removal and user data across Google products, with country and product breakdowns.</p>
+        <span class="feature-card-meta">Coming soon</span>
+      </div>
+
+      <div class="feature-card is-soon" role="listitem" aria-label="SoR Analysis — coming soon">
+        <div class="feature-card-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M2 12l4-4 3 3 5-7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3>SoR Analysis <span class="card-soon-badge">Soon</span></h3>
+        <p>Independent aggregation of EU Statements of Reasons cross-checked against platform-published figures, H2 2025.</p>
+        <span class="feature-card-meta">Coming soon</span>
+      </div>
+
+    </div>
+
+    <!-- Latest analysis -->
+    <p class="section-label">Latest analysis</p>
+    <div class="analysis-card">
+      <div class="analysis-stat-pill" aria-hidden="true">
+        <span class="num">10M+</span>
+        <span class="lbl">Statements<br>of Reasons</span>
+      </div>
+      <div class="analysis-card-body">
+        <p class="analysis-card-eyebrow">H2 2025 · EU DSA</p>
+        <h3>SoR vs. Published Reports</h3>
+        <p>Independent aggregation of over 10 million Statements of Reasons filed under the EU DSA, cross-checked against figures published in platform transparency reports. Discrepancies flagged by category and platform.</p>
+        <a href="https://kieranmaynard.com/work/" class="analysis-link" target="_blank" rel="noopener noreferrer">
+          Read the analysis
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M2 6.5h9M7 2l4.5 4.5L7 11"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <p>Built by <a href="https://kieranmaynard.com/">Kieran Maynard</a> · Data: <a href="https://transparency.dsa.ec.europa.eu/" target="_blank" rel="noopener noreferrer">DSA Transparency Database</a> · <a href="/api">API</a> · <a href="https://github.com/krMaynard/transparency-report-api" target="_blank" rel="noopener noreferrer">GitHub</a></p>
+  </footer>
+
+</div>
+</div><!-- /.main-area -->
+
+</div><!-- /.app-body -->
+
+<script>
+(function () {
+  // Dark-mode toggle
+  var btn = document.querySelector('[data-theme-toggle]');
+  if (btn) {
+    btn.addEventListener('click', function () {
+      var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('theme', next); } catch (e) {}
+    });
+  }
+  // Mobile sidebar toggle
+  var hamburger = document.getElementById('hamburger');
+  var sidebar   = document.getElementById('sidebar');
+  var overlay   = document.getElementById('sidebar-overlay');
+  function openSidebar() {
+    sidebar.classList.add('is-open');
+    overlay.classList.add('is-open');
+    hamburger.setAttribute('aria-expanded', 'true');
+    overlay.removeAttribute('aria-hidden');
+  }
+  function closeSidebar() {
+    sidebar.classList.remove('is-open');
+    overlay.classList.remove('is-open');
+    hamburger.setAttribute('aria-expanded', 'false');
+    overlay.setAttribute('aria-hidden', 'true');
+  }
+  hamburger.addEventListener('click', function () {
+    sidebar.classList.contains('is-open') ? closeSidebar() : openSidebar();
+  });
+  overlay.addEventListener('click', closeSidebar);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && sidebar.classList.contains('is-open')) closeSidebar();
+  });
+})();
+</script>
+</body>
+</html>
