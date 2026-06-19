@@ -39,6 +39,16 @@
     min-height: 100vh;
   }
 
+  /* ── Site banner ─────────────────────────────────────────────── */
+  .site-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.9rem 1.5rem; background: var(--panel); border-bottom: 1px solid var(--border);
+  }
+  .site-nav .nav-name { font-weight: 700; font-size: 1rem; color: var(--fg); text-decoration: none; }
+  .site-nav .nav-links { display: flex; gap: 1.4rem; align-items: center; }
+  .site-nav .nav-links a { color: var(--muted); text-decoration: none; font-size: .9rem; }
+  .site-nav .nav-links a:hover { color: var(--accent); }
+
   /* ── Top bar ────────────────────────────────────────────────── */
   .topbar {
     position: sticky; top: 0; z-index: 200;
@@ -240,6 +250,18 @@
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 
+<!-- ── Site banner ──────────────────────────────────────────────────────── -->
+<nav class="site-nav" aria-label="Site">
+  <a href="https://kieranmaynard.com/" class="nav-name">Kieran Maynard</a>
+  <div class="nav-links">
+    <a href="https://kieranmaynard.com/work.html">Work</a>
+    <a href="https://kieranmaynard.com/transparency.html">Products</a>
+    <a href="https://kieranmaynard.com/consulting.html">Consulting</a>
+    <a href="https://kieranmaynard.com/blog.html">Blog</a>
+    <a href="mailto:kieranmaynard@gmail.com">Contact</a>
+  </div>
+</nav>
+
 <!-- ── Top bar ──────────────────────────────────────────────────────────── -->
 <header class="topbar">
   <div class="topbar-left">
@@ -269,7 +291,7 @@
   <nav>
     <div class="nav-section">Datasets</div>
 
-    <a href="/" class="nav-item is-active" aria-current="page">
+    <a href="/reports" class="nav-item is-active" aria-current="page">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
         <rect x="1" y="9" width="3" height="6" rx="1"/>
         <rect x="6" y="5" width="3" height="10" rx="1"/>
@@ -278,12 +300,19 @@
       DSA Reports
     </a>
 
-    <a href="#" class="nav-item is-soon" aria-disabled="true" tabindex="-1">
+    <a href="/removals" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
         <circle cx="8" cy="8" r="6.25"/>
         <path d="M5.5 10.5l5-5M5.5 5.5l5 5" stroke-linecap="round"/>
       </svg>
-      Google Removals
+      Government Removals
+    </a>
+
+    <a href="#" class="nav-item is-soon" aria-disabled="true" tabindex="-1">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <path d="M2 12l4-4 3 3 5-7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      SoR Analysis
       <span class="soon-badge">Soon</span>
     </a>
 

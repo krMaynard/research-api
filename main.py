@@ -109,7 +109,7 @@ ALLOW_DEMO_KEYS = os.getenv("ALLOW_DEMO_KEYS", "1").lower() in ("1", "true", "ye
 # on each Cloud Run revision; defaults to "dev" locally. Surfaced at GET /version
 # and in the X-Version response header so you can confirm what's actually live.
 APP_VERSION = os.getenv("APP_VERSION") or "dev"
-# Combined-site layout: the dashboard is served at "/", and the JSON API lives
+# Combined-site layout: the home page is served at "/", the dashboard at "/reports", and the JSON API lives
 # under this prefix on the same origin (no CORS). Operational endpoints
 # (/healthz, /readyz, /metrics, /version) and pages (/portal) stay at the root.
 API_PREFIX = "/api"
@@ -1985,6 +1985,12 @@ def vendored_asset(filename: str) -> FileResponse:
 
 
 @app.get("/", response_class=HTMLResponse)
+def home_page() -> FileResponse:
+    """Serve the product home page."""
+    return _serve_page("home.html", "Home page")
+
+
+@app.get("/reports", response_class=HTMLResponse)
 def dashboard_page() -> FileResponse:
     """Serve the public VLOP transparency dashboard (reads GET /api/overview)."""
     # Chart.js is vendored same-origin (/static/vendor/chart.umd.js), so the CSP
