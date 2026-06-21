@@ -5,6 +5,8 @@
     "tier": "vlop",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": "https://transparencyreport.google.com/report-downloads",
+    "click_steps": [{"text": "Digital Services Act"}],
     "report_url": null,
     "notes": null
   },
@@ -14,6 +16,8 @@
     "tier": "vlop",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": "https://transparencyreport.google.com/report-downloads",
+    "click_steps": [{"text": "Digital Services Act"}],
     "report_url": null,
     "notes": "Google publishes a combined multi-service DSA report"
   },
@@ -23,6 +27,8 @@
     "tier": "vlop-vlose",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": "https://transparencyreport.google.com/report-downloads",
+    "click_steps": [{"text": "Digital Services Act"}],
     "report_url": null,
     "notes": null
   },
@@ -32,6 +38,8 @@
     "tier": "vlop",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": "https://transparencyreport.google.com/report-downloads",
+    "click_steps": [{"text": "Digital Services Act"}],
     "report_url": null,
     "notes": null
   },
@@ -41,6 +49,8 @@
     "tier": "vlop",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": "https://transparencyreport.google.com/report-downloads",
+    "click_steps": [{"text": "Digital Services Act"}],
     "report_url": null,
     "notes": "Google catch-all reporting unit for cross-product enforcement"
   },
@@ -50,6 +60,8 @@
     "tier": "vlop",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": "https://transparencyreport.google.com/report-downloads",
+    "click_steps": [{"text": "Digital Services Act"}],
     "report_url": null,
     "notes": null
   },
@@ -59,6 +71,8 @@
     "tier": "vlop",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": "https://transparency.x.com/en/reports/dsa-transparency-report",
+    "click_steps": [],
     "report_url": null,
     "notes": null
   },
@@ -68,6 +82,8 @@
     "tier": "vlop",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": "https://www.tiktok.com/transparency/en/dsa-transparency/",
+    "click_steps": [],
     "report_url": null,
     "notes": null
   },
@@ -77,6 +93,8 @@
     "tier": "vlop",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": "https://transparency.meta.com/reports/regulatory-transparency-reports/",
+    "click_steps": [],
     "report_url": null,
     "notes": null
   },
@@ -86,6 +104,8 @@
     "tier": "vlop",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": "https://transparency.meta.com/reports/regulatory-transparency-reports/",
+    "click_steps": [],
     "report_url": null,
     "notes": null
   },
@@ -95,6 +115,8 @@
     "tier": "vlop",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": "https://policy.pinterest.com/en/digital-services-act-transparency-report",
+    "click_steps": [],
     "report_url": null,
     "notes": null
   },
@@ -104,6 +126,8 @@
     "tier": "vlop",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": null,
+    "click_steps": [],
     "report_url": null,
     "notes": null
   },
@@ -113,6 +137,8 @@
     "tier": "vlop",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": "https://trustworthyshopping.aboutamazon.com/digital-services-act-dsa-amazon-eu-store-transparency-report",
+    "click_steps": [],
     "report_url": null,
     "notes": null
   },
@@ -122,6 +148,8 @@
     "tier": "vlop",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": null,
+    "click_steps": [],
     "report_url": null,
     "notes": null
   },
@@ -131,6 +159,8 @@
     "tier": "vlop",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": null,
+    "click_steps": [],
     "report_url": null,
     "notes": null
   },
@@ -140,6 +170,8 @@
     "tier": "vlop",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": null,
+    "click_steps": [],
     "report_url": null,
     "notes": null
   },
@@ -149,6 +181,8 @@
     "tier": "vlose",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": null,
+    "click_steps": [],
     "report_url": null,
     "notes": null
   },
@@ -158,6 +192,8 @@
     "tier": "vlop",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": null,
+    "click_steps": [],
     "report_url": null,
     "notes": null
   },
@@ -167,6 +203,8 @@
     "tier": "vlop",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": null,
+    "click_steps": [],
     "report_url": null,
     "notes": null
   },
@@ -176,6 +214,8 @@
     "tier": "vlop",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": null,
+    "click_steps": [],
     "report_url": null,
     "notes": null
   },
@@ -185,6 +225,8 @@
     "tier": "vlop",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": null,
+    "click_steps": [],
     "report_url": null,
     "notes": null
   },
@@ -194,6 +236,8 @@
     "tier": "vlop",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": "https://values.snap.com/privacy/transparency/european-union-h2-2025",
+    "click_steps": [],
     "report_url": null,
     "notes": null
   },
@@ -203,6 +247,8 @@
     "tier": "vlop",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": null,
+    "click_steps": [],
     "report_url": null,
     "notes": null
   },
@@ -212,6 +258,8 @@
     "tier": "vlop",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": null,
+    "click_steps": [],
     "report_url": null,
     "notes": null
   },
@@ -221,6 +269,8 @@
     "tier": "vlop",
     "period_start": "2025-07-01",
     "period_end": "2025-12-31",
+    "transparency_page_url": null,
+    "click_steps": [],
     "report_url": null,
     "notes": "Designated December 2023; confirmed active for H2 2025"
   }

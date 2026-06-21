@@ -215,14 +215,55 @@ def _open_csv(path: Path, col_map: dict[str, str]) -> tuple[list[str], list[dict
 
 
 def _find_part(source_dir: Path, part: int) -> Path | None:
-    """Locate the CSV file for a given part number in source_dir."""
+    """Locate the CSV file for a given part number in source_dir.
+
+    If no CSV is found but an XLSX file is present, its sheets are extracted
+    into the same directory (once) and the search is retried.
+    """
     candidates = _PART_FILENAMES.get(part, [f"part{part}"])
     for name in source_dir.iterdir():
         stem = name.stem.lower().replace("-", "_").replace(" ", "_")
         if any(stem.startswith(c) or c in stem for c in candidates):
             if name.suffix.lower() in (".csv", ".txt"):
                 return name
+    # Fallback: extract any XLSX found in the directory
+    for xlsx in source_dir.glob("*.xlsx"):
+        converted = _xlsx_to_csvs(xlsx, source_dir)
+        if converted:
+            return _find_part(source_dir, part)  # retry after extraction
     return None
+
+
+def _xlsx_to_csvs(xlsx_path: Path, dest: Path) -> list[Path]:
+    """Split an XLSX file into per-part CSV files in dest (part{N}.csv).
+
+    Returns paths to the written CSVs.  Skips gracefully if openpyxl is absent.
+    """
+    try:
+        import openpyxl  # type: ignore[import-untyped]
+    except ImportError:
+        print(f"  WARN openpyxl not installed — skipping {xlsx_path.name}. "
+              "Run: pip install openpyxl")
+        return []
+    import re as _re
+    wb = openpyxl.load_workbook(xlsx_path, data_only=True)
+    written: list[Path] = []
+    for i, sheet_name in enumerate(wb.sheetnames, start=1):
+        ws = wb[sheet_name]
+        # Infer part number from sheet name leading digit or keyword
+        sn = sheet_name.lower().replace("-", "_").replace(" ", "_")
+        m = _re.match(r"^(\d+)", sn.strip())
+        part_num = int(m.group(1)) if m and 1 <= int(m.group(1)) <= 11 else i
+        out_csv = dest / f"part{part_num}.csv"
+        if not out_csv.exists():
+            with out_csv.open("w", newline="", encoding="utf-8") as f:
+                import csv as _csv
+                w = _csv.writer(f)
+                for row in ws.iter_rows(values_only=True):
+                    w.writerow(["" if v is None else v for v in row])
+            print(f"    XLSX '{sheet_name}' → {out_csv.name}")
+        written.append(out_csv)
+    return written
 
 
 def _download(url: str, dest: Path) -> None:

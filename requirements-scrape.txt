@@ -1,0 +1,11 @@
+# Dependencies for scripts/scrape-reports.py only.
+# Install into a separate venv and download the browser:
+#
+#   python -m venv .venv-scrape && source .venv-scrape/bin/activate
+#   pip install -r requirements-scrape.txt
+#   playwright install chromium
+#
+# openpyxl is also used by harvest-harmonized.py when an XLSX is present
+# in a --source-dir; install it in whichever venv runs the harvester too.
+playwright
+openpyxl
