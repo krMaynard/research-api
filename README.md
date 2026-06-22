@@ -5,11 +5,15 @@
 A FastAPI service that lets a researcher describe a query with **structured
 parameters** (no SQL), runs it asynchronously on a worker thread, and serves the
 results back as JSON or CSV. Backed by a read-only SQLite database seeded from
-public transparency-reporting datasets — the aggregated **EU Digital Services Act
-(DSA) VLOP transparency reports** (content-moderation statistics for 33 designated
-Very Large Online Platforms / Search Engines, H2 2025, tables 3–11 of the DSA
-Implementing Regulation template; `../krMaynard.github.io/data/vlop-dsa.json`) and
-**Google Government content-removal requests**.
+public transparency-reporting datasets:
+
+- **EU Digital Services Act (DSA) VLOP transparency reports** — content-moderation
+  statistics for 25 designated Very Large Online Platforms / Search Engines (H2 2025,
+  tables 3–11 of the DSA Implementing Regulation template). The vendored snapshot lives
+  at `data/vlop-dsa.json`; coverage expands as more platforms self-publish harmonized
+  reports and are ingested via the harvesting pipeline.
+- **Google Government content-removal requests** — 160 countries, 13 reporting
+  periods (2019–2025), 42 products, 22 stated reasons.
 
 A query names one of the **report tables** (`GET /api/tables`) and then
 describes filters, group-bys, and aggregates over that table's fields.
@@ -252,7 +256,7 @@ X-Webhook-Signature: sha256=<hmac of the raw body>
 
 ## Authentication
 
-Every endpoint except `/`, `/docs`, and `/openapi.json` requires a key in the
+Every endpoint except the public pages (`/`, `/reports`, `/removals`, `/portal`, `/privacy`), `/docs`, and `/openapi.json` requires a key in the
 `X-API-Key` header. To keep the demo obviously-not-production, the keys are
 just the two researcher names: `alice` and `bob`.
 
@@ -272,8 +276,8 @@ cd transparency-report-api
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-# seed.py reads ../krMaynard.github.io/data/vlop-dsa.json by default;
-# override with --source if the JSON lives elsewhere
+# seed.py reads data/vlop-dsa.json (vendored snapshot) by default;
+# or pass --source to point at a different JSON file
 python seed.py
 # python seed.py --source /path/to/vlop-dsa.json --db demo.db
 
@@ -423,18 +427,22 @@ vars, Claude Desktop / Claude Code setup).
 
 ## Endpoints
 
-The dashboard is served at `/` and the JSON API lives under `/api/*` on the same
-origin (no CORS). Operational endpoints and pages stay at the root.
+The site has a multi-page layout; the JSON API lives under `/api/*` on the same
+origin (no CORS). Operational endpoints stay at the root.
 
 | Method | Path                                | Auth | Description                                    |
 |--------|-------------------------------------|------|------------------------------------------------|
-| GET    | `/`                                 | —    | Public VLOP transparency **dashboard** (web UI) |
-| GET    | `/api/overview`                     | —    | Public headline aggregates powering the dashboard |
+| GET    | `/`                                 | —    | Product home page                              |
+| GET    | `/reports`                          | —    | **DSA Reports** dashboard — Chart.js overview, query builder, Compare tables, Ask box |
+| GET    | `/removals`                         | —    | **Government Removals** dashboard — time-series view of Google's content-removal data |
+| GET    | `/portal`                           | —    | Researcher portal (web UI)                      |
+| GET    | `/privacy`                          | —    | Privacy policy                                 |
+| GET    | `/api/overview`                     | —    | Public headline aggregates for the DSA Reports dashboard |
+| GET    | `/api/overview/removals`            | —    | Public headline aggregates for the Government Removals dashboard |
 | GET    | `/api/explore/options`              | —    | Public: tables + their dimensions/measures (query-builder metadata) |
 | POST   | `/api/explore`                      | —    | Public: run a bounded structured query **inline** (row-capped, IP-rate-limited) |
 | POST   | `/api/ask`                          | —    | Public: ask in natural language — an LLM writes the structured query (if `ANTHROPIC_API_KEY` set) |
 | GET    | `/api`                              | —    | API service info                               |
-| GET    | `/portal`                           | —    | Researcher portal (web UI)                      |
 | POST   | `/api/auth/google`                  | —    | Verify a Google ID token → session key (any verified account) |
 | POST   | `/api/portal/register`              | —    | Demo: issue a key without auth (disabled when `ALLOW_DEMO_KEYS=0`) |
 | DELETE | `/api/portal/key`                   | key  | Revoke your own session / portal-issued key    |
@@ -445,9 +453,9 @@ origin (no CORS). Operational endpoints and pages stay at the root.
 | GET    | `/readyz`                           | —    | Readiness probe (checks DB connection)         |
 | GET    | `/version`                          | —    | Deployed build (commit SHA); also `X-Version` header |
 | GET    | `/metrics`                          | —    | Prometheus metrics (scrape over internal net)  |
-| GET    | `/api/tables`                       | key  | List the DSA report tables + dataset period    |
+| GET    | `/api/tables`                       | key  | List the queryable tables + dataset period     |
 | GET    | `/api/fields?table=…`               | key  | A table's queryable fields and operations      |
-| GET    | `/api/schema/{table}`               | key  | A report table's field registry                |
+| GET    | `/api/schema/{table}`               | key  | A table's full field registry                  |
 | POST   | `/api/query`                        | key  | Submit a structured query over a `table` (optional `callback_url`) — returns `202 + job_id` |
 | GET    | `/api/jobs`                         | key  | List **your** jobs                             |
 | GET    | `/api/jobs/{job_id}`                | key  | Job status (your jobs only)                    |
@@ -510,12 +518,17 @@ auth) remains available for clients that prefer header auth.
 > zero-config default is a random per-process key, so signed links would
 > otherwise break on restart and wouldn't validate across multiple workers.
 
-## Schema (EU DSA VLOP transparency reports)
+## Schema
 
-Star schema — shared dimension tables plus one fact table per DSA report table
-(H2 2025, 33 services). Dimensions: `services(id, name, platform)` (platform =
-parent company), `categories(id, code, label)`, `sections`, `indicators`,
-`scopes`, `surfaces`. Report tables (queried via `table`):
+The database holds two independent datasets, each queryable via `table` in the
+structured query API.
+
+### DSA VLOP transparency reports
+
+Star schema — shared dimension tables plus one fact table per Annex I report
+part (H2 2025, currently 25 services, expanding as more platforms publish).
+DSA dimensions: `services(id, name, platform)` (platform = parent company),
+`categories(id, code, label)`, `sections`, `indicators`, `scopes`, `surfaces`.
 
 | `table` | DSA report | Key fields |
 |---------|-----------|-----------|
@@ -529,9 +542,69 @@ parent company), `categories(id, code, label)`, `sections`, `indicators`,
 | `t10_amar` | Avg Monthly Active Recipients | scope → `value` |
 | `t11_qualitative` | Qualitative descriptions | indicator → `qualitative_text` (free text, no measures) |
 
-Every table also has the `service_name` and `platform` dimensions. Run
-`GET /api/tables`, then `GET /api/schema/{table}` for a table's exact dimension/measure
-fields and a runnable example.
+Every `t*` table also has the `service_name` and `platform` dimensions.
+
+### Google Government Removal Requests
+
+| `table` | Description | Key dimensions | Key measures |
+|---------|-------------|----------------|--------------|
+| `gr_removals` | Government requests to remove content from Google products, 2019–2025 | `period`, `country_code`, `country_name`, `requestor`, `product`, `reason` | `num_requests`, `items_requested`, `removed_legal`, `removed_policy`, `not_found`, `no_action`, `already_removed` |
+
+Run `GET /api/tables`, then `GET /api/schema/{table}` for a table's exact
+dimension/measure fields and a runnable example.
+
+## Data harvesting pipeline
+
+The DSA dataset grows as platforms self-publish harmonized Annex I reports (EU
+2024/2835). A scrape-and-harvest pipeline turns those self-published files into
+queryable rows in `demo.db`:
+
+```
+data/registry.json          ← stable URLs + click steps for each platform
+  │
+  └─ scripts/scrape-reports.py     ← downloads/extracts CSV/XLSX via Playwright
+       │
+       └─ data/reports/<slug>/     ← local Annex I CSV files
+            │
+            └─ scripts/harvest-harmonized.py  ← parse Annex I → upsert into demo.db
+```
+
+### Running a cycle
+
+```bash
+source .venv-scrape/bin/activate    # playwright + openpyxl
+./scripts/run-cycle.sh              # all platforms in registry
+./scripts/run-cycle.sh --service TikTok   # one platform
+./scripts/run-cycle.sh --tier vlop        # VLOPs only
+
+# Or run steps individually:
+python scripts/scrape-reports.py --registry data/registry.json --out data/reports
+python scripts/harvest-harmonized.py --service "TikTok" --source-dir data/reports/tiktok --db demo.db
+```
+
+### Extending the registry
+
+`data/registry.json` is the source of truth. Each entry has a `service_name`,
+`platform` (parent company), `tier` (`vlop`/`vlose`/`online-platform`/`hosting`/
+`intermediary`), `period_start`/`period_end`, a stable `transparency_page_url` where
+the file can be found, optional `click_steps` (selectors to click before the download
+link appears), and a direct `report_url` once known.
+
+To add platforms not yet in the registry, `scripts/discover-platforms.py` runs web
+searches to find their transparency pages and outputs draft registry entries for review:
+
+```bash
+# Find transparency page URLs for a list of known platforms:
+python scripts/discover-platforms.py --from-names data/platforms.tsv --out draft.json
+
+# Search for Annex I files published anywhere on the open web:
+python scripts/discover-platforms.py --search-annex --out draft.json
+
+# Review draft.json, edit as needed, then add entries to data/registry.json
+```
+
+`data/platforms.tsv` is a seed list of Article 24 online platforms that aren't yet
+in the registry — a starting point for `--from-names` discovery.
 
 ## Sample queries
 
@@ -834,14 +907,15 @@ make portal-gifs                        # → docs/gifs/portal-*.gif
   download URLs carry their HMAC in the query string, so the full URL is never
   leaked via `Referer`), `X-Frame-Options: DENY`, `Permissions-Policy`
   (geolocation/camera/mic/payment off), and `Strict-Transport-Security` (HSTS).
-  The two HTML pages (`/`, `/portal`) send a **Content-Security-Policy** that
-  locks `script-src` to `'self'` plus each page's own inline `<script>` (allowlisted
-  by sha256 hash — computed from the file, so never stale). Chart.js is **vendored
-  same-origin** (`static/vendor/chart.umd.js`), so the dashboard needs no
-  third-party script origin at all; the portal allows only `accounts.google.com`
-  for Google sign-in. No `'unsafe-inline'` for scripts; `frame-ancestors 'none'`
-  blocks clickjacking. DB values are HTML-escaped before render. If Chart.js fails
-  to load, the dashboard degrades to data tables rather than blank panels.
+  All HTML pages (`/reports`, `/removals`, `/portal`, `/privacy`, and the home
+  `/`) send a per-page **Content-Security-Policy** that locks `script-src` to
+  `'self'` plus each page's own inline `<script>` (allowlisted by sha256 hash —
+  computed from the file, so never stale). Chart.js is **vendored same-origin**
+  (`static/vendor/chart.umd.js`), so the dashboards need no third-party script
+  origin at all; the portal allows only `accounts.google.com` for Google sign-in.
+  No `'unsafe-inline'` for scripts; `frame-ancestors 'none'` blocks clickjacking.
+  DB values are HTML-escaped before render. If Chart.js fails to load, the
+  dashboards degrade to data tables rather than blank panels.
 - When `REDIS_URL` is set, jobs and results persist across restarts and are
   shared across multiple processes. Without it, everything lives in memory
   and a restart clears all jobs.
