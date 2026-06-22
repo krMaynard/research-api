@@ -35,6 +35,8 @@ Built to demonstrate two things:
 | `static/index.html` | Public VLOP dashboard (served at `/`) — Chart.js overview + interactive query builder + "Compare tables" composite panel + NL "Ask" box (`GET /api/overview`, `POST /api/explore`, `POST /api/ask`) |
 | `static/vendor/chart.umd.js` | Vendored Chart.js 4.4.4 (self-hosted, not a CDN) — served by the `/static/vendor/{filename}` route so the dashboard CSP stays `script-src 'self'` |
 | `static/portal.html` | Researcher portal single-page app (served at `/portal`) — Google sign-in + demo fallback |
+| `static/{es,fr,de}/*.html` | Localized copies of the five pages (Spanish/French/German), served under a locale prefix (`/es`, `/es/reports`, …). **Generated** — never hand-edit; see `scripts/localize_static.py` |
+| `scripts/localize_static.py` | Generates the localized pages from the English originals + per-locale translation tables (the single source of UI translations). Re-run after any English page change |
 | `Dockerfile` | Self-contained image: installs deps, seeds `demo.db` at build time, runs uvicorn on `$PORT` as non-root |
 | `service.yaml` | Cloud Run (Knative) manifest — prod env + startup/liveness probes |
 | `scripts/refresh-dataset.sh` | Re-vendor `data/vlop-dsa.json` from the canonical sibling-repo dataset |
@@ -51,6 +53,28 @@ Built to demonstrate two things:
 | `.github/workflows/ci.yml` | CI: `pyflakes` lint + `pytest` on every PR/push (Python 3.11 & 3.12) |
 | `.github/workflows/deploy.yml` | CD: build/push image + deploy to Cloud Run on push to `main` (WIF; skips until configured) |
 | `.gcloudignore` | Trims the Cloud Build upload context (keeps Dockerfile + `data/`) |
+
+## Localization
+
+The five static pages are localized into **Spanish (`/es`), French (`/fr`), and
+German (`/de`)** alongside the English originals (served at the root). English is
+the source of truth; the translations are **generated**, not hand-written:
+
+- `scripts/localize_static.py` holds the per-locale translation tables (chrome +
+  page strings, including inline-JS UI strings) and emits `static/<locale>/*.html`
+  from `static/*.html`. After **any** change to an English page, re-run
+  `python scripts/localize_static.py` so all four languages stay in sync, and
+  commit the regenerated files. Never edit `static/{es,fr,de}/*.html` by hand.
+- Routing: a loop in `main.py` registers `/<locale>`, `/<locale>/reports`,
+  `/<locale>/removals`, `/<locale>/portal`, `/<locale>/privacy` for each locale,
+  all through `_serve_page` (so each localized file gets its own recomputed
+  per-page CSP hash). The JSON API (`/api/*`), Swagger (`/docs`) and operational
+  endpoints stay locale-agnostic; localized pages call the same `/api/*`.
+- The globe **language switcher** (formerly a cross-site link to
+  kieranmaynard.com) now switches the transparency site's own language —
+  English / Español / Français / Deutsch — pointing at the equivalent page in
+  each locale. The switcher block is rebuilt by the generator, so it is
+  consistent across every page and locale.
 
 ## CI
 

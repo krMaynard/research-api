@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="de">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Government Removals — Transparency Report API</title>
-<meta name="description" content="Government requests to remove content from Google products — 160 countries, 13 reporting periods, 42 products, 22 reasons." />
+<title>Behördliche Entfernungen — Transparency Report API</title>
+<meta name="description" content="Behördliche Anfragen zur Entfernung von Inhalten aus Google-Produkten – 160 Länder, 13 Berichtszeiträume, 42 Produkte, 22 Gründe." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
@@ -250,30 +250,30 @@
 </style>
 </head>
 <body>
-<a class="skip-link" href="#main">Skip to content</a>
+<a class="skip-link" href="#main">Zum Inhalt springen</a>
 
 <!-- ── Site banner ──────────────────────────────────────────────────────── -->
-<nav class="site-nav" aria-label="Site">
+<nav class="site-nav" aria-label="Seite">
   <a href="https://kieranmaynard.com/" class="nav-name">Kieran Maynard</a>
   <div class="nav-right">
     <div class="nav-links">
-      <a href="https://kieranmaynard.com/work.html">Work</a>
-      <a href="https://kieranmaynard.com/transparency.html">Products</a>
-      <a href="https://kieranmaynard.com/consulting.html">Consulting</a>
+      <a href="https://kieranmaynard.com/work.html">Arbeit</a>
+      <a href="https://kieranmaynard.com/transparency.html">Produkte</a>
+      <a href="https://kieranmaynard.com/consulting.html">Beratung</a>
       <a href="https://kieranmaynard.com/blog.html">Blog</a>
-      <a href="https://kieranmaynard.com/contact.html">Contact</a>
+      <a href="https://kieranmaynard.com/contact.html">Kontakt</a>
     </div>
     <details class="lang-switcher">
-      <summary class="lang-current" aria-label="Language" title="Language">
+      <summary class="lang-current" aria-label="Sprache" title="Sprache">
         <svg class="lang-globe" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.7 2.6 15.3 0 18"/><path d="M12 3c-2.6 2.7-2.6 15.3 0 18"/></svg>
-        <span>English</span>
+        <span>Deutsch</span>
         <svg class="lang-caret" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>
       </summary>
       <ul class="lang-menu">
-        <li><a class="lang-opt is-current" href="/removals" aria-current="page"><span>English</span><svg class="lang-check" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M3.5 8.5l3 3 6-7"/></svg></a></li>
+        <li><a class="lang-opt" href="/removals"><span>English</span></a></li>
         <li><a class="lang-opt" href="/es/removals"><span>Español</span></a></li>
         <li><a class="lang-opt" href="/fr/removals"><span>Français</span></a></li>
-        <li><a class="lang-opt" href="/de/removals"><span>Deutsch</span></a></li>
+        <li><a class="lang-opt is-current" href="/de/removals" aria-current="page"><span>Deutsch</span><svg class="lang-check" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M3.5 8.5l3 3 6-7"/></svg></a></li>
       </ul>
     </details>
   </div>
@@ -281,15 +281,15 @@
 
 <header class="topbar">
   <div class="topbar-left">
-    <button type="button" class="hamburger" id="hamburger" aria-label="Toggle navigation" aria-expanded="false" aria-controls="sidebar">
+    <button type="button" class="hamburger" id="hamburger" aria-label="Navigation umschalten" aria-expanded="false" aria-controls="sidebar">
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
         <line x1="3" y1="5" x2="17" y2="5"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="15" x2="17" y2="15"/>
       </svg>
     </button>
-    <a href="/" class="topbar-brand">Transparency Report API</a>
+    <a href="/de/" class="topbar-brand">Transparency Report API</a>
   </div>
   <div class="topbar-right">
-    <button type="button" class="theme-toggle" aria-label="Toggle dark mode" data-theme-toggle>
+    <button type="button" class="theme-toggle" aria-label="Dunkelmodus umschalten" data-theme-toggle>
       <svg class="theme-icon-dark" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
       <svg class="theme-icon-light" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/></svg>
     </button>
@@ -298,55 +298,55 @@
 
 <div class="app-body">
 
-<aside class="sidebar" id="sidebar" aria-label="Application navigation">
+<aside class="sidebar" id="sidebar" aria-label="Anwendungsnavigation">
   <nav>
-    <div class="nav-section">Datasets</div>
+    <div class="nav-section">Datensätze</div>
 
-    <a href="/reports" class="nav-item">
+    <a href="/de/reports" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
         <rect x="1" y="9" width="3" height="6" rx="1"/><rect x="6" y="5" width="3" height="10" rx="1"/><rect x="11" y="1" width="3" height="14" rx="1"/>
       </svg>
-      DSA Reports
+      DSA-Berichte
     </a>
 
-    <a href="/removals" class="nav-item is-active" aria-current="page">
+    <a href="/de/removals" class="nav-item is-active" aria-current="page">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
         <circle cx="8" cy="8" r="6.25"/>
         <path d="M5.5 10.5l5-5M5.5 5.5l5 5" stroke-linecap="round"/>
       </svg>
-      Government Removals
+      Behördliche Entfernungen
     </a>
 
     <a href="#" class="nav-item is-soon" aria-disabled="true" tabindex="-1">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
         <path d="M2 12l4-4 3 3 5-7" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      SoR Analysis
-      <span class="soon-badge">Soon</span>
+      SoR-Analyse
+      <span class="soon-badge">Bald</span>
     </a>
 
     <hr class="nav-hr">
-    <div class="nav-section">Tools</div>
+    <div class="nav-section">Werkzeuge</div>
 
-    <a href="/portal" class="nav-item">
+    <a href="/de/portal" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
         <path d="M8 1a3.5 3.5 0 1 0 0 7A3.5 3.5 0 0 0 8 1zM8 9C4.5 9 1.5 10.6 1.5 12.5v1a.5.5 0 0 0 .5.5h12a.5.5 0 0 0 .5-.5v-1C14.5 10.6 11.5 9 8 9z"/>
       </svg>
-      Researcher Portal
+      Forschungsportal
     </a>
 
     <a href="/docs" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
         <path d="M3 1h8l3 3v11H3V1zm7 .5V4.5H12.5L10 1.5zM4 6h8v1H4zm0 2.5h8v1H4zm0 2.5h5v1H4z"/>
       </svg>
-      API Docs
+      API-Dokumentation
     </a>
 
     <a href="/api" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
         <path d="M5 4L1.5 8 5 12M11 4l3.5 4L11 12M9 3l-2 10"/>
       </svg>
-      API Reference
+      API-Referenz
     </a>
 
     <hr class="nav-hr">
@@ -365,7 +365,7 @@
       GitHub
     </a>
   </nav>
-  <div class="sidebar-footer">By <a href="https://kieranmaynard.com/">Kieran Maynard</a> · <a href="/privacy">Privacy</a></div>
+  <div class="sidebar-footer">Von <a href="https://kieranmaynard.com/">Kieran Maynard</a> · <a href="/de/privacy">Datenschutz</a></div>
 </aside>
 
 <div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
@@ -377,16 +377,16 @@
 
   <header>
     <span class="badge">Google · 2019–2025</span>
-    <h1>Government Requests to Remove Content</h1>
-    <p>Government requests to remove content from Google products, across 13 reporting periods, 160 countries, 42 products, and 22 stated reasons. Built around multi-period trends — every filter becomes a time series.</p>
+    <h1>Behördliche Anfragen zur Entfernung von Inhalten</h1>
+    <p>Behördliche Anfragen zur Entfernung von Inhalten aus Google-Produkten, über 13 Berichtszeiträume, 160 Länder, 42 Produkte und 22 angegebene Gründe. Aufgebaut auf mehrjährigen Trends – jeder Filter wird zu einer Zeitreihe.</p>
   </header>
 
   <!-- Headline stats -->
   <div class="stats" id="stats" aria-busy="true">
-    <div class="stat"><div class="num" id="stat-requests">—</div><div class="lbl">Government requests</div></div>
-    <div class="stat"><div class="num" id="stat-items">—</div><div class="lbl">Items targeted for removal</div></div>
-    <div class="stat"><div class="num" id="stat-countries">—</div><div class="lbl">Countries represented</div></div>
-    <div class="stat"><div class="num" id="stat-periods">—</div><div class="lbl">Reporting periods</div></div>
+    <div class="stat"><div class="num" id="stat-requests">—</div><div class="lbl">Behördliche Anfragen</div></div>
+    <div class="stat"><div class="num" id="stat-items">—</div><div class="lbl">Zur Entfernung gemeldete Inhalte</div></div>
+    <div class="stat"><div class="num" id="stat-countries">—</div><div class="lbl">Vertretene Länder</div></div>
+    <div class="stat"><div class="num" id="stat-periods">—</div><div class="lbl">Berichtszeiträume</div></div>
   </div>
 
   <div class="error hidden" id="load-error" role="alert"></div>
@@ -394,32 +394,32 @@
   <div id="dashboard" class="hidden">
 
     <!-- Filters -->
-    <div class="filters" role="region" aria-label="Dashboard filters">
+    <div class="filters" role="region" aria-label="Dashboard-Filter">
       <div class="filter-group">
-        <label for="f-from">From</label>
+        <label for="f-from">Von</label>
         <select id="f-from"></select>
       </div>
       <div class="filter-group">
-        <label for="f-to">To</label>
+        <label for="f-to">Bis</label>
         <select id="f-to"></select>
       </div>
       <div class="filter-group">
-        <label for="f-country">Country</label>
+        <label for="f-country">Land</label>
         <select id="f-country"></select>
       </div>
       <div class="filter-group">
-        <label for="f-requestor">Requestor</label>
+        <label for="f-requestor">Antragsteller</label>
         <select id="f-requestor"></select>
       </div>
       <div class="filter-group">
-        <label for="f-product">Product</label>
+        <label for="f-product">Produkt</label>
         <select id="f-product"></select>
       </div>
       <div class="filter-group">
-        <label for="f-reason">Reason</label>
+        <label for="f-reason">Grund</label>
         <select id="f-reason"></select>
       </div>
-      <button type="button" class="filter-reset" id="f-reset">Reset</button>
+      <button type="button" class="filter-reset" id="f-reset">Zurücksetzen</button>
     </div>
 
     <p class="filter-summary" id="filter-summary" aria-live="polite"></p>
@@ -430,51 +430,51 @@
 
       <div class="chart-card wide">
         <div class="chart-card-head">
-          <h3>Items targeted for removal, by period</h3>
+          <h3>Zur Entfernung gemeldete Inhalte, nach Zeitraum</h3>
           <div class="breakdown-wrap">
-            <label for="f-breakdown">Break down by</label>
+            <label for="f-breakdown">Aufschlüsseln nach</label>
             <select id="f-breakdown">
-              <option value="">None (total)</option>
-              <option value="country_name">Country</option>
-              <option value="requestor">Requestor type</option>
-              <option value="product">Google product</option>
-              <option value="reason">Reason</option>
+              <option value="">Keine (Gesamt)</option>
+              <option value="country_name">Land</option>
+              <option value="requestor">Antragstellertyp</option>
+              <option value="product">Google-Produkt</option>
+              <option value="reason">Grund</option>
             </select>
           </div>
         </div>
-        <div class="chart-loading" id="ts-loading">Loading…</div>
+        <div class="chart-loading" id="ts-loading">Wird geladen…</div>
         <canvas id="chart-ts" height="160" aria-hidden="true" class="hidden"></canvas>
         <div id="chart-ts-table" class="hidden sr-only"></div>
       </div>
 
       <div class="chart-card wide">
-        <h3>Removal rate over time</h3>
-        <p class="chart-sub">Share of targeted items Google actually removed (legal + policy + already removed).</p>
-        <div class="chart-loading" id="rate-loading">Loading…</div>
+        <h3>Entfernungsrate im Zeitverlauf</h3>
+        <p class="chart-sub">Anteil der gemeldeten Inhalte, die Google tatsächlich entfernt hat (rechtlich + Richtlinien + bereits entfernt).</p>
+        <div class="chart-loading" id="rate-loading">Wird geladen…</div>
         <canvas id="chart-rate" height="120" aria-hidden="true" class="hidden"></canvas>
       </div>
 
       <div class="chart-card">
-        <h3>Top 10 countries by items targeted</h3>
-        <div class="chart-loading" id="cty-loading">Loading…</div>
+        <h3>Top 10 Länder nach gemeldeten Inhalten</h3>
+        <div class="chart-loading" id="cty-loading">Wird geladen…</div>
         <canvas id="chart-countries" height="200" aria-hidden="true" class="hidden"></canvas>
       </div>
 
       <div class="chart-card">
-        <h3>Top reasons cited</h3>
-        <div class="chart-loading" id="rsn-loading">Loading…</div>
+        <h3>Häufigste genannte Gründe</h3>
+        <div class="chart-loading" id="rsn-loading">Wird geladen…</div>
         <canvas id="chart-reasons" height="200" aria-hidden="true" class="hidden"></canvas>
       </div>
 
       <div class="chart-card">
-        <h3>Top Google products targeted</h3>
-        <div class="chart-loading" id="prd-loading">Loading…</div>
+        <h3>Am häufigsten betroffene Google-Produkte</h3>
+        <div class="chart-loading" id="prd-loading">Wird geladen…</div>
         <canvas id="chart-products" height="200" aria-hidden="true" class="hidden"></canvas>
       </div>
 
       <div class="chart-card">
-        <h3>How Google responded</h3>
-        <div class="chart-loading" id="cmp-loading">Loading…</div>
+        <h3>Wie Google reagiert hat</h3>
+        <div class="chart-loading" id="cmp-loading">Wird geladen…</div>
         <canvas id="chart-compliance" height="200" aria-hidden="true" class="hidden"></canvas>
       </div>
 
@@ -483,15 +483,15 @@
     <!-- Data table -->
     <div class="table-card">
       <div class="table-card-head">
-        <h3>Records (top 50 by items targeted)</h3>
+        <h3>Datensätze (Top 50 nach gemeldeten Inhalten)</h3>
         <span class="row-count" id="row-count"></span>
       </div>
       <div class="table-scroll">
         <table>
           <thead>
             <tr>
-              <th>Period</th><th>Country</th><th>Requestor</th><th>Product</th><th>Reason</th>
-              <th class="num">Requests</th><th class="num">Items targeted</th><th class="num">Items removed</th>
+              <th>Zeitraum</th><th>Land</th><th>Antragsteller</th><th>Produkt</th><th>Grund</th>
+              <th class="num">Anfragen</th><th class="num">Gemeldete Inhalte</th><th class="num">Entfernte Inhalte</th>
             </tr>
           </thead>
           <tbody id="table-body"></tbody>
@@ -504,7 +504,7 @@
 </main>
 
 <footer>
-  <p>Source: <a href="https://transparencyreport.google.com/government-removals/overview" target="_blank" rel="noopener noreferrer">Google Transparency Report</a> — detailed government removal requests (2019–H1 2025). Data via <a href="/api">Transparency Report API</a> · <a href="/portal">Researcher access</a> · <a href="/privacy">Privacy</a></p>
+  <p>Quelle: <a href="https://transparencyreport.google.com/government-removals/overview" target="_blank" rel="noopener noreferrer">Google Transparency Report</a> — detaillierte behördliche Entfernungsanfragen (2019–1. Hj. 2025). Daten über <a href="/api">Transparency Report API</a> · <a href="/de/portal">Zugang für Forschende</a> · <a href="/de/privacy">Datenschutz</a></p>
 </footer>
 
 </div>
@@ -536,7 +536,7 @@
   // ── Helpers ───────────────────────────────────────────────────────────────
   function fmt(n) {
     if (n == null) return '—';
-    return Number(n).toLocaleString('en-US');
+    return Number(n).toLocaleString('de-DE');
   }
   function fmtPct(n) { return n == null ? '—' : (n * 100).toFixed(1) + '%'; }
   function esc(s) {
@@ -664,7 +664,7 @@
       type: 'line',
       data: {
         labels: labels,
-        datasets: [{ label: 'Removal rate', data: values, borderColor: PALETTE[0], backgroundColor: PALETTE[0] + '22', borderWidth: 2, pointRadius: 3, tension: 0.3, fill: true }],
+        datasets: [{ label: 'Entfernungsrate', data: values, borderColor: PALETTE[0], backgroundColor: PALETTE[0] + '22', borderWidth: 2, pointRadius: 3, tension: 0.3, fill: true }],
       },
       options: {
         responsive: true,
@@ -679,7 +679,7 @@
     if (!breakdown) {
       var labels = rows.map(function(r){ return r[0]; });
       var values = rows.map(function(r){ return r[1]; });
-      lineChart('chart-ts', 'ts-loading', labels, [{ label: 'Items targeted', data: values }]);
+      lineChart('chart-ts', 'ts-loading', labels, [{ label: 'Gemeldete Inhalte', data: values }]);
     } else {
       // rows = [period, breakdown_val, items] — pivot into per-breakdown datasets
       var periodSet = [], seriesMap = {};
@@ -714,7 +714,7 @@
   function renderTopCountries(rows) {
     var labels = rows.map(function(r){ return r[0]; }).reverse();
     var values = rows.map(function(r){ return r[1]; }).reverse();
-    barChart('chart-countries', 'cty-loading', labels, values, 'Items targeted');
+    barChart('chart-countries', 'cty-loading', labels, values, 'Gemeldete Inhalte');
   }
 
   function renderTopReasons(rows) {
@@ -726,7 +726,7 @@
   function renderTopProducts(rows) {
     var labels = rows.map(function(r){ return r[0]; }).reverse();
     var values = rows.map(function(r){ return r[1]; }).reverse();
-    barChart('chart-products', 'prd-loading', labels, values, 'Items targeted');
+    barChart('chart-products', 'prd-loading', labels, values, 'Gemeldete Inhalte');
   }
 
   function renderCompliance(rows) {
@@ -738,7 +738,7 @@
     }
     var r = rows[0];
     // cols: removed_legal, removed_policy, already_removed, not_found, not_enough_info, no_action
-    var labels = ['Removed (legal)', 'Removed (policy)', 'Already removed', 'Not found', 'Not enough info', 'No action'];
+    var labels = ['Entfernt (rechtlich)', 'Entfernt (Richtlinien)', 'Bereits entfernt', 'Nicht gefunden', 'Nicht genügend Infos', 'Keine Aktion'];
     var values = [r[0]||0, r[1]||0, r[2]||0, r[3]||0, r[4]||0, r[5]||0];
     doughnutChart('chart-compliance', 'cmp-loading', labels, values);
   }
@@ -747,11 +747,11 @@
     var tbody = document.getElementById('table-body');
     var count = document.getElementById('row-count');
     if (!rows.length) {
-      tbody.innerHTML = '<tr><td colspan="8" style="color:var(--muted);text-align:center;padding:20px">No records match the current filters.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="color:var(--muted);text-align:center;padding:20px">Keine Datensätze entsprechen den aktuellen Filtern.</td></tr>';
       count.textContent = '';
       return;
     }
-    count.textContent = rows.length + ' rows';
+    count.textContent = rows.length + ' Zeilen';
     tbody.innerHTML = rows.map(function(r) {
       var removed = (r[5]||0) + (r[6]||0) + (r[7]||0);
       return '<tr>'
@@ -774,11 +774,11 @@
     var requestor = document.getElementById('f-requestor').value;
     var product   = document.getElementById('f-product').value;
     var reason    = document.getElementById('f-reason').value;
-    if (country)   parts.push('Country: ' + country);
-    if (requestor) parts.push('Requestor: ' + requestor);
-    if (product)   parts.push('Product: ' + product);
-    if (reason)    parts.push('Reason: ' + reason);
-    document.getElementById('filter-summary').innerHTML = 'Showing: <strong>' + parts.map(esc).join(' · ') + '</strong>';
+    if (country)   parts.push('Land: ' + country);
+    if (requestor) parts.push('Antragsteller: ' + requestor);
+    if (product)   parts.push('Produkt: ' + product);
+    if (reason)    parts.push('Grund: ' + reason);
+    document.getElementById('filter-summary').innerHTML = 'Anzeige: <strong>' + parts.map(esc).join(' · ') + '</strong>';
   }
 
   // ── Main refresh ──────────────────────────────────────────────────────────
@@ -790,7 +790,7 @@
 
     // Show loading indicators
     ['ts-loading','rate-loading','cty-loading','rsn-loading','prd-loading','cmp-loading'].forEach(function(id) {
-      var el = document.getElementById(id); if (el) { el.classList.remove('hidden'); el.textContent = 'Loading…'; }
+      var el = document.getElementById(id); if (el) { el.classList.remove('hidden'); el.textContent = 'Wird geladen…'; }
     });
     ['chart-ts','chart-rate','chart-countries','chart-reasons','chart-products','chart-compliance'].forEach(function(id) {
       var el = document.getElementById(id); if (el) el.classList.add('hidden');
@@ -845,7 +845,7 @@
       renderTable(results[6].rows);
 
     } catch (err) {
-      errEl.textContent = 'Failed to load charts: ' + err.message;
+      errEl.textContent = 'Diagramme konnten nicht geladen werden: ' + err.message;
       errEl.classList.remove('hidden');
     }
   }
@@ -890,10 +890,10 @@
           var opt = document.createElement('option'); opt.value = v; opt.textContent = v; sel.appendChild(opt);
         });
       }
-      populateSelect('f-country',   d.countries.map(function(c){ return c.name; }), 'All countries');
-      populateSelect('f-requestor', d.requestors, 'All requestor types');
-      populateSelect('f-product',   d.products,   'All products');
-      populateSelect('f-reason',    d.reasons,    'All reasons');
+      populateSelect('f-country',   d.countries.map(function(c){ return c.name; }), 'Alle Länder');
+      populateSelect('f-requestor', d.requestors, 'Alle Antragstellertypen');
+      populateSelect('f-product',   d.products,   'Alle Produkte');
+      populateSelect('f-reason',    d.reasons,    'Alle Gründe');
 
       // Wire up filter events
       document.getElementById('f-from').addEventListener('change', function () {
@@ -923,7 +923,7 @@
       refresh();
 
     } catch (err) {
-      errEl.textContent = 'Failed to load dataset: ' + err.message;
+      errEl.textContent = 'Datensatz konnte nicht geladen werden: ' + err.message;
       errEl.classList.remove('hidden');
     }
   }

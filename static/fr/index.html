@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>DSA Reports — Transparency Report API</title>
+<title>Rapports DSA — Transparency Report API</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
@@ -281,29 +281,29 @@
 </style>
 </head>
 <body>
-<a class="skip-link" href="#main">Skip to content</a>
+<a class="skip-link" href="#main">Aller au contenu</a>
 
 <!-- ── Site banner ──────────────────────────────────────────────────────── -->
 <nav class="site-nav" aria-label="Site">
   <a href="https://kieranmaynard.com/" class="nav-name">Kieran Maynard</a>
   <div class="nav-right">
     <div class="nav-links">
-      <a href="https://kieranmaynard.com/work.html">Work</a>
-      <a href="https://kieranmaynard.com/transparency.html">Products</a>
-      <a href="https://kieranmaynard.com/consulting.html">Consulting</a>
+      <a href="https://kieranmaynard.com/work.html">Travaux</a>
+      <a href="https://kieranmaynard.com/transparency.html">Produits</a>
+      <a href="https://kieranmaynard.com/consulting.html">Conseil</a>
       <a href="https://kieranmaynard.com/blog.html">Blog</a>
       <a href="https://kieranmaynard.com/contact.html">Contact</a>
     </div>
     <details class="lang-switcher">
-      <summary class="lang-current" aria-label="Language" title="Language">
+      <summary class="lang-current" aria-label="Langue" title="Langue">
         <svg class="lang-globe" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.7 2.6 15.3 0 18"/><path d="M12 3c-2.6 2.7-2.6 15.3 0 18"/></svg>
-        <span>English</span>
+        <span>Français</span>
         <svg class="lang-caret" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>
       </summary>
       <ul class="lang-menu">
-        <li><a class="lang-opt is-current" href="/reports" aria-current="page"><span>English</span><svg class="lang-check" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M3.5 8.5l3 3 6-7"/></svg></a></li>
+        <li><a class="lang-opt" href="/reports"><span>English</span></a></li>
         <li><a class="lang-opt" href="/es/reports"><span>Español</span></a></li>
-        <li><a class="lang-opt" href="/fr/reports"><span>Français</span></a></li>
+        <li><a class="lang-opt is-current" href="/fr/reports" aria-current="page"><span>Français</span><svg class="lang-check" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M3.5 8.5l3 3 6-7"/></svg></a></li>
         <li><a class="lang-opt" href="/de/reports"><span>Deutsch</span></a></li>
       </ul>
     </details>
@@ -314,17 +314,17 @@
 <header class="topbar">
   <div class="topbar-left">
     <button type="button" class="hamburger" id="hamburger"
-            aria-label="Toggle navigation" aria-expanded="false" aria-controls="sidebar">
+            aria-label="Basculer la navigation" aria-expanded="false" aria-controls="sidebar">
       <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
         <rect x="2" y="4" width="16" height="1.8" rx="1"/>
         <rect x="2" y="9.1" width="16" height="1.8" rx="1"/>
         <rect x="2" y="14.2" width="16" height="1.8" rx="1"/>
       </svg>
     </button>
-    <a href="/" class="topbar-brand">Transparency Report API</a>
+    <a href="/fr/" class="topbar-brand">Transparency Report API</a>
   </div>
   <div class="topbar-right">
-    <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle dark mode" aria-pressed="false">
+    <button type="button" class="theme-toggle" data-theme-toggle aria-label="Basculer le mode sombre" aria-pressed="false">
       <svg class="theme-icon-dark" viewBox="0 0 20 20" aria-hidden="true" fill="currentColor"><path d="M17.293 13.293A8 8 0 0 1 6.707 2.707a8.001 8.001 0 1 0 10.586 10.586z"/></svg>
       <svg class="theme-icon-light" viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="3.2" fill="currentColor" stroke="none"/><line x1="10" y1="2" x2="10" y2="3.8"/><line x1="10" y1="16.2" x2="10" y2="18"/><line x1="2" y1="10" x2="3.8" y2="10"/><line x1="16.2" y1="10" x2="18" y2="10"/><line x1="3.86" y1="3.86" x2="5.13" y2="5.13"/><line x1="14.87" y1="14.87" x2="16.14" y2="16.14"/><line x1="3.86" y1="16.14" x2="5.13" y2="14.87"/><line x1="14.87" y1="5.13" x2="16.14" y2="3.86"/></svg>
     </button>
@@ -335,57 +335,57 @@
 <div class="app-body">
 
 <!-- ── Sidebar ──────────────────────────────────────────────────────────── -->
-<aside class="sidebar" id="sidebar" aria-label="Application navigation">
+<aside class="sidebar" id="sidebar" aria-label="Navigation de l’application">
   <nav>
-    <div class="nav-section">Datasets</div>
+    <div class="nav-section">Jeux de données</div>
 
-    <a href="/reports" class="nav-item is-active" aria-current="page">
+    <a href="/fr/reports" class="nav-item is-active" aria-current="page">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
         <rect x="1" y="9" width="3" height="6" rx="1"/>
         <rect x="6" y="5" width="3" height="10" rx="1"/>
         <rect x="11" y="1" width="3" height="14" rx="1"/>
       </svg>
-      DSA Reports
+      Rapports DSA
     </a>
 
-    <a href="/removals" class="nav-item">
+    <a href="/fr/removals" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
         <circle cx="8" cy="8" r="6.25"/>
         <path d="M5.5 10.5l5-5M5.5 5.5l5 5" stroke-linecap="round"/>
       </svg>
-      Government Removals
+      Retraits gouvernementaux
     </a>
 
     <a href="#" class="nav-item is-soon" aria-disabled="true" tabindex="-1">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
         <path d="M2 12l4-4 3 3 5-7" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      SoR Analysis
-      <span class="soon-badge">Soon</span>
+      Analyse des SoR
+      <span class="soon-badge">Bientôt</span>
     </a>
 
     <hr class="nav-hr">
-    <div class="nav-section">Tools</div>
+    <div class="nav-section">Outils</div>
 
-    <a href="/portal" class="nav-item">
+    <a href="/fr/portal" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
         <path d="M8 1a3.5 3.5 0 1 0 0 7A3.5 3.5 0 0 0 8 1zM8 9C4.5 9 1.5 10.6 1.5 12.5v1a.5.5 0 0 0 .5.5h12a.5.5 0 0 0 .5-.5v-1C14.5 10.6 11.5 9 8 9z"/>
       </svg>
-      Researcher Portal
+      Portail chercheurs
     </a>
 
     <a href="/docs" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
         <path d="M3 1h8l3 3v11H3V1zm7 .5V4.5H12.5L10 1.5zM4 6h8v1H4zm0 2.5h8v1H4zm0 2.5h5v1H4z"/>
       </svg>
-      API Docs
+      Documentation API
     </a>
 
     <a href="/api" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
         <path d="M5 4L1.5 8 5 12M11 4l3.5 4L11 12M9 3l-2 10"/>
       </svg>
-      API Reference
+      Référence API
     </a>
 
     <hr class="nav-hr">
@@ -405,7 +405,7 @@
     </a>
   </nav>
   <div class="sidebar-footer">
-    By <a href="https://kieranmaynard.com/">Kieran Maynard</a> · <a href="/privacy">Privacy</a>
+    Par <a href="https://kieranmaynard.com/">Kieran Maynard</a> · <a href="/fr/privacy">Confidentialité</a>
   </div>
 </aside>
 
@@ -416,112 +416,112 @@
 <div class="main-area">
 <div class="wrap">
   <header>
-    <span class="badge">EU DSA · VLOP transparency</span>
-    <h1>DSA Transparency Reports</h1>
-    <p id="period">Content-moderation statistics from the EU Digital Services Act transparency reports.</p>
+    <span class="badge">DSA de l’UE · Transparence VLOP</span>
+    <h1>Rapports de transparence du DSA</h1>
+    <p id="period">Statistiques de modération de contenu issues des rapports de transparence du règlement européen sur les services numériques.</p>
   </header>
 
  <main id="main" tabindex="-1">
   <section class="card hidden" id="ask-card">
-    <h2>Ask in plain English ✨</h2>
-    <p class="sub">An LLM turns your question into the <em>structured</em> query (never SQL),
-      which runs through the same validated <code>/api/explore</code> path.</p>
+    <h2>Posez votre question en langage naturel ✨</h2>
+    <p class="sub">Un LLM transforme votre question en requête <em>structurée</em> (jamais de SQL),
+      exécutée via le même chemin validé <code>/api/explore</code>.</p>
     <div class="controls">
-      <input id="ask-q" type="text" aria-label="Ask a question about the data"
-             placeholder="e.g. Which platforms received the most Article 16 notices?"
+      <input id="ask-q" type="text" aria-label="Poser une question sur les données"
+             placeholder="p. ex. Quelles plateformes ont reçu le plus de signalements au titre de l’article 16 ?"
              style="flex:1 1 320px; min-width:240px; background:var(--panel2); color:var(--fg);
                     border:1px solid var(--border); border-radius:8px; padding:9px 12px; font-size:14px;" />
-      <button id="ask-run" type="button">Ask</button>
+      <button id="ask-run" type="button">Demander</button>
     </div>
     <div class="chips" id="ask-chips"></div>
-    <div class="ask-gate hidden" id="ask-gate">Natural-language Ask needs an API key — it runs a language model. <a href="/portal">Sign in at the portal →</a></div>
+    <div class="ask-gate hidden" id="ask-gate">La question en langage naturel nécessite une clé d’API — elle exécute un modèle de langage. <a href="/fr/portal">Connectez-vous sur le portail →</a></div>
     <div class="error" id="ask-error" role="alert"></div>
     <p class="explain" id="ask-explain"></p>
     <canvas id="ask-chart" height="150" aria-hidden="true"></canvas>
     <div id="ask-out" aria-live="polite"></div>
     <div class="resactions hidden" id="ask-actions">
-      <button class="ghost" id="ask-refine" type="button">Refine in builder ↓</button>
-      <button class="ghost" id="ask-csv" type="button">Download CSV</button>
-      <button class="ghost" id="ask-json-dl" type="button">Download JSON</button>
+      <button class="ghost" id="ask-refine" type="button">Affiner dans le générateur ↓</button>
+      <button class="ghost" id="ask-csv" type="button">Télécharger CSV</button>
+      <button class="ghost" id="ask-json-dl" type="button">Télécharger JSON</button>
     </div>
-    <details><summary>Generated query</summary><pre id="ask-json"></pre></details>
+    <details><summary>Requête générée</summary><pre id="ask-json"></pre></details>
   </section>
 
-  <div class="stats" id="stats" aria-busy="true"><p class="loading">Loading headline figures…</p></div>
+  <div class="stats" id="stats" aria-busy="true"><p class="loading">Chargement des chiffres clés…</p></div>
 
   <section class="card">
-    <h2>Article 16 notices by platform</h2>
-    <p class="sub">Top platforms by total notices received (DSA Table 4).</p>
+    <h2>Signalements au titre de l’article 16 par plateforme</h2>
+    <p class="sub">Principales plateformes selon le total de signalements reçus (tableau 4 du DSA).</p>
     <canvas id="chart-platforms" height="150" aria-hidden="true"></canvas>
-    <div id="chart-platforms-fallback"><p class="loading">Loading chart…</p></div>
+    <div id="chart-platforms-fallback"><p class="loading">Chargement du graphique…</p></div>
   </section>
 
   <section class="card">
-    <h2>Article 16 notices by category</h2>
-    <p class="sub">Notices grouped by the category of allegedly illegal content.</p>
+    <h2>Signalements au titre de l’article 16 par catégorie</h2>
+    <p class="sub">Signalements regroupés par catégorie de contenu présumé illicite.</p>
     <canvas id="chart-categories" height="150" aria-hidden="true"></canvas>
-    <div id="chart-categories-fallback"><p class="loading">Loading chart…</p></div>
+    <div id="chart-categories-fallback"><p class="loading">Chargement du graphique…</p></div>
   </section>
 
   <div class="error" id="error" role="alert"></div>
 
   <section class="card" id="explore-card">
-    <h2>Explore the data</h2>
-    <p class="sub">Build a query against any DSA report table — it runs live through the same
-      validated structured-query API (<code>POST /api/explore</code>), no SQL.</p>
+    <h2>Explorer les données</h2>
+    <p class="sub">Construisez une requête sur n’importe quelle table de rapport du DSA — elle s’exécute en direct via la même
+      API de requêtes structurées validée (<code>POST /api/explore</code>), sans SQL.</p>
     <div class="controls">
       <label>Table <select id="ex-table"></select></label>
-      <label>Group by <select id="ex-dim"></select></label>
-      <label>Aggregate <select id="ex-agg"></select></label>
-      <label>Measure <select id="ex-measure"></select></label>
-      <label>Show top <select id="ex-top">
+      <label>Grouper par <select id="ex-dim"></select></label>
+      <label>Agrégation <select id="ex-agg"></select></label>
+      <label>Mesure <select id="ex-measure"></select></label>
+      <label>Afficher le top <select id="ex-top">
         <option>5</option><option selected>10</option><option>20</option><option>50</option>
       </select></label>
-      <button id="ex-run" type="button">Run query</button>
+      <button id="ex-run" type="button">Exécuter la requête</button>
     </div>
     <div class="error" id="ex-error" role="alert"></div>
     <canvas id="ex-chart" height="150" aria-hidden="true"></canvas>
     <div id="ex-out" aria-live="polite"></div>
     <div class="resactions hidden" id="ex-actions">
-      <button class="ghost" id="ex-csv" type="button">Download CSV</button>
-      <button class="ghost" id="ex-json-dl" type="button">Download JSON</button>
+      <button class="ghost" id="ex-csv" type="button">Télécharger CSV</button>
+      <button class="ghost" id="ex-json-dl" type="button">Télécharger JSON</button>
     </div>
-    <details><summary>Request JSON (try it via the API)</summary><pre id="ex-json"></pre></details>
+    <details><summary>JSON de la requête (essayez-le via l’API)</summary><pre id="ex-json"></pre></details>
   </section>
 
   <section class="card" id="compare-card">
-    <h2>Compare tables</h2>
-    <p class="sub">Cross-table analysis — two sub-queries merged per service with a computed
-      ratio (the same validated <code>POST /api/explore</code>, composite shape).</p>
+    <h2>Comparer les tableaux</h2>
+    <p class="sub">Analyse multi-tables — deux sous-requêtes fusionnées par service avec un ratio
+      calculé (la même <code>POST /api/explore</code> validée, en forme composite).</p>
     <div class="controls">
-      <label>Preset <select id="cmp-preset"></select></label>
-      <label>A: table <select id="cmp-table-a"></select></label>
-      <label>A: measure <select id="cmp-measure-a"></select></label>
-      <label>B: table <select id="cmp-table-b"></select></label>
-      <label>B: measure <select id="cmp-measure-b"></select></label>
-      <label>Join on <select id="cmp-join"></select></label>
-      <label>Compute <select id="cmp-derived">
+      <label>Préréglage <select id="cmp-preset"></select></label>
+      <label>A : table <select id="cmp-table-a"></select></label>
+      <label>A : mesure <select id="cmp-measure-a"></select></label>
+      <label>B : table <select id="cmp-table-b"></select></label>
+      <label>B : mesure <select id="cmp-measure-b"></select></label>
+      <label>Joindre sur <select id="cmp-join"></select></label>
+      <label>Calculer <select id="cmp-derived">
         <option value="a_div_b" selected>A ÷ B</option>
         <option value="b_div_a">B ÷ A</option>
-        <option value="pct_a_of_b">A as % of B</option>
-        <option value="a_per_1k_b">A per 1,000 B</option>
+        <option value="pct_a_of_b">A en % de B</option>
+        <option value="a_per_1k_b">A pour 1 000 B</option>
       </select></label>
-      <button id="cmp-run" type="button">Compare</button>
+      <button id="cmp-run" type="button">Comparer</button>
     </div>
     <div class="error" id="cmp-error" role="alert"></div>
     <canvas id="cmp-chart" height="150" aria-hidden="true"></canvas>
     <div id="cmp-out" aria-live="polite"></div>
     <div class="resactions hidden" id="cmp-actions">
-      <button class="ghost" id="cmp-csv" type="button">Download CSV</button>
-      <button class="ghost" id="cmp-json-dl" type="button">Download JSON</button>
+      <button class="ghost" id="cmp-csv" type="button">Télécharger CSV</button>
+      <button class="ghost" id="cmp-json-dl" type="button">Télécharger JSON</button>
     </div>
-    <details><summary>Request JSON (try it via the API)</summary><pre id="cmp-json"></pre></details>
+    <details><summary>JSON de la requête (essayez-le via l’API)</summary><pre id="cmp-json"></pre></details>
   </section>
  </main>
 
   <footer>
-    Public overview from the same-origin API at <code>/api/overview</code>.
-    Researchers can run custom queries via the <a href="/portal">portal</a> + <a href="/docs">API</a>. · <a href="/privacy">Privacy</a>
+    Aperçu public depuis l’API de même origine sur <code>/api/overview</code>.
+    Les chercheurs peuvent exécuter des requêtes personnalisées via le <a href="/fr/portal">portail</a> + l’<a href="/docs">API</a>. · <a href="/fr/privacy">Confidentialité</a>
   </footer>
 </div><!-- .wrap -->
 </div><!-- .main-area -->
@@ -534,7 +534,7 @@ const fmt = (n) => (n ?? 0).toLocaleString();
 const fmtPeriod = (p) => {
   const m = /^(\d{4})-(\d{2})-\d{2}\/(\d{4})-(\d{2})-\d{2}$/.exec(p || "");
   if (!m) return p || "";
-  const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const MON = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
   const [, y1, mo1, y2, mo2] = m;
   return y1 === y2
     ? `${MON[+mo1 - 1]}–${MON[+mo2 - 1]} ${y1}`
@@ -596,7 +596,7 @@ async function load() {
     if (!res.ok) throw new Error(`/api/overview → ${res.status}`);
     d = await res.json();
   } catch (err) {
-    $("#error").textContent = "Could not load overview: " + err.message;
+    $("#error").textContent = "Impossible de charger l’aperçu : " + err.message;
     $("#stats").setAttribute("aria-busy", "false");
     $("#stats").innerHTML = "";
     ["#chart-platforms-fallback", "#chart-categories-fallback"].forEach(s => $(s).innerHTML = "");
@@ -604,18 +604,18 @@ async function load() {
   }
   $("#stats").setAttribute("aria-busy", "false");
 
-  if (d.period) $("#period").textContent = `Reporting period ${fmtPeriod(d.period)} · ${d.services} services across ${d.platforms} parent companies.`;
+  if (d.period) $("#period").textContent = `Période de référence ${fmtPeriod(d.period)} · ${d.services} services répartis sur ${d.platforms} sociétés mères.`;
   $("#stats").innerHTML =
-    stat(fmt(d.services), "Designated services") +
-    stat(fmt(d.platforms), "Parent companies") +
-    stat(fmt(d.total_notices), "Art. 16 notices");
+    stat(fmt(d.services), "Services désignés") +
+    stat(fmt(d.platforms), "Sociétés mères") +
+    stat(fmt(d.total_notices), "Signalements art. 16");
 
   const tp = d.top_platforms || [];
   barChart("#chart-platforms", "#chart-platforms-fallback",
-           tp.map(x => x.platform), tp.map(x => x.notices), "Platform", "Notices");
+           tp.map(x => x.platform), tp.map(x => x.notices), "Plateforme", "Signalements");
   const bc = d.by_category || [];
   barChart("#chart-categories", "#chart-categories-fallback",
-           bc.map(x => x.category), bc.map(x => x.notices), "Category", "Notices");
+           bc.map(x => x.category), bc.map(x => x.notices), "Catégorie", "Signalements");
 }
 
 // ── Interactive query builder (POST /api/explore) ────────────────────────────
@@ -637,7 +637,7 @@ function onTableChange() {
   } else {
     // No numeric measures (e.g. t11) — only row counts make sense.
     fillSelect(aggSel, ["COUNT"]);
-    fillSelect(mSel, ["(rows)"]);
+    fillSelect(mSel, ["(lignes)"]);
     mSel.disabled = true;
   }
 }
@@ -661,7 +661,7 @@ async function runExplore() {
   const runBtn = $("#ex-run");
   runBtn.disabled = true;
   $("#ex-out").setAttribute("aria-busy", "true");
-  $("#ex-out").innerHTML = "<p class='loading'>Running query…</p>";
+  $("#ex-out").innerHTML = "<p class='loading'>Exécution de la requête…</p>";
   let d;
   try {
     const res = await fetch("/api/explore", {
@@ -670,7 +670,7 @@ async function runExplore() {
     d = await res.json();
     if (!res.ok) throw new Error(d.detail || `HTTP ${res.status}`);
   } catch (err) {
-    $("#ex-error").textContent = "Query failed: " + err.message;
+    $("#ex-error").textContent = "Échec de la requête : " + err.message;
     $("#ex-out").innerHTML = "";
     return;
   } finally {
@@ -708,7 +708,7 @@ async function setupExplore() {
   try {
     exOptions = await (await fetch("/api/explore/options")).json();
   } catch (err) {
-    $("#ex-error").textContent = "Could not load query options: " + err.message;
+    $("#ex-error").textContent = "Impossible de charger les options de requête : " + err.message;
     return;
   }
   fillSelect($("#ex-table"), exOptions.tables.map(t => t.table));
@@ -727,20 +727,20 @@ let lastCompare = null;
 
 // One-click cross-table analyses. `filters` (per leg) become that leg's `query`.
 const CMP_PRESETS = [
-  { label: "Actions per appeal", a: { table: "t5_own_initiative_illegal", measure: "measures" },
+  { label: "Actions par appel", a: { table: "t5_own_initiative_illegal", measure: "measures" },
     b: { table: "t7_appeals_recidivism", measure: "value" }, derived: "a_div_b" },
-  { label: "Notices per 1,000 users", a: { table: "t4_notices", measure: "notices" },
+  { label: "Signalements pour 1 000 utilisateurs", a: { table: "t4_notices", measure: "notices" },
     b: { table: "t10_amar", measure: "value" }, derived: "a_per_1k_b" },
-  { label: "Trusted-flagger share of notices (%)", a: { table: "t4_notices", measure: "tf_notices" },
+  { label: "Part des signalements par signaleurs de confiance (%)", a: { table: "t4_notices", measure: "tf_notices" },
     b: { table: "t4_notices", measure: "notices" }, derived: "pct_a_of_b" },
-  { label: "Custom…", custom: true },
+  { label: "Personnalisé…", custom: true },
 ];
 
 const CMP_EXPRS = {
   a_div_b: { expr: "a.av / b.bv", label: "A ÷ B" },
   b_div_a: { expr: "b.bv / a.av", label: "B ÷ A" },
-  pct_a_of_b: { expr: "100 * a.av / b.bv", label: "A as % of B" },
-  a_per_1k_b: { expr: "1000 * a.av / b.bv", label: "A per 1,000 B" },
+  pct_a_of_b: { expr: "100 * a.av / b.bv", label: "A en % de B" },
+  a_per_1k_b: { expr: "1000 * a.av / b.bv", label: "A pour 1 000 B" },
 };
 
 // Ratios and per-1k rates need decimals; counts don't. "—" keeps NULLs (a service
@@ -758,7 +758,7 @@ function onCmpTableChange(which) {
   const table = $(`#cmp-table-${which}`).value;
   const mSel = $(`#cmp-measure-${which}`);
   const measures = cmpMeasures(table);
-  fillSelect(mSel, measures || ["(rows)"]);
+  fillSelect(mSel, measures || ["(lignes)"]);
   mSel.disabled = !measures;
   // Join dims = dimensions present in BOTH tables (what the API validates).
   const dims = (t) => exOptions.tables.find(x => x.table === t).dimensions;
@@ -809,7 +809,7 @@ async function runCompare() {
   const runBtn = $("#cmp-run");
   runBtn.disabled = true;
   $("#cmp-out").setAttribute("aria-busy", "true");
-  $("#cmp-out").innerHTML = "<p class='loading'>Running comparison…</p>";
+  $("#cmp-out").innerHTML = "<p class='loading'>Exécution de la comparaison…</p>";
   let d;
   try {
     const res = await fetch("/api/explore", {
@@ -818,7 +818,7 @@ async function runCompare() {
     d = await res.json();
     if (!res.ok) throw new Error(d.detail || `HTTP ${res.status}`);
   } catch (err) {
-    $("#cmp-error").textContent = "Comparison failed: " + err.message;
+    $("#cmp-error").textContent = "Échec de la comparaison : " + err.message;
     $("#cmp-out").innerHTML = "";
     return;
   } finally {
@@ -896,11 +896,11 @@ function renderRows(d, chartSel, outSel, legend) {
   const body = d.rows.map(r =>
     `<tr>${r.map((v) => typeof v === "number" ? `<td class="num">${fmt(v)}</td>` : `<td>${esc(v)}</td>`).join("")}</tr>`
   ).join("");
-  out.innerHTML = d.rows.length ? `<table class="restable">${head}${body}</table>` : "<p class='sub'>No rows.</p>";
+  out.innerHTML = d.rows.length ? `<table class="restable">${head}${body}</table>` : "<p class='sub'>Aucune ligne.</p>";
 }
 
 // ── Shared: plain-English explanation, CSV/JSON export, truncation note ───────
-const AGG_WORDS = { SUM: "total", AVG: "average", MIN: "minimum", MAX: "maximum", COUNT: "count of" };
+const AGG_WORDS = { SUM: "total", AVG: "moyenne", MIN: "minimum", MAX: "maximum", COUNT: "nombre de" };
 let lastAsk = null, lastExplore = null;
 
 function explainQuery(aq, cached) {
@@ -909,20 +909,20 @@ function explainQuery(aq, cached) {
   const agg = (aq.aggregates || [])[0];
   const dim = (aq.group_by || [])[0];
   if (agg) {
-    const what = agg.function === "COUNT" ? "number of rows" : `${AGG_WORDS[agg.function] || agg.function} ${agg.field_name || agg.field}`;
-    parts.push(`Showing the <strong>${esc(what)}</strong>${dim ? ` by <strong>${esc(dim)}</strong>` : ""}`);
+    const what = agg.function === "COUNT" ? "nombre de lignes" : `${AGG_WORDS[agg.function] || agg.function} ${agg.field_name || agg.field}`;
+    parts.push(`Affichage du <strong>${esc(what)}</strong>${dim ? ` par <strong>${esc(dim)}</strong>` : ""}`);
   } else {
-    parts.push("Showing matching rows");
+    parts.push("Affichage des lignes correspondantes");
   }
   const filters = (aq.filters || []).map(f =>
-    `${esc(f.field)} ${f.op === "IN" ? "in" : f.op.toLowerCase()} ${esc((f.values || []).join(", "))}`);
-  if (filters.length) parts.push(`where ${filters.join(" and ")}`);
-  parts.push(`<span class="muted">— from ${esc(aq.table)}, top ${esc(aq.max_count)}${cached ? " · cached" : ""}.</span>`);
+    `${esc(f.field)} ${f.op === "IN" ? "dans" : f.op.toLowerCase()} ${esc((f.values || []).join(", "))}`);
+  if (filters.length) parts.push(`où ${filters.join(" et ")}`);
+  parts.push(`<span class="muted">— depuis ${esc(aq.table)}, top ${esc(aq.max_count)}${cached ? " · en cache" : ""}.</span>`);
   return parts.join(" ");
 }
 
 function truncNote(d) {
-  return d.truncated ? `<p class="sub">Showing the first ${fmt(d.row_count)} rows (capped).</p>` : "";
+  return d.truncated ? `<p class="sub">Affichage des ${fmt(d.row_count)} premières lignes (plafonné).</p>` : "";
 }
 
 function toCSV(d) {
@@ -961,10 +961,10 @@ function refineInBuilder(aq) {
 }
 
 const ASK_EXAMPLES = [
-  "Top platforms by Article 16 notices",
-  "Which services have the most monthly active users?",
-  "Notices by category for TikTok",
-  "Average automated actions per platform",
+  "Principales plateformes par signalements de l’article 16",
+  "Quels services comptent le plus d’utilisateurs actifs mensuels ?",
+  "Signalements par catégorie pour TikTok",
+  "Actions automatisées moyennes par plateforme",
 ];
 
 async function runAsk() {
@@ -974,7 +974,7 @@ async function runAsk() {
   if (!key) { askGate(true); return; }
   $("#ask-error").textContent = ""; $("#ask-explain").innerHTML = "";
   $("#ask-actions").classList.add("hidden");
-  const btn = $("#ask-run"); btn.disabled = true; btn.textContent = "Asking…";
+  const btn = $("#ask-run"); btn.disabled = true; btn.textContent = "Demande en cours…";
   try {
     const res = await fetch("/api/ask", {
       method: "POST",
@@ -983,7 +983,7 @@ async function runAsk() {
     });
     if (res.status === 401) {
       localStorage.removeItem("vlop_api_key"); askGate(true);
-      throw new Error("Your session expired — sign in again at the portal.");
+      throw new Error("Votre session a expiré — reconnectez-vous sur le portail.");
     }
     const d = await res.json();
     if (!res.ok) {
@@ -1000,7 +1000,7 @@ async function runAsk() {
   } catch (err) {
     $("#ask-error").textContent = "" + err.message;
   } finally {
-    btn.disabled = false; btn.textContent = "Ask";
+    btn.disabled = false; btn.textContent = "Demander";
   }
 }
 
