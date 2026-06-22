@@ -65,7 +65,7 @@
   .lang-menu {
     position: absolute; top: calc(100% + 8px); right: 0; min-width: 170px; margin: 0; padding: .3rem;
     list-style: none; background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
-    box-shadow: 0 12px 30px var(--shadow); z-index: 60;
+    box-shadow: 0 12px 30px var(--shadow); z-index: 201;
   }
   .lang-menu li { margin: 0; }
   .lang-opt {
@@ -174,7 +174,7 @@
 
   /* ── Mobile sidebar overlay ─────────────────────────────────── */
   .sidebar-overlay {
-    display: none; position: fixed; inset: 0; z-index: 150;
+    display: none; position: fixed; inset: 0; z-index: 205;
     background: rgba(0,0,0,.4);
   }
   .sidebar-overlay.is-open { display: block; }
@@ -271,7 +271,7 @@
   @media (max-width: 720px) {
     .hamburger { display: flex; }
     .sidebar {
-      position: fixed; left: 0; top: var(--topbar-h); bottom: 0; z-index: 190;
+      position: fixed; left: 0; top: var(--topbar-h); bottom: 0; z-index: 210;
       transform: translateX(calc(-1 * var(--sidebar-w)));
     }
     .sidebar.is-open { transform: translateX(0); }
