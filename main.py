@@ -1816,14 +1816,14 @@ def root() -> dict[str, Any]:
         "period": meta.get("period"),
         "pattern": "async-job",
         "query_style": "TikTok-Research-API-style structured parameters (no SQL accepted); pick a `table` (GET /api/tables)",
-        "auth": "X-API-Key header required for the job API; public: `/`, `/api`, `/api/overview`, `/api/explore`, `/docs`, `/openapi.json`",
+        "auth": "X-API-Key header required for the job API; public: `/`, `/api`, `/api/overview`, `/api/explore`, `/api/tables`, `/api/fields`, `/api/schema`, `/docs`, `/openapi.json`",
         "endpoints": {
             "GET /": "Public VLOP transparency dashboard (web UI)",
             "GET /api/overview": "Public headline aggregates powering the dashboard (no auth)",
             "GET /api/explore/options": "Public: tables + their dimensions/measures for the query builder",
             "POST /api/explore": "Public: run a bounded structured query inline (no auth, row-capped, rate-limited)",
             "POST /api/ask": "Ask in natural language (requires an API key) — an LLM writes the structured query (if enabled)",
-            "GET /portal": "Researcher portal (web UI: sign in, get a key, browse the schema)",
+            "GET /portal": "Researcher portal (web UI: browse the schema; sign in to get a key)",
             "POST /api/auth/google": "Sign in with a Google ID token (FedCM/GIS) → session key",
             "POST /api/portal/register": "Issue an API key without sign-in (disabled when ALLOW_DEMO_KEYS=0)",
             "DELETE /api/portal/key": "Revoke your session / portal-issued key",
@@ -1836,9 +1836,9 @@ def root() -> dict[str, Any]:
             "GET /api/jobs/{job_id}/result?format=json|csv": "Result (only when status=done)",
             "GET /api/jobs/{job_id}/download?...": "Secure result download via a signed, expiring URL (no key)",
             "DELETE /api/jobs/{job_id}": "Cancel a queued/running job, or remove a finished one",
-            "GET /api/tables": "List the queryable DSA report tables",
-            "GET /api/fields?table=…": "Fields and operations for a table",
-            "GET /api/schema/{table}": "Field registry for a report table",
+            "GET /api/tables": "Public: list the queryable DSA report tables",
+            "GET /api/fields?table=…": "Public: fields and operations for a table",
+            "GET /api/schema/{table}": "Public: field registry for a report table",
             "GET /healthz": "Liveness probe",
             "GET /readyz": "Readiness probe (checks DB connection)",
             "GET /version": "Deployed build identifier (commit SHA)",
@@ -2764,7 +2764,7 @@ def _table_fields_doc(table: str, spec: TableSpec) -> dict[str, Any]:
 
 
 @api_router.get("/fields")
-def list_fields(table: str | None = None, _: dict = Depends(require_api_key)) -> dict[str, Any]:
+def list_fields(table: str | None = None) -> dict[str, Any]:
     """Fields for a report table (`?table=…`), or an overview of all tables."""
     if table is None:
         return {
@@ -2779,7 +2779,7 @@ def list_fields(table: str | None = None, _: dict = Depends(require_api_key)) ->
 
 
 @api_router.get("/tables")
-def list_tables(_: dict = Depends(require_api_key)) -> dict[str, Any]:
+def list_tables() -> dict[str, Any]:
     """The queryable DSA report tables and the dataset's reporting period."""
     meta = _dataset_meta()
     return {
@@ -2791,7 +2791,7 @@ def list_tables(_: dict = Depends(require_api_key)) -> dict[str, Any]:
 
 
 @api_router.get("/schema/{table}")
-def table_schema(table: str, _: dict = Depends(require_api_key)) -> dict[str, Any]:
+def table_schema(table: str) -> dict[str, Any]:
     """The queryable field registry (dimensions + measures) for a report table."""
     spec = TABLES.get(table)
     if spec is None:

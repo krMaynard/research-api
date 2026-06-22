@@ -319,16 +319,16 @@ root. The API endpoints are registered on an `APIRouter` included with
 | POST | `/api/explore` | — | Public: run a bounded structured query inline (row-capped, IP-rate-limited, ≤`EXPLORE_MAX_LEGS` composite legs) |
 | POST | `/api/ask` | — | Public: NL→query via an LLM (Claude) → structured `QueryRequest` → `compile_query`; off unless `ANTHROPIC_API_KEY` set |
 | GET | `/api` | — | API service info |
-| GET | `/portal` | — | Researcher portal web UI (sign in → key → schema) |
+| GET | `/portal` | — | Researcher portal web UI (schema shown to everyone; sign in → key) |
 | POST | `/api/auth/google` | — | Verify a Google ID token → session key (any verified account) |
 | POST | `/api/portal/register` | — | Demo: issue a key without auth (`ALLOW_DEMO_KEYS`) |
 | DELETE | `/api/portal/key` | key | Revoke your own session / portal-issued key |
 | GET | `/api/admin/registrations` | admin | List researcher registrations (`?status=`) |
 | POST | `/api/admin/registrations/{email}/approve` | admin | Restore a revoked account |
 | POST | `/api/admin/registrations/{email}/revoke` | admin | Revoke an account |
-| GET | `/api/tables` | key | List the DSA report tables + dataset period |
-| GET | `/api/fields?table=…` | key | Fields + operations for a table (no arg → table overview) |
-| GET | `/api/schema/{table}` | key | Field registry for a report table |
+| GET | `/api/tables` | — | Public: list the DSA report tables + dataset period |
+| GET | `/api/fields?table=…` | — | Public: fields + operations for a table (no arg → table overview) |
+| GET | `/api/schema/{table}` | — | Public: field registry for a report table |
 | POST | `/api/query` | key | Submit structured query — single-table or composite (optional `callback_url`) → 202 + job_id |
 | GET | `/api/jobs` | key | List your jobs |
 | GET | `/api/jobs/{id}` | key | Job status |

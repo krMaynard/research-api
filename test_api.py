@@ -84,10 +84,10 @@ class TestPortal:
             "/api/portal/register", json={"name": "Grace", "email": "grace@navy.mil"}
         ).json()["api_key"]
         hdr = {"X-API-Key": key}
-        assert client.get("/api/fields", headers=hdr).status_code == 200
+        assert client.get("/api/jobs", headers=hdr).status_code == 200
         assert client.delete("/api/portal/key", headers=hdr).json()["revoked"] is True
         # Revoked key no longer authenticates.
-        assert client.get("/api/fields", headers=hdr).status_code == 401
+        assert client.get("/api/jobs", headers=hdr).status_code == 401
 
     def test_configured_key_cannot_be_revoked(self):
         assert client.delete("/api/portal/key", headers=ALICE).status_code == 400
@@ -104,7 +104,7 @@ class TestPortal:
         assert client.post("/api/portal/register", json={"name": "Ada"}).status_code == 422
 
     def test_unknown_issued_key_rejected(self):
-        assert client.get("/api/fields", headers={"X-API-Key": "rk_deadbeef"}).status_code == 401
+        assert client.get("/api/jobs", headers={"X-API-Key": "rk_deadbeef"}).status_code == 401
 
     def test_register_rate_limited(self):
         # Use an isolated store + a low limit so we exercise the 429 path without
@@ -176,10 +176,10 @@ class TestKeyStore:
 
 class TestAuth:
     def test_no_key_is_401(self):
-        assert client.get("/api/tables").status_code == 401
+        assert client.get("/api/jobs").status_code == 401
 
     def test_bad_key_is_401(self):
-        assert client.get("/api/tables", headers={"X-API-Key": "bogus"}).status_code == 401
+        assert client.get("/api/jobs", headers={"X-API-Key": "bogus"}).status_code == 401
 
     def test_valid_key_ok(self):
         r = client.get("/api/tables", headers=ALICE)
@@ -228,8 +228,13 @@ class TestFields:
     def test_unknown_table_is_404(self):
         assert client.get("/api/fields?table=nope", headers=ALICE).status_code == 404
 
-    def test_fields_requires_auth(self):
-        assert client.get("/api/fields").status_code == 401
+    def test_schema_endpoints_are_public(self):
+        # Schema discovery needs no API key — the same structure is already public
+        # via /api/explore/options, /docs and /openapi.json.
+        assert client.get("/api/fields").status_code == 200
+        assert client.get("/api/fields?table=t4_notices").status_code == 200
+        assert client.get("/api/tables").status_code == 200
+        assert client.get("/api/schema/t4_notices").status_code == 200
 
 
 # ── Query lifecycle ───────────────────────────────────────────────────────────
@@ -935,10 +940,10 @@ class TestGoogleAuth:
     def test_revoke_invalidates_live_session(self):
         admin_key = self._signin("admin@example.com").json()["api_key"]
         user_key = self._signin("r3@example.com").json()["api_key"]
-        assert client.get("/api/tables", headers={"X-API-Key": user_key}).status_code == 200
+        assert client.get("/api/jobs", headers={"X-API-Key": user_key}).status_code == 200
         client.post("/api/admin/registrations/r3@example.com/revoke", headers={"X-API-Key": admin_key})
         # The live session stops working immediately (re-checked on every request).
-        assert client.get("/api/tables", headers={"X-API-Key": user_key}).status_code == 401
+        assert client.get("/api/jobs", headers={"X-API-Key": user_key}).status_code == 401
         # And a fresh sign-in is rejected as revoked.
         assert self._signin("r3@example.com").status_code == 403
 
@@ -1533,10 +1538,11 @@ class TestLocalization:
         assert 'is-current" href="/es/reports" aria-current="page"' in html
 
     def test_internal_chrome_links_are_prefixed(self):
-        # Sidebar / brand links stay within the locale; the JSON API + Swagger don't.
+        # Sidebar / brand links stay within the locale; Swagger + the JSON API don't.
         html = client.get("/es/reports").text
         assert 'href="/es/removals"' in html and 'href="/es/portal"' in html
-        assert 'href="/api"' in html and 'href="/docs"' in html  # never prefixed
+        assert 'href="/docs"' in html  # Swagger link is locale-agnostic, never prefixed
+        assert "/api/explore" in html and "/es/api/" not in html  # API calls aren't prefixed
 
     def test_english_home_uses_in_site_switcher(self):
         # The globe now switches the transparency site's own language.

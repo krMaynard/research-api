@@ -325,13 +325,6 @@ display: flex; align-items: center;
     </a>
 
     <a href="/docs" class="nav-item">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-        <path d="M3 1h8l3 3v11H3V1zm7 .5V4.5H12.5L10 1.5zM4 6h8v1H4zm0 2.5h8v1H4zm0 2.5h5v1H4z"/>
-      </svg>
-      API 文档
-    </a>
-
-    <a href="/api" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
         <path d="M5 4L1.5 8 5 12M11 4l3.5 4L11 12M9 3l-2 10"/>
       </svg>
@@ -416,7 +409,7 @@ display: flex; align-items: center;
   <!-- Step 3: schema -->
   <section class="card hidden" id="schema-card">
     <h2>数据集结构</h2>
-    <p class="sub">你可以查询的全部内容，已使用你的新密钥加载。</p>
+    <p class="sub">你可以查询的全部内容，无需登录。</p>
     <p class="hint" id="dataset-meta"></p>
 
     <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:18px 0 10px;">报告表</h3>
@@ -463,8 +456,8 @@ async function loadSchema() {
   show($("#schema-card"));
 }
 
-// Common success path for both Google sign-in and detail-based registration: an issued
-// key/session that unlocks the schema view.
+// Common success path for both Google sign-in and detail-based registration:
+// reveal the issued key. The schema is public and already shown on load.
 async function onAuthSuccess(data) {
   apiKey = data.api_key;
   // Share the key with the dashboard's Ask box (same origin, picked up on focus).
@@ -477,7 +470,6 @@ async function onAuthSuccess(data) {
   }
   $("#login-card").classList.add("hidden");
   show($("#key-card"));
-  await loadSchema();
 }
 
 // ── Google sign-in ──────────────────────────────────────────────────────────
@@ -547,6 +539,8 @@ $("#login-form").addEventListener("submit", async (e) => {
 
 // Decide which sign-in methods to offer based on server config.
 async function init() {
+  // The dataset schema is public — load and show it for everyone, no sign-in needed.
+  loadSchema().catch(() => {});
   let cfg = {};
   try { cfg = (await (await fetch("/api")).json()).auth_config || {}; } catch (_) {}
   const googleOn = !!(cfg.google_signin && cfg.google_client_id);
