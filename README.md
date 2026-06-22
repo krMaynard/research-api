@@ -553,59 +553,6 @@ Every `t*` table also has the `service_name` and `platform` dimensions.
 Run `GET /api/tables`, then `GET /api/schema/{table}` for a table's exact
 dimension/measure fields and a runnable example.
 
-## Data harvesting pipeline
-
-The DSA dataset grows as platforms self-publish harmonized Annex I reports (EU
-2024/2835). A scrape-and-harvest pipeline turns those self-published files into
-queryable rows in `demo.db`:
-
-```
-data/registry.json          ← stable URLs + click steps for each platform
-  │
-  └─ scripts/scrape-reports.py     ← downloads/extracts CSV/XLSX via Playwright
-       │
-       └─ data/reports/<slug>/     ← local Annex I CSV files
-            │
-            └─ scripts/harvest-harmonized.py  ← parse Annex I → upsert into demo.db
-```
-
-### Running a cycle
-
-```bash
-source .venv-scrape/bin/activate    # playwright + openpyxl
-./scripts/run-cycle.sh              # all platforms in registry
-./scripts/run-cycle.sh --service TikTok   # one platform
-./scripts/run-cycle.sh --tier vlop        # VLOPs only
-
-# Or run steps individually:
-python scripts/scrape-reports.py --registry data/registry.json --out data/reports
-python scripts/harvest-harmonized.py --service "TikTok" --source-dir data/reports/tiktok --db demo.db
-```
-
-### Extending the registry
-
-`data/registry.json` is the source of truth. Each entry has a `service_name`,
-`platform` (parent company), `tier` (`vlop`/`vlose`/`online-platform`/`hosting`/
-`intermediary`), `period_start`/`period_end`, a stable `transparency_page_url` where
-the file can be found, optional `click_steps` (selectors to click before the download
-link appears), and a direct `report_url` once known.
-
-To add platforms not yet in the registry, `scripts/discover-platforms.py` runs web
-searches to find their transparency pages and outputs draft registry entries for review:
-
-```bash
-# Find transparency page URLs for a list of known platforms:
-python scripts/discover-platforms.py --from-names data/platforms.tsv --out draft.json
-
-# Search for Annex I files published anywhere on the open web:
-python scripts/discover-platforms.py --search-annex --out draft.json
-
-# Review draft.json, edit as needed, then add entries to data/registry.json
-```
-
-`data/platforms.tsv` is a seed list of Article 24 online platforms that aren't yet
-in the registry — a starting point for `--from-names` discovery.
-
 ## Sample queries
 
 ```jsonc
