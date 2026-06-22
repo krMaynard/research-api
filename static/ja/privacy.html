@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="es">
+<html lang="ja">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Política de privacidad — Transparency Report API</title>
-<meta name="description" content="Qué datos recopila Transparency Report API, por qué se te pide iniciar sesión y qué ocurre con las indicaciones." />
+<title>プライバシーポリシー — Transparency Report API</title>
+<meta name="description" content="Transparency Report API が収集するデータ、サインインが求められる理由、プロンプトの取り扱いについて。" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
@@ -212,31 +212,31 @@
 </style>
 </head>
 <body>
-<a class="skip-link" href="#main">Saltar al contenido</a>
+<a class="skip-link" href="#main">本文へスキップ</a>
 
 <!-- ── Site banner ──────────────────────────────────────────────────────── -->
-<nav class="site-nav" aria-label="Sitio">
+<nav class="site-nav" aria-label="サイト">
   <a href="https://kieranmaynard.com/" class="nav-name">Kieran Maynard</a>
   <div class="nav-right">
     <div class="nav-links">
-      <a href="https://kieranmaynard.com/work.html">Trabajo</a>
-      <a href="https://kieranmaynard.com/transparency.html">Productos</a>
-      <a href="https://kieranmaynard.com/consulting.html">Consultoría</a>
+      <a href="https://kieranmaynard.com/work.html">実績</a>
+      <a href="https://kieranmaynard.com/transparency.html">プロダクト</a>
+      <a href="https://kieranmaynard.com/consulting.html">コンサルティング</a>
       <a href="https://kieranmaynard.com/blog.html">Blog</a>
-      <a href="https://kieranmaynard.com/contact.html">Contacto</a>
+      <a href="https://kieranmaynard.com/contact.html">お問い合わせ</a>
     </div>
     <details class="lang-switcher">
-      <summary class="lang-current" aria-label="Idioma" title="Idioma">
+      <summary class="lang-current" aria-label="言語" title="言語">
         <svg class="lang-globe" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.7 2.6 15.3 0 18"/><path d="M12 3c-2.6 2.7-2.6 15.3 0 18"/></svg>
-        <span>Español</span>
+        <span>日本語</span>
         <svg class="lang-caret" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>
       </summary>
       <ul class="lang-menu">
         <li><a class="lang-opt" href="/privacy"><span>English</span></a></li>
-        <li><a class="lang-opt is-current" href="/es/privacy" aria-current="page"><span>Español</span><svg class="lang-check" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M3.5 8.5l3 3 6-7"/></svg></a></li>
+        <li><a class="lang-opt" href="/es/privacy"><span>Español</span></a></li>
         <li><a class="lang-opt" href="/fr/privacy"><span>Français</span></a></li>
         <li><a class="lang-opt" href="/de/privacy"><span>Deutsch</span></a></li>
-        <li><a class="lang-opt" href="/ja/privacy"><span>日本語</span></a></li>
+        <li><a class="lang-opt is-current" href="/ja/privacy" aria-current="page"><span>日本語</span><svg class="lang-check" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M3.5 8.5l3 3 6-7"/></svg></a></li>
         <li><a class="lang-opt" href="/zh/privacy"><span>中文</span></a></li>
         <li><a class="lang-opt" href="/ko/privacy"><span>한국어</span></a></li>
       </ul>
@@ -247,15 +247,15 @@
 <header class="topbar">
   <div class="topbar-left">
     <button type="button" class="hamburger" id="hamburger"
-            aria-label="Alternar navegación" aria-expanded="false" aria-controls="sidebar">
+            aria-label="ナビゲーションの切り替え" aria-expanded="false" aria-controls="sidebar">
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
         <line x1="3" y1="5" x2="17" y2="5"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="15" x2="17" y2="15"/>
       </svg>
     </button>
-    <a href="/es/" class="topbar-brand">Transparency Report API</a>
+    <a href="/ja/" class="topbar-brand">Transparency Report API</a>
   </div>
   <div class="topbar-right">
-    <button type="button" class="theme-toggle" aria-label="Alternar modo oscuro" data-theme-toggle>
+    <button type="button" class="theme-toggle" aria-label="ダークモードの切り替え" data-theme-toggle>
       <svg class="theme-icon-dark" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
       <svg class="theme-icon-light" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/></svg>
     </button>
@@ -264,55 +264,55 @@
 
 <div class="app-body">
 
-<aside class="sidebar" id="sidebar" aria-label="Navegación de la aplicación">
+<aside class="sidebar" id="sidebar" aria-label="アプリケーションのナビゲーション">
   <nav>
-    <div class="nav-section">Conjuntos de datos</div>
+    <div class="nav-section">データセット</div>
 
-    <a href="/es/reports" class="nav-item">
+    <a href="/ja/reports" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
         <rect x="1" y="9" width="3" height="6" rx="1"/><rect x="6" y="5" width="3" height="10" rx="1"/><rect x="11" y="1" width="3" height="14" rx="1"/>
       </svg>
-      Informes DSA
+      DSA レポート
     </a>
 
-    <a href="/es/removals" class="nav-item">
+    <a href="/ja/removals" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
         <circle cx="8" cy="8" r="6.25"/>
         <path d="M5.5 10.5l5-5M5.5 5.5l5 5" stroke-linecap="round"/>
       </svg>
-      Retiradas gubernamentales
+      政府による削除要請
     </a>
 
     <a href="#" class="nav-item is-soon" aria-disabled="true" tabindex="-1">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
         <path d="M2 12l4-4 3 3 5-7" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      Análisis de SoR
-      <span class="soon-badge">Pronto</span>
+      SoR 分析
+      <span class="soon-badge">近日</span>
     </a>
 
     <hr class="nav-hr">
-    <div class="nav-section">Herramientas</div>
+    <div class="nav-section">ツール</div>
 
-    <a href="/es/portal" class="nav-item">
+    <a href="/ja/portal" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
         <path d="M8 1a3.5 3.5 0 1 0 0 7A3.5 3.5 0 0 0 8 1zM8 9C4.5 9 1.5 10.6 1.5 12.5v1a.5.5 0 0 0 .5.5h12a.5.5 0 0 0 .5-.5v-1C14.5 10.6 11.5 9 8 9z"/>
       </svg>
-      Portal de investigadores
+      研究者ポータル
     </a>
 
     <a href="/docs" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
         <path d="M3 1h8l3 3v11H3V1zm7 .5V4.5H12.5L10 1.5zM4 6h8v1H4zm0 2.5h8v1H4zm0 2.5h5v1H4z"/>
       </svg>
-      Documentación de la API
+      API ドキュメント
     </a>
 
     <a href="/api" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
         <path d="M5 4L1.5 8 5 12M11 4l3.5 4L11 12M9 3l-2 10"/>
       </svg>
-      Referencia de la API
+      API リファレンス
     </a>
 
     <hr class="nav-hr">
@@ -331,7 +331,7 @@
       GitHub
     </a>
   </nav>
-  <div class="sidebar-footer">Por <a href="https://kieranmaynard.com/">Kieran Maynard</a> · <a href="/es/privacy">Privacidad</a></div>
+  <div class="sidebar-footer">作成：<a href="https://kieranmaynard.com/">Kieran Maynard</a> · <a href="/ja/privacy">プライバシー</a></div>
 </aside>
 
 <div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
@@ -341,105 +341,105 @@
 
 <main id="main" tabindex="-1">
 
-  <p class="page-eyebrow">Legal</p>
-  <h1>Política de privacidad</h1>
-  <p class="page-subtitle">Última actualización: junio de 2026 · Preguntas: <a href="mailto:kieranmaynard@gmail.com">kieranmaynard@gmail.com</a></p>
+  <p class="page-eyebrow">法的事項</p>
+  <h1>プライバシーポリシー</h1>
+  <p class="page-subtitle">最終更新：2026 年 6 月 · お問い合わせ：<a href="mailto:kieranmaynard@gmail.com">kieranmaynard@gmail.com</a></p>
 
   <div class="callout">
-    <strong>Versión corta:</strong> Este servicio recopila lo mínimo necesario para darte acceso a la API y evitar abusos. Tus indicaciones se reenvían a la API Claude de Anthropic, pero no se almacenan aquí. Sin analíticas, sin publicidad, sin rastreo de terceros.
+    <strong>要約：</strong>本サービスは、API アクセスの提供と不正利用の防止に必要な最小限の情報のみを収集します。プロンプトは Anthropic の Claude API に転送されますが、ここには保存されません。分析ツール、広告、第三者によるトラッキングは一切ありません。
   </div>
 
-  <h2>Qué es este servicio</h2>
-  <p>Transparency Report API es una herramienta de investigación independiente que hace consultables —a través de una API HTTP estructurada y paneles interactivos— datos de transparencia estructurados: estadísticas de moderación de contenidos de la Ley de Servicios Digitales (DSA) de la UE y solicitudes gubernamentales de retirada de Google. No está afiliada a la Comisión Europea, a Google ni a ninguna plataforma cuyos datos cubre.</p>
+  <h2>本サービスについて</h2>
+  <p>Transparency Report API は独立した研究ツールであり、構造化された透明性データ（EU デジタルサービス法（DSA）のコンテンツモデレーション統計と Google への政府削除要請）を、構造化された HTTP API と対話型ダッシュボードを通じてクエリ可能にします。欧州委員会、Google、およびそのデータを扱う対象プラットフォームのいずれとも提携していません。</p>
 
-  <h2>Por qué se te pide iniciar sesión o registrarte</h2>
-  <p>El acceso a la API de consultas estructuradas (<code>POST /api/query</code>, <code>GET /api/jobs/*</code>) requiere una clave de API. Hay dos razones:</p>
+  <h2>サインインまたは登録が求められる理由</h2>
+  <p>構造化クエリ API（<code>POST /api/query</code>、<code>GET /api/jobs/*</code>）へのアクセスには API キーが必要です。理由は 2 つあります：</p>
   <ul>
-    <li><strong>Límite de frecuencia.</strong> Cada clave está limitada a 60 consultas por ventana de 60 segundos para evitar el abuso de los recursos del servidor.</li>
-    <li><strong>Aislamiento de trabajos.</strong> Los trabajos de consulta están vinculados a la clave que los creó: solo ves tus propios resultados, no los de nadie más.</li>
+    <li><strong>レート制限。</strong>サーバーリソースの不正利用を防ぐため、各キーは 60 秒あたり 60 クエリに制限されています。</li>
+    <li><strong>ジョブの分離。</strong>クエリのジョブは、それを作成したキーごとに分離されます — 他人の結果は見えず、自分の結果のみが表示されます。</li>
   </ul>
-  <p>No hay publicidad, ni monetización de datos, ni uso comercial de la información de tu cuenta.</p>
+  <p>広告、データの収益化、アカウント情報の商業利用は一切ありません。</p>
 
-  <h2>Cómo obtener acceso</h2>
-  <p>Hay dos opciones disponibles:</p>
+  <h2>アクセスを取得する方法</h2>
+  <p>2 つの方法があります：</p>
   <ul>
-    <li><strong>Inicio de sesión con Google.</strong> Iniciar sesión con una cuenta de Google crea automáticamente una clave de sesión. Tu dirección de correo proporcionada por Google se almacena como identificador de cuenta y se utiliza únicamente para aplicar los límites de frecuencia y permitir revocar el acceso si fuera necesario. Este servicio nunca ve tu contraseña de Google: la autenticación la gestiona por completo Google Identity Services.</li>
-    <li><strong>Registro de demostración</strong> (cuando está habilitado). Enviar una dirección de correo en el portal emite una clave de demostración de corta duración. El correo se almacena como identificador de esa clave.</li>
+    <li><strong>Google サインイン。</strong>Google アカウントでサインインすると、セッションキーが自動的に作成されます。Google から提供されるメールアドレスはアカウント識別子として保存され、レート制限の適用と、必要に応じたアクセスの取り消しのためにのみ使用されます。Google のパスワードが本サービスに見られることはありません — 認証はすべて Google Identity Services が処理します。</li>
+    <li><strong>デモ登録</strong>（有効な場合）。ポータルでメールアドレスを送信すると、短期間のデモキーが発行されます。メールアドレスはそのキーの識別子として保存されます。</li>
   </ul>
 
-  <h2>Datos recopilados</h2>
-  <table class="data-table" aria-label="Datos recopilados">
+  <h2>収集するデータ</h2>
+  <table class="data-table" aria-label="収集するデータ">
     <thead>
-      <tr><th>Qué</th><th>Por qué</th><th>Conservación</th></tr>
+      <tr><th>項目</th><th>目的</th><th>保持期間</th></tr>
     </thead>
     <tbody>
       <tr>
-        <td>Correo de la cuenta de Google (si inicias sesión con Google)</td>
-        <td>Identidad de la cuenta, límite de frecuencia, revocación por administrador</td>
-        <td>Hasta que revoques tu clave o expire tu sesión</td>
+        <td>Google アカウントのメールアドレス（Google でサインインした場合）</td>
+        <td>アカウントの識別、レート制限、管理者による取り消し</td>
+        <td>キーを取り消すか、セッションの有効期限が切れるまで</td>
       </tr>
       <tr>
-        <td>Correo que proporcionas en el registro de demostración</td>
-        <td>Identificador de clave, límite de frecuencia</td>
-        <td>Hasta que expire la clave de demostración (normalmente 24 horas)</td>
+        <td>デモ登録時に入力するメールアドレス</td>
+        <td>キーの識別子、レート制限</td>
+        <td>デモキーの有効期限が切れるまで（通常 24 時間）</td>
       </tr>
       <tr>
-        <td>Claves de API (tokens opacos)</td>
-        <td>Autenticación, límite de frecuencia</td>
-        <td>Limitadas por TTL; se borran al reiniciar el servidor (en memoria salvo que se configure Redis)</td>
+        <td>API キー（不透明なトークン）</td>
+        <td>認証、レート制限</td>
+        <td>TTL により有効期限あり。サーバー再起動時に消去（Redis を設定しない限りメモリ内）</td>
       </tr>
       <tr>
-        <td>Resultados de consultas</td>
-        <td>Se te devuelven mediante la API de sondeo de trabajos</td>
-        <td>Solo en memoria; nunca se escriben en disco; se borran al reiniciar el servidor</td>
+        <td>クエリ結果</td>
+        <td>ジョブのポーリング API を通じて返却</td>
+        <td>メモリ内のみ。ディスクには書き込まれず、サーバー再起動時に消去</td>
       </tr>
     </tbody>
   </table>
-  <p>No se recopilan nombres, información de pago ni otros datos personales más allá de lo indicado arriba.</p>
+  <p>上記に記載されている以外の氏名、支払い情報、その他の個人データは一切収集しません。</p>
 
-  <h2>La función «Preguntar»: indicaciones enviadas a Anthropic</h2>
-  <p>El cuadro de pregunta en lenguaje natural (<code>POST /api/ask</code>) te permite describir una consulta con tus propias palabras. Cuando envías una indicación:</p>
+  <h2>「質問」機能 — Anthropic に送信されるプロンプト</h2>
+  <p>自然言語による質問ボックス（<code>POST /api/ask</code>）では、クエリを自然な言葉で記述できます。プロンプトを送信すると：</p>
   <ul>
-    <li>Tu indicación de texto libre se reenvía en tiempo real a la <strong>API Claude de Anthropic</strong> para traducirla a una consulta estructurada.</li>
-    <li>Este servicio <strong>no</strong> almacena tu indicación: pasa de largo y no se escribe en disco ni en los registros de aquí.</li>
-    <li>Anthropic puede registrar y procesar las indicaciones según su propia <a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener noreferrer">Política de privacidad</a>.</li>
-    <li>Si prefieres no usar esta función, utiliza el constructor de consultas interactivo o la API directamente: ambos funcionan sin ninguna llamada a un LLM de terceros.</li>
+    <li>入力した自由記述のプロンプトは、構造化クエリに変換するためにリアルタイムで <strong>Anthropic の Claude API</strong> に転送されます。</li>
+    <li>本サービスはプロンプトを保存しません<strong></strong> — プロンプトは通過するだけで、ここでディスクやログに書き込まれることはありません。</li>
+    <li>Anthropic は、独自の<a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>に従ってプロンプトを記録・処理する場合があります。</li>
+    <li>この機能を使用したくない場合は、対話型クエリビルダーまたは API を直接利用してください — どちらも第三者の LLM 呼び出しなしで動作します。</li>
   </ul>
-  <p>Esta función solo está activa cuando se configura una <code>ANTHROPIC_API_KEY</code> en el entorno de despliegue.</p>
+  <p>この機能は、デプロイ環境に <code>ANTHROPIC_API_KEY</code> が設定されている場合にのみ有効です。</p>
 
-  <h2>Servicios de terceros</h2>
-  <table class="data-table" aria-label="Servicios de terceros">
+  <h2>第三者サービス</h2>
+  <table class="data-table" aria-label="第三者サービス">
     <thead>
-      <tr><th>Servicio</th><th>Finalidad</th><th>Su política de privacidad</th></tr>
+      <tr><th>サービス</th><th>目的</th><th>各社のプライバシーポリシー</th></tr>
     </thead>
     <tbody>
       <tr>
         <td>Anthropic / Claude</td>
-        <td>Traducción de lenguaje natural a consulta (solo función Preguntar)</td>
+        <td>自然言語からクエリへの変換（質問機能のみ）</td>
         <td><a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener noreferrer">anthropic.com/privacy</a></td>
       </tr>
       <tr>
         <td>Google Identity Services</td>
-        <td>Verificación del token de inicio de sesión</td>
+        <td>サインイントークンの検証</td>
         <td><a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">policies.google.com/privacy</a></td>
       </tr>
       <tr>
         <td>Google Fonts</td>
-        <td>Tipografía Open Sans</td>
+        <td>Open Sans 書体</td>
         <td><a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">policies.google.com/privacy</a></td>
       </tr>
     </tbody>
   </table>
-  <p>Este sitio no utiliza analíticas, redes publicitarias, píxeles de seguimiento ni cookies más allá de las que Google Identity Services establece para el estado de inicio de sesión.</p>
+  <p>本サイトは、Google Identity Services がサインイン状態のために設定するもの以外に、分析ツール、広告ネットワーク、トラッキングピクセル、Cookie を使用しません。</p>
 
-  <h2>Eliminación de datos y contacto</h2>
-  <p>Para revocar tu clave de API de inmediato, usa el botón <strong>Revocar clave</strong> del <a href="/es/portal">Portal de investigadores</a>. Esto elimina tu clave de sesión y el registro de tu cuenta.</p>
-  <p>Para cualquier otra pregunta o solicitud de eliminación de datos, contacta con: <a href="mailto:kieranmaynard@gmail.com">kieranmaynard@gmail.com</a></p>
+  <h2>データの削除とお問い合わせ</h2>
+  <p>API キーをすぐに取り消すには、<a href="/ja/portal">研究者ポータル</a>の<strong>キーを取り消す</strong>ボタンを使用してください。これにより、セッションキーとアカウント記録が削除されます。</p>
+  <p>その他のご質問やデータ削除のご依頼は、こちらまでお問い合わせください：<a href="mailto:kieranmaynard@gmail.com">kieranmaynard@gmail.com</a></p>
 
 </main>
 
 <footer>
-  <p><a href="/es/">Inicio</a> · <a href="/es/portal">Portal de investigadores</a> · <a href="/api">API</a> · <a href="https://github.com/krMaynard/transparency-report-api" target="_blank" rel="noopener noreferrer">GitHub</a></p>
+  <p><a href="/ja/">ホーム</a> · <a href="/ja/portal">研究者ポータル</a> · <a href="/api">API</a> · <a href="https://github.com/krMaynard/transparency-report-api" target="_blank" rel="noopener noreferrer">GitHub</a></p>
 </footer>
 
 </div>

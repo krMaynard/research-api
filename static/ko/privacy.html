@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="es">
+<html lang="ko">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Política de privacidad — Transparency Report API</title>
-<meta name="description" content="Qué datos recopila Transparency Report API, por qué se te pide iniciar sesión y qué ocurre con las indicaciones." />
+<title>개인정보 처리방침 — Transparency Report API</title>
+<meta name="description" content="Transparency Report API가 수집하는 데이터, 로그인을 요청하는 이유, 그리고 프롬프트가 어떻게 처리되는지에 대해." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
@@ -212,33 +212,33 @@
 </style>
 </head>
 <body>
-<a class="skip-link" href="#main">Saltar al contenido</a>
+<a class="skip-link" href="#main">본문 바로가기</a>
 
 <!-- ── Site banner ──────────────────────────────────────────────────────── -->
-<nav class="site-nav" aria-label="Sitio">
+<nav class="site-nav" aria-label="사이트">
   <a href="https://kieranmaynard.com/" class="nav-name">Kieran Maynard</a>
   <div class="nav-right">
     <div class="nav-links">
-      <a href="https://kieranmaynard.com/work.html">Trabajo</a>
-      <a href="https://kieranmaynard.com/transparency.html">Productos</a>
-      <a href="https://kieranmaynard.com/consulting.html">Consultoría</a>
+      <a href="https://kieranmaynard.com/work.html">경력</a>
+      <a href="https://kieranmaynard.com/transparency.html">제품</a>
+      <a href="https://kieranmaynard.com/consulting.html">컨설팅</a>
       <a href="https://kieranmaynard.com/blog.html">Blog</a>
-      <a href="https://kieranmaynard.com/contact.html">Contacto</a>
+      <a href="https://kieranmaynard.com/contact.html">문의하기</a>
     </div>
     <details class="lang-switcher">
-      <summary class="lang-current" aria-label="Idioma" title="Idioma">
+      <summary class="lang-current" aria-label="언어" title="언어">
         <svg class="lang-globe" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.7 2.6 15.3 0 18"/><path d="M12 3c-2.6 2.7-2.6 15.3 0 18"/></svg>
-        <span>Español</span>
+        <span>한국어</span>
         <svg class="lang-caret" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>
       </summary>
       <ul class="lang-menu">
         <li><a class="lang-opt" href="/privacy"><span>English</span></a></li>
-        <li><a class="lang-opt is-current" href="/es/privacy" aria-current="page"><span>Español</span><svg class="lang-check" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M3.5 8.5l3 3 6-7"/></svg></a></li>
+        <li><a class="lang-opt" href="/es/privacy"><span>Español</span></a></li>
         <li><a class="lang-opt" href="/fr/privacy"><span>Français</span></a></li>
         <li><a class="lang-opt" href="/de/privacy"><span>Deutsch</span></a></li>
         <li><a class="lang-opt" href="/ja/privacy"><span>日本語</span></a></li>
         <li><a class="lang-opt" href="/zh/privacy"><span>中文</span></a></li>
-        <li><a class="lang-opt" href="/ko/privacy"><span>한국어</span></a></li>
+        <li><a class="lang-opt is-current" href="/ko/privacy" aria-current="page"><span>한국어</span><svg class="lang-check" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M3.5 8.5l3 3 6-7"/></svg></a></li>
       </ul>
     </details>
   </div>
@@ -247,15 +247,15 @@
 <header class="topbar">
   <div class="topbar-left">
     <button type="button" class="hamburger" id="hamburger"
-            aria-label="Alternar navegación" aria-expanded="false" aria-controls="sidebar">
+            aria-label="내비게이션 전환" aria-expanded="false" aria-controls="sidebar">
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
         <line x1="3" y1="5" x2="17" y2="5"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="15" x2="17" y2="15"/>
       </svg>
     </button>
-    <a href="/es/" class="topbar-brand">Transparency Report API</a>
+    <a href="/ko/" class="topbar-brand">Transparency Report API</a>
   </div>
   <div class="topbar-right">
-    <button type="button" class="theme-toggle" aria-label="Alternar modo oscuro" data-theme-toggle>
+    <button type="button" class="theme-toggle" aria-label="다크 모드 전환" data-theme-toggle>
       <svg class="theme-icon-dark" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
       <svg class="theme-icon-light" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/></svg>
     </button>
@@ -264,55 +264,55 @@
 
 <div class="app-body">
 
-<aside class="sidebar" id="sidebar" aria-label="Navegación de la aplicación">
+<aside class="sidebar" id="sidebar" aria-label="애플리케이션 내비게이션">
   <nav>
-    <div class="nav-section">Conjuntos de datos</div>
+    <div class="nav-section">데이터셋</div>
 
-    <a href="/es/reports" class="nav-item">
+    <a href="/ko/reports" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
         <rect x="1" y="9" width="3" height="6" rx="1"/><rect x="6" y="5" width="3" height="10" rx="1"/><rect x="11" y="1" width="3" height="14" rx="1"/>
       </svg>
-      Informes DSA
+      DSA 보고서
     </a>
 
-    <a href="/es/removals" class="nav-item">
+    <a href="/ko/removals" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
         <circle cx="8" cy="8" r="6.25"/>
         <path d="M5.5 10.5l5-5M5.5 5.5l5 5" stroke-linecap="round"/>
       </svg>
-      Retiradas gubernamentales
+      정부 삭제 요청
     </a>
 
     <a href="#" class="nav-item is-soon" aria-disabled="true" tabindex="-1">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
         <path d="M2 12l4-4 3 3 5-7" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      Análisis de SoR
-      <span class="soon-badge">Pronto</span>
+      SoR 분석
+      <span class="soon-badge">예정</span>
     </a>
 
     <hr class="nav-hr">
-    <div class="nav-section">Herramientas</div>
+    <div class="nav-section">도구</div>
 
-    <a href="/es/portal" class="nav-item">
+    <a href="/ko/portal" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
         <path d="M8 1a3.5 3.5 0 1 0 0 7A3.5 3.5 0 0 0 8 1zM8 9C4.5 9 1.5 10.6 1.5 12.5v1a.5.5 0 0 0 .5.5h12a.5.5 0 0 0 .5-.5v-1C14.5 10.6 11.5 9 8 9z"/>
       </svg>
-      Portal de investigadores
+      연구자 포털
     </a>
 
     <a href="/docs" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
         <path d="M3 1h8l3 3v11H3V1zm7 .5V4.5H12.5L10 1.5zM4 6h8v1H4zm0 2.5h8v1H4zm0 2.5h5v1H4z"/>
       </svg>
-      Documentación de la API
+      API 문서
     </a>
 
     <a href="/api" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
         <path d="M5 4L1.5 8 5 12M11 4l3.5 4L11 12M9 3l-2 10"/>
       </svg>
-      Referencia de la API
+      API 레퍼런스
     </a>
 
     <hr class="nav-hr">
@@ -331,7 +331,7 @@
       GitHub
     </a>
   </nav>
-  <div class="sidebar-footer">Por <a href="https://kieranmaynard.com/">Kieran Maynard</a> · <a href="/es/privacy">Privacidad</a></div>
+  <div class="sidebar-footer">제작: <a href="https://kieranmaynard.com/">Kieran Maynard</a> · <a href="/ko/privacy">개인정보</a></div>
 </aside>
 
 <div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
@@ -341,105 +341,105 @@
 
 <main id="main" tabindex="-1">
 
-  <p class="page-eyebrow">Legal</p>
-  <h1>Política de privacidad</h1>
-  <p class="page-subtitle">Última actualización: junio de 2026 · Preguntas: <a href="mailto:kieranmaynard@gmail.com">kieranmaynard@gmail.com</a></p>
+  <p class="page-eyebrow">법적 고지</p>
+  <h1>개인정보 처리방침</h1>
+  <p class="page-subtitle">최종 업데이트: 2026년 6월 · 문의: <a href="mailto:kieranmaynard@gmail.com">kieranmaynard@gmail.com</a></p>
 
   <div class="callout">
-    <strong>Versión corta:</strong> Este servicio recopila lo mínimo necesario para darte acceso a la API y evitar abusos. Tus indicaciones se reenvían a la API Claude de Anthropic, pero no se almacenan aquí. Sin analíticas, sin publicidad, sin rastreo de terceros.
+    <strong>요약:</strong> 이 서비스는 API 접근을 제공하고 악용을 방지하는 데 필요한 최소한의 정보만 수집합니다. 프롬프트는 Anthropic's Claude API로 전달되지만 여기에 저장되지 않습니다. 분석 도구, 광고, 제3자 추적이 없습니다.
   </div>
 
-  <h2>Qué es este servicio</h2>
-  <p>Transparency Report API es una herramienta de investigación independiente que hace consultables —a través de una API HTTP estructurada y paneles interactivos— datos de transparencia estructurados: estadísticas de moderación de contenidos de la Ley de Servicios Digitales (DSA) de la UE y solicitudes gubernamentales de retirada de Google. No está afiliada a la Comisión Europea, a Google ni a ninguna plataforma cuyos datos cubre.</p>
+  <h2>이 서비스란</h2>
+  <p>Transparency Report API는 구조화된 투명성 데이터 — EU 디지털 서비스법(DSA) 콘텐츠 조정 통계와 Google 정부 삭제 요청 — 를 구조화된 HTTP API와 대화형 대시보드를 통해 쿼리할 수 있게 하는 독립적인 연구 도구입니다. 유럽 위원회, Google, 또는 데이터가 다뤄지는 어떤 플랫폼과도 제휴 관계가 없습니다.</p>
 
-  <h2>Por qué se te pide iniciar sesión o registrarte</h2>
-  <p>El acceso a la API de consultas estructuradas (<code>POST /api/query</code>, <code>GET /api/jobs/*</code>) requiere una clave de API. Hay dos razones:</p>
+  <h2>로그인 또는 등록을 요청하는 이유</h2>
+  <p>구조화 쿼리 API(<code>POST /api/query</code>, <code>GET /api/jobs/*</code>)에 접근하려면 API 키가 필요합니다. 두 가지 이유가 있습니다:</p>
   <ul>
-    <li><strong>Límite de frecuencia.</strong> Cada clave está limitada a 60 consultas por ventana de 60 segundos para evitar el abuso de los recursos del servidor.</li>
-    <li><strong>Aislamiento de trabajos.</strong> Los trabajos de consulta están vinculados a la clave que los creó: solo ves tus propios resultados, no los de nadie más.</li>
+    <li><strong>요청 빈도 제한.</strong> 서버 리소스의 악용을 방지하기 위해 각 키는 60초 창당 60건의 쿼리로 제한됩니다.</li>
+    <li><strong>작업 격리.</strong> 쿼리 작업은 이를 생성한 키로 범위가 한정됩니다 — 다른 사람의 결과가 아닌 본인의 결과만 볼 수 있습니다.</li>
   </ul>
-  <p>No hay publicidad, ni monetización de datos, ni uso comercial de la información de tu cuenta.</p>
+  <p>광고, 데이터 수익화, 계정 정보의 상업적 이용이 없습니다.</p>
 
-  <h2>Cómo obtener acceso</h2>
-  <p>Hay dos opciones disponibles:</p>
+  <h2>접근 방법</h2>
+  <p>두 가지 옵션이 있습니다:</p>
   <ul>
-    <li><strong>Inicio de sesión con Google.</strong> Iniciar sesión con una cuenta de Google crea automáticamente una clave de sesión. Tu dirección de correo proporcionada por Google se almacena como identificador de cuenta y se utiliza únicamente para aplicar los límites de frecuencia y permitir revocar el acceso si fuera necesario. Este servicio nunca ve tu contraseña de Google: la autenticación la gestiona por completo Google Identity Services.</li>
-    <li><strong>Registro de demostración</strong> (cuando está habilitado). Enviar una dirección de correo en el portal emite una clave de demostración de corta duración. El correo se almacena como identificador de esa clave.</li>
+    <li><strong>Google 로그인.</strong> Google 계정으로 로그인하면 세션 키가 자동으로 생성됩니다. Google이 제공한 이메일 주소는 계정 식별자로 저장되며, 요청 빈도 제한을 적용하고 필요 시 접근을 취소할 수 있도록 하는 데에만 사용됩니다. 이 서비스는 Google 비밀번호를 절대 볼 수 없으며 — 인증은 전적으로 Google Identity Services가 처리합니다.</li>
+    <li><strong>데모 등록</strong>(활성화된 경우). 포털에 이메일 주소를 제출하면 단기 데모 키가 발급됩니다. 이메일은 해당 키의 식별자로 저장됩니다.</li>
   </ul>
 
-  <h2>Datos recopilados</h2>
-  <table class="data-table" aria-label="Datos recopilados">
+  <h2>수집되는 데이터</h2>
+  <table class="data-table" aria-label="수집되는 데이터">
     <thead>
-      <tr><th>Qué</th><th>Por qué</th><th>Conservación</th></tr>
+      <tr><th>항목</th><th>목적</th><th>보존 기간</th></tr>
     </thead>
     <tbody>
       <tr>
-        <td>Correo de la cuenta de Google (si inicias sesión con Google)</td>
-        <td>Identidad de la cuenta, límite de frecuencia, revocación por administrador</td>
-        <td>Hasta que revoques tu clave o expire tu sesión</td>
+        <td>Google 계정 이메일 (Google로 로그인하는 경우)</td>
+        <td>계정 식별, 요청 빈도 제한, 관리자 취소</td>
+        <td>키를 취소하거나 세션이 만료될 때까지</td>
       </tr>
       <tr>
-        <td>Correo que proporcionas en el registro de demostración</td>
-        <td>Identificador de clave, límite de frecuencia</td>
-        <td>Hasta que expire la clave de demostración (normalmente 24 horas)</td>
+        <td>데모 등록 시 제공한 이메일</td>
+        <td>키 식별자, 요청 빈도 제한</td>
+        <td>데모 키가 만료될 때까지 (일반적으로 24시간)</td>
       </tr>
       <tr>
-        <td>Claves de API (tokens opacos)</td>
-        <td>Autenticación, límite de frecuencia</td>
-        <td>Limitadas por TTL; se borran al reiniciar el servidor (en memoria salvo que se configure Redis)</td>
+        <td>API 키 (불투명 토큰)</td>
+        <td>인증, 요청 빈도 제한</td>
+        <td>TTL로 제한됨; 서버 재시작 시 삭제됨 (Redis가 구성되지 않은 한 메모리 내 저장)</td>
       </tr>
       <tr>
-        <td>Resultados de consultas</td>
-        <td>Se te devuelven mediante la API de sondeo de trabajos</td>
-        <td>Solo en memoria; nunca se escriben en disco; se borran al reiniciar el servidor</td>
+        <td>쿼리 결과</td>
+        <td>작업 폴링 API를 통해 사용자에게 반환됨</td>
+        <td>메모리 내에만 저장; 디스크에 절대 기록되지 않음; 서버 재시작 시 삭제됨</td>
       </tr>
     </tbody>
   </table>
-  <p>No se recopilan nombres, información de pago ni otros datos personales más allá de lo indicado arriba.</p>
+  <p>위에 나열된 것 외에는 이름, 결제 정보 또는 기타 개인 데이터를 수집하지 않습니다.</p>
 
-  <h2>La función «Preguntar»: indicaciones enviadas a Anthropic</h2>
-  <p>El cuadro de pregunta en lenguaje natural (<code>POST /api/ask</code>) te permite describir una consulta con tus propias palabras. Cuando envías una indicación:</p>
+  <h2>"질문" 기능 — Anthropic으로 전송되는 프롬프트</h2>
+  <p>자연어 질문 상자(<code>POST /api/ask</code>)를 사용하면 쿼리를 자연어로 설명할 수 있습니다. 프롬프트를 제출하면:</p>
   <ul>
-    <li>Tu indicación de texto libre se reenvía en tiempo real a la <strong>API Claude de Anthropic</strong> para traducirla a una consulta estructurada.</li>
-    <li>Este servicio <strong>no</strong> almacena tu indicación: pasa de largo y no se escribe en disco ni en los registros de aquí.</li>
-    <li>Anthropic puede registrar y procesar las indicaciones según su propia <a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener noreferrer">Política de privacidad</a>.</li>
-    <li>Si prefieres no usar esta función, utiliza el constructor de consultas interactivo o la API directamente: ambos funcionan sin ninguna llamada a un LLM de terceros.</li>
+    <li>자유 텍스트 프롬프트는 구조화된 쿼리로 변환되도록 실시간으로 <strong>Anthropic's Claude API</strong>에 전달됩니다.</li>
+    <li>이 서비스는 프롬프트를 <strong>저장하지 않습니다</strong> — 통과될 뿐 여기의 디스크나 로그에 기록되지 않습니다.</li>
+    <li>Anthropic은 자체 <a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener noreferrer">개인정보 처리방침</a>에 따라 프롬프트를 기록하고 처리할 수 있습니다.</li>
+    <li>이 기능을 사용하지 않으려면 대화형 쿼리 빌더나 API를 직접 사용하세요 — 둘 다 제3자 LLM 호출 없이 작동합니다.</li>
   </ul>
-  <p>Esta función solo está activa cuando se configura una <code>ANTHROPIC_API_KEY</code> en el entorno de despliegue.</p>
+  <p>이 기능은 배포 환경에 <code>ANTHROPIC_API_KEY</code>가 구성된 경우에만 활성화됩니다.</p>
 
-  <h2>Servicios de terceros</h2>
-  <table class="data-table" aria-label="Servicios de terceros">
+  <h2>제3자 서비스</h2>
+  <table class="data-table" aria-label="제3자 서비스">
     <thead>
-      <tr><th>Servicio</th><th>Finalidad</th><th>Su política de privacidad</th></tr>
+      <tr><th>서비스</th><th>목적</th><th>해당 개인정보 처리방침</th></tr>
     </thead>
     <tbody>
       <tr>
         <td>Anthropic / Claude</td>
-        <td>Traducción de lenguaje natural a consulta (solo función Preguntar)</td>
+        <td>자연어-쿼리 변환 (질문 기능 전용)</td>
         <td><a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener noreferrer">anthropic.com/privacy</a></td>
       </tr>
       <tr>
         <td>Google Identity Services</td>
-        <td>Verificación del token de inicio de sesión</td>
+        <td>로그인 토큰 검증</td>
         <td><a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">policies.google.com/privacy</a></td>
       </tr>
       <tr>
         <td>Google Fonts</td>
-        <td>Tipografía Open Sans</td>
+        <td>Open Sans 글꼴</td>
         <td><a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">policies.google.com/privacy</a></td>
       </tr>
     </tbody>
   </table>
-  <p>Este sitio no utiliza analíticas, redes publicitarias, píxeles de seguimiento ni cookies más allá de las que Google Identity Services establece para el estado de inicio de sesión.</p>
+  <p>이 사이트는 Google Identity Services가 로그인 상태를 위해 설정하는 것 외에는 분석 도구, 광고 네트워크, 추적 픽셀 또는 쿠키를 사용하지 않습니다.</p>
 
-  <h2>Eliminación de datos y contacto</h2>
-  <p>Para revocar tu clave de API de inmediato, usa el botón <strong>Revocar clave</strong> del <a href="/es/portal">Portal de investigadores</a>. Esto elimina tu clave de sesión y el registro de tu cuenta.</p>
-  <p>Para cualquier otra pregunta o solicitud de eliminación de datos, contacta con: <a href="mailto:kieranmaynard@gmail.com">kieranmaynard@gmail.com</a></p>
+  <h2>데이터 삭제 및 문의</h2>
+  <p>API 키를 즉시 취소하려면 <a href="/ko/portal">연구자 포털</a>의 <strong>키 취소</strong> 버튼을 사용하세요. 이렇게 하면 세션 키와 계정 기록이 삭제됩니다.</p>
+  <p>기타 문의나 데이터 삭제 요청은 다음으로 연락하세요: <a href="mailto:kieranmaynard@gmail.com">kieranmaynard@gmail.com</a></p>
 
 </main>
 
 <footer>
-  <p><a href="/es/">Inicio</a> · <a href="/es/portal">Portal de investigadores</a> · <a href="/api">API</a> · <a href="https://github.com/krMaynard/transparency-report-api" target="_blank" rel="noopener noreferrer">GitHub</a></p>
+  <p><a href="/ko/">홈</a> · <a href="/ko/portal">연구자 포털</a> · <a href="/api">API</a> · <a href="https://github.com/krMaynard/transparency-report-api" target="_blank" rel="noopener noreferrer">GitHub</a></p>
 </footer>
 
 </div>

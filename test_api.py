@@ -1462,7 +1462,7 @@ class TestAccessibility:
 # ── Localized static pages (es / fr / de) ────────────────────────────────────
 
 class TestLocalization:
-    LOCALES = ("es", "fr", "de")
+    LOCALES = ("es", "fr", "de", "ja", "zh", "ko")
     SUFFIXES = ("", "reports", "removals", "portal", "privacy")
 
     def _path(self, loc, suffix):
@@ -1515,6 +1515,9 @@ class TestLocalization:
             "es": "Transparencia de plataformas",
             "fr": "Transparence des plateformes",
             "de": "Plattform-Transparenz",
+            "ja": "プラットフォームの透明性",
+            "zh": "平台透明度",
+            "ko": "플랫폼 투명성",
         }
         for loc, marker in markers.items():
             assert marker in client.get(f"/{loc}/").text, loc

@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="fr">
+<html lang="zh">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Retraits gouvernementaux — Transparency Report API</title>
-<meta name="description" content="Demandes gouvernementales de retrait de contenu sur les produits Google — 160 pays, 13 périodes de référence, 42 produits, 22 motifs." />
+<title>政府删除请求 — Transparency Report API</title>
+<meta name="description" content="要求从 Google 产品中删除内容的政府请求——涵盖 160 个国家、13 个报告期、42 种产品、22 种理由。" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
@@ -250,32 +250,32 @@
 </style>
 </head>
 <body>
-<a class="skip-link" href="#main">Aller au contenu</a>
+<a class="skip-link" href="#main">跳到主要内容</a>
 
 <!-- ── Site banner ──────────────────────────────────────────────────────── -->
-<nav class="site-nav" aria-label="Site">
+<nav class="site-nav" aria-label="网站">
   <a href="https://kieranmaynard.com/" class="nav-name">Kieran Maynard</a>
   <div class="nav-right">
     <div class="nav-links">
-      <a href="https://kieranmaynard.com/work.html">Travaux</a>
-      <a href="https://kieranmaynard.com/transparency.html">Produits</a>
-      <a href="https://kieranmaynard.com/consulting.html">Conseil</a>
+      <a href="https://kieranmaynard.com/work.html">工作经历</a>
+      <a href="https://kieranmaynard.com/transparency.html">产品</a>
+      <a href="https://kieranmaynard.com/consulting.html">咨询服务</a>
       <a href="https://kieranmaynard.com/blog.html">Blog</a>
-      <a href="https://kieranmaynard.com/contact.html">Contact</a>
+      <a href="https://kieranmaynard.com/contact.html">联系我</a>
     </div>
     <details class="lang-switcher">
-      <summary class="lang-current" aria-label="Langue" title="Langue">
+      <summary class="lang-current" aria-label="语言" title="语言">
         <svg class="lang-globe" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.7 2.6 15.3 0 18"/><path d="M12 3c-2.6 2.7-2.6 15.3 0 18"/></svg>
-        <span>Français</span>
+        <span>中文</span>
         <svg class="lang-caret" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>
       </summary>
       <ul class="lang-menu">
         <li><a class="lang-opt" href="/removals"><span>English</span></a></li>
         <li><a class="lang-opt" href="/es/removals"><span>Español</span></a></li>
-        <li><a class="lang-opt is-current" href="/fr/removals" aria-current="page"><span>Français</span><svg class="lang-check" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M3.5 8.5l3 3 6-7"/></svg></a></li>
+        <li><a class="lang-opt" href="/fr/removals"><span>Français</span></a></li>
         <li><a class="lang-opt" href="/de/removals"><span>Deutsch</span></a></li>
         <li><a class="lang-opt" href="/ja/removals"><span>日本語</span></a></li>
-        <li><a class="lang-opt" href="/zh/removals"><span>中文</span></a></li>
+        <li><a class="lang-opt is-current" href="/zh/removals" aria-current="page"><span>中文</span><svg class="lang-check" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M3.5 8.5l3 3 6-7"/></svg></a></li>
         <li><a class="lang-opt" href="/ko/removals"><span>한국어</span></a></li>
       </ul>
     </details>
@@ -284,15 +284,15 @@
 
 <header class="topbar">
   <div class="topbar-left">
-    <button type="button" class="hamburger" id="hamburger" aria-label="Basculer la navigation" aria-expanded="false" aria-controls="sidebar">
+    <button type="button" class="hamburger" id="hamburger" aria-label="切换导航" aria-expanded="false" aria-controls="sidebar">
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
         <line x1="3" y1="5" x2="17" y2="5"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="15" x2="17" y2="15"/>
       </svg>
     </button>
-    <a href="/fr/" class="topbar-brand">Transparency Report API</a>
+    <a href="/zh/" class="topbar-brand">Transparency Report API</a>
   </div>
   <div class="topbar-right">
-    <button type="button" class="theme-toggle" aria-label="Basculer le mode sombre" data-theme-toggle>
+    <button type="button" class="theme-toggle" aria-label="切换深色模式" data-theme-toggle>
       <svg class="theme-icon-dark" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
       <svg class="theme-icon-light" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/></svg>
     </button>
@@ -301,55 +301,55 @@
 
 <div class="app-body">
 
-<aside class="sidebar" id="sidebar" aria-label="Navigation de l’application">
+<aside class="sidebar" id="sidebar" aria-label="应用导航">
   <nav>
-    <div class="nav-section">Jeux de données</div>
+    <div class="nav-section">数据集</div>
 
-    <a href="/fr/reports" class="nav-item">
+    <a href="/zh/reports" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
         <rect x="1" y="9" width="3" height="6" rx="1"/><rect x="6" y="5" width="3" height="10" rx="1"/><rect x="11" y="1" width="3" height="14" rx="1"/>
       </svg>
-      Rapports DSA
+      DSA 报告
     </a>
 
-    <a href="/fr/removals" class="nav-item is-active" aria-current="page">
+    <a href="/zh/removals" class="nav-item is-active" aria-current="page">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
         <circle cx="8" cy="8" r="6.25"/>
         <path d="M5.5 10.5l5-5M5.5 5.5l5 5" stroke-linecap="round"/>
       </svg>
-      Retraits gouvernementaux
+      政府删除请求
     </a>
 
     <a href="#" class="nav-item is-soon" aria-disabled="true" tabindex="-1">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
         <path d="M2 12l4-4 3 3 5-7" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      Analyse des SoR
-      <span class="soon-badge">Bientôt</span>
+      SoR 分析
+      <span class="soon-badge">即将</span>
     </a>
 
     <hr class="nav-hr">
-    <div class="nav-section">Outils</div>
+    <div class="nav-section">工具</div>
 
-    <a href="/fr/portal" class="nav-item">
+    <a href="/zh/portal" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
         <path d="M8 1a3.5 3.5 0 1 0 0 7A3.5 3.5 0 0 0 8 1zM8 9C4.5 9 1.5 10.6 1.5 12.5v1a.5.5 0 0 0 .5.5h12a.5.5 0 0 0 .5-.5v-1C14.5 10.6 11.5 9 8 9z"/>
       </svg>
-      Portail chercheurs
+      研究者门户
     </a>
 
     <a href="/docs" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
         <path d="M3 1h8l3 3v11H3V1zm7 .5V4.5H12.5L10 1.5zM4 6h8v1H4zm0 2.5h8v1H4zm0 2.5h5v1H4z"/>
       </svg>
-      Documentation API
+      API 文档
     </a>
 
     <a href="/api" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
         <path d="M5 4L1.5 8 5 12M11 4l3.5 4L11 12M9 3l-2 10"/>
       </svg>
-      Référence API
+      API 参考
     </a>
 
     <hr class="nav-hr">
@@ -368,7 +368,7 @@
       GitHub
     </a>
   </nav>
-  <div class="sidebar-footer">Par <a href="https://kieranmaynard.com/">Kieran Maynard</a> · <a href="/fr/privacy">Confidentialité</a></div>
+  <div class="sidebar-footer">作者：<a href="https://kieranmaynard.com/">Kieran Maynard</a> · <a href="/zh/privacy">隐私</a></div>
 </aside>
 
 <div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
@@ -380,16 +380,16 @@
 
   <header>
     <span class="badge">Google · 2019–2025</span>
-    <h1>Demandes gouvernementales de retrait de contenu</h1>
-    <p>Demandes gouvernementales de retrait de contenu sur les produits Google, sur 13 périodes de référence, 160 pays, 42 produits et 22 motifs invoqués. Conçu autour des tendances pluriannuelles — chaque filtre devient une série temporelle.</p>
+    <h1>政府删除内容请求</h1>
+    <p>要求从 Google 产品中删除内容的政府请求，横跨 13 个报告期、160 个国家、42 种产品和 22 种声明理由。围绕多报告期趋势构建——每个筛选条件都会形成一条时间序列。</p>
   </header>
 
   <!-- Headline stats -->
   <div class="stats" id="stats" aria-busy="true">
-    <div class="stat"><div class="num" id="stat-requests">—</div><div class="lbl">Demandes gouvernementales</div></div>
-    <div class="stat"><div class="num" id="stat-items">—</div><div class="lbl">Éléments visés par le retrait</div></div>
-    <div class="stat"><div class="num" id="stat-countries">—</div><div class="lbl">Pays représentés</div></div>
-    <div class="stat"><div class="num" id="stat-periods">—</div><div class="lbl">Périodes de référence</div></div>
+    <div class="stat"><div class="num" id="stat-requests">—</div><div class="lbl">政府请求</div></div>
+    <div class="stat"><div class="num" id="stat-items">—</div><div class="lbl">被要求删除的项目</div></div>
+    <div class="stat"><div class="num" id="stat-countries">—</div><div class="lbl">涉及国家</div></div>
+    <div class="stat"><div class="num" id="stat-periods">—</div><div class="lbl">报告期</div></div>
   </div>
 
   <div class="error hidden" id="load-error" role="alert"></div>
@@ -397,32 +397,32 @@
   <div id="dashboard" class="hidden">
 
     <!-- Filters -->
-    <div class="filters" role="region" aria-label="Filtres du tableau de bord">
+    <div class="filters" role="region" aria-label="仪表盘筛选">
       <div class="filter-group">
-        <label for="f-from">De</label>
+        <label for="f-from">起始</label>
         <select id="f-from"></select>
       </div>
       <div class="filter-group">
-        <label for="f-to">À</label>
+        <label for="f-to">截止</label>
         <select id="f-to"></select>
       </div>
       <div class="filter-group">
-        <label for="f-country">Pays</label>
+        <label for="f-country">国家</label>
         <select id="f-country"></select>
       </div>
       <div class="filter-group">
-        <label for="f-requestor">Demandeur</label>
+        <label for="f-requestor">请求方</label>
         <select id="f-requestor"></select>
       </div>
       <div class="filter-group">
-        <label for="f-product">Produit</label>
+        <label for="f-product">产品</label>
         <select id="f-product"></select>
       </div>
       <div class="filter-group">
-        <label for="f-reason">Motif</label>
+        <label for="f-reason">理由</label>
         <select id="f-reason"></select>
       </div>
-      <button type="button" class="filter-reset" id="f-reset">Réinitialiser</button>
+      <button type="button" class="filter-reset" id="f-reset">重置</button>
     </div>
 
     <p class="filter-summary" id="filter-summary" aria-live="polite"></p>
@@ -433,51 +433,51 @@
 
       <div class="chart-card wide">
         <div class="chart-card-head">
-          <h3>Éléments visés par le retrait, par période</h3>
+          <h3>各报告期被要求删除的项目</h3>
           <div class="breakdown-wrap">
-            <label for="f-breakdown">Ventiler par</label>
+            <label for="f-breakdown">拆分依据</label>
             <select id="f-breakdown">
-              <option value="">Aucun (total)</option>
-              <option value="country_name">Pays</option>
-              <option value="requestor">Type de demandeur</option>
-              <option value="product">Produit Google</option>
-              <option value="reason">Motif</option>
+              <option value="">无（总计）</option>
+              <option value="country_name">国家</option>
+              <option value="requestor">请求方类型</option>
+              <option value="product">Google 产品</option>
+              <option value="reason">理由</option>
             </select>
           </div>
         </div>
-        <div class="chart-loading" id="ts-loading">Chargement…</div>
+        <div class="chart-loading" id="ts-loading">正在加载…</div>
         <canvas id="chart-ts" height="160" aria-hidden="true" class="hidden"></canvas>
         <div id="chart-ts-table" class="hidden sr-only"></div>
       </div>
 
       <div class="chart-card wide">
-        <h3>Taux de retrait au fil du temps</h3>
-        <p class="chart-sub">Part des éléments visés que Google a effectivement retirés (légal + règles + déjà retirés).</p>
-        <div class="chart-loading" id="rate-loading">Chargement…</div>
+        <h3>删除率随时间变化</h3>
+        <p class="chart-sub">Google 实际删除的被要求项目所占比例（法律 + 政策 + 已删除）。</p>
+        <div class="chart-loading" id="rate-loading">正在加载…</div>
         <canvas id="chart-rate" height="120" aria-hidden="true" class="hidden"></canvas>
       </div>
 
       <div class="chart-card">
-        <h3>Top 10 des pays par éléments visés</h3>
-        <div class="chart-loading" id="cty-loading">Chargement…</div>
+        <h3>按被要求项目排名前 10 的国家</h3>
+        <div class="chart-loading" id="cty-loading">正在加载…</div>
         <canvas id="chart-countries" height="200" aria-hidden="true" class="hidden"></canvas>
       </div>
 
       <div class="chart-card">
-        <h3>Principaux motifs invoqués</h3>
-        <div class="chart-loading" id="rsn-loading">Chargement…</div>
+        <h3>引用最多的理由</h3>
+        <div class="chart-loading" id="rsn-loading">正在加载…</div>
         <canvas id="chart-reasons" height="200" aria-hidden="true" class="hidden"></canvas>
       </div>
 
       <div class="chart-card">
-        <h3>Principaux produits Google visés</h3>
-        <div class="chart-loading" id="prd-loading">Chargement…</div>
+        <h3>被要求最多的 Google 产品</h3>
+        <div class="chart-loading" id="prd-loading">正在加载…</div>
         <canvas id="chart-products" height="200" aria-hidden="true" class="hidden"></canvas>
       </div>
 
       <div class="chart-card">
-        <h3>Comment Google a répondu</h3>
-        <div class="chart-loading" id="cmp-loading">Chargement…</div>
+        <h3>Google 如何回应</h3>
+        <div class="chart-loading" id="cmp-loading">正在加载…</div>
         <canvas id="chart-compliance" height="200" aria-hidden="true" class="hidden"></canvas>
       </div>
 
@@ -486,15 +486,15 @@
     <!-- Data table -->
     <div class="table-card">
       <div class="table-card-head">
-        <h3>Enregistrements (top 50 par éléments visés)</h3>
+        <h3>记录（按被要求项目排名前 50）</h3>
         <span class="row-count" id="row-count"></span>
       </div>
       <div class="table-scroll">
         <table>
           <thead>
             <tr>
-              <th>Période</th><th>Pays</th><th>Demandeur</th><th>Produit</th><th>Motif</th>
-              <th class="num">Demandes</th><th class="num">Éléments visés</th><th class="num">Éléments retirés</th>
+              <th>报告期</th><th>国家</th><th>请求方</th><th>产品</th><th>理由</th>
+              <th class="num">请求数</th><th class="num">被要求项目</th><th class="num">已删除项目</th>
             </tr>
           </thead>
           <tbody id="table-body"></tbody>
@@ -507,7 +507,7 @@
 </main>
 
 <footer>
-  <p>Source : <a href="https://transparencyreport.google.com/government-removals/overview" target="_blank" rel="noopener noreferrer">Google Transparency Report</a> — demandes gouvernementales de retrait détaillées (2019–1er sem. 2025). Données via <a href="/api">Transparency Report API</a> · <a href="/fr/portal">Accès chercheurs</a> · <a href="/fr/privacy">Confidentialité</a></p>
+  <p>来源：<a href="https://transparencyreport.google.com/government-removals/overview" target="_blank" rel="noopener noreferrer">Google Transparency Report</a> ——详细的政府删除请求（2019 年至 2025 年上半年）。数据来自 <a href="/api">Transparency Report API</a> · <a href="/zh/portal">研究者访问</a> · <a href="/zh/privacy">隐私</a></p>
 </footer>
 
 </div>
@@ -539,9 +539,9 @@
   // ── Helpers ───────────────────────────────────────────────────────────────
   function fmt(n) {
     if (n == null) return '—';
-    return Number(n).toLocaleString('fr-FR');
+    return Number(n).toLocaleString('zh-CN');
   }
-  function fmtPct(n) { return n == null ? '—' : (n * 100).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' %'; }
+  function fmtPct(n) { return n == null ? '—' : (n * 100).toLocaleString('zh-CN', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%'; }
   function esc(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
@@ -667,7 +667,7 @@
       type: 'line',
       data: {
         labels: labels,
-        datasets: [{ label: 'Taux de retrait', data: values, borderColor: PALETTE[0], backgroundColor: PALETTE[0] + '22', borderWidth: 2, pointRadius: 3, tension: 0.3, fill: true }],
+        datasets: [{ label: '删除率', data: values, borderColor: PALETTE[0], backgroundColor: PALETTE[0] + '22', borderWidth: 2, pointRadius: 3, tension: 0.3, fill: true }],
       },
       options: {
         responsive: true,
@@ -682,7 +682,7 @@
     if (!breakdown) {
       var labels = rows.map(function(r){ return r[0]; });
       var values = rows.map(function(r){ return r[1]; });
-      lineChart('chart-ts', 'ts-loading', labels, [{ label: 'Éléments visés', data: values }]);
+      lineChart('chart-ts', 'ts-loading', labels, [{ label: '被要求项目', data: values }]);
     } else {
       // rows = [period, breakdown_val, items] — pivot into per-breakdown datasets
       var periodSet = [], seriesMap = {};
@@ -717,7 +717,7 @@
   function renderTopCountries(rows) {
     var labels = rows.map(function(r){ return r[0]; }).reverse();
     var values = rows.map(function(r){ return r[1]; }).reverse();
-    barChart('chart-countries', 'cty-loading', labels, values, 'Éléments visés');
+    barChart('chart-countries', 'cty-loading', labels, values, '被要求项目');
   }
 
   function renderTopReasons(rows) {
@@ -729,7 +729,7 @@
   function renderTopProducts(rows) {
     var labels = rows.map(function(r){ return r[0]; }).reverse();
     var values = rows.map(function(r){ return r[1]; }).reverse();
-    barChart('chart-products', 'prd-loading', labels, values, 'Éléments visés');
+    barChart('chart-products', 'prd-loading', labels, values, '被要求项目');
   }
 
   function renderCompliance(rows) {
@@ -741,7 +741,7 @@
     }
     var r = rows[0];
     // cols: removed_legal, removed_policy, already_removed, not_found, not_enough_info, no_action
-    var labels = ['Retiré (légal)', 'Retiré (règles)', 'Déjà retiré', 'Introuvable', 'Infos insuffisantes', 'Aucune action'];
+    var labels = ['已删除（法律）', '已删除（政策）', '已删除', '未找到', '信息不足', '未处理'];
     var values = [r[0]||0, r[1]||0, r[2]||0, r[3]||0, r[4]||0, r[5]||0];
     doughnutChart('chart-compliance', 'cmp-loading', labels, values);
   }
@@ -750,11 +750,11 @@
     var tbody = document.getElementById('table-body');
     var count = document.getElementById('row-count');
     if (!rows.length) {
-      tbody.innerHTML = '<tr><td colspan="8" style="color:var(--muted);text-align:center;padding:20px">Aucun enregistrement ne correspond aux filtres actuels.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="color:var(--muted);text-align:center;padding:20px">没有记录符合当前筛选条件。</td></tr>';
       count.textContent = '';
       return;
     }
-    count.textContent = rows.length + ' lignes';
+    count.textContent = rows.length + ' 行';
     tbody.innerHTML = rows.map(function(r) {
       var removed = (r[5]||0) + (r[6]||0) + (r[7]||0);
       return '<tr>'
@@ -777,11 +777,11 @@
     var requestor = document.getElementById('f-requestor').value;
     var product   = document.getElementById('f-product').value;
     var reason    = document.getElementById('f-reason').value;
-    if (country)   parts.push('Pays : ' + country);
-    if (requestor) parts.push('Demandeur : ' + requestor);
-    if (product)   parts.push('Produit : ' + product);
-    if (reason)    parts.push('Motif : ' + reason);
-    document.getElementById('filter-summary').innerHTML = 'Affichage : <strong>' + parts.map(esc).join(' · ') + '</strong>';
+    if (country)   parts.push('国家：' + country);
+    if (requestor) parts.push('请求方：' + requestor);
+    if (product)   parts.push('产品：' + product);
+    if (reason)    parts.push('理由：' + reason);
+    document.getElementById('filter-summary').innerHTML = '显示：<strong>' + parts.map(esc).join(' · ') + '</strong>';
   }
 
   // ── Main refresh ──────────────────────────────────────────────────────────
@@ -793,7 +793,7 @@
 
     // Show loading indicators
     ['ts-loading','rate-loading','cty-loading','rsn-loading','prd-loading','cmp-loading'].forEach(function(id) {
-      var el = document.getElementById(id); if (el) { el.classList.remove('hidden'); el.textContent = 'Chargement…'; }
+      var el = document.getElementById(id); if (el) { el.classList.remove('hidden'); el.textContent = '正在加载…'; }
     });
     ['chart-ts','chart-rate','chart-countries','chart-reasons','chart-products','chart-compliance'].forEach(function(id) {
       var el = document.getElementById(id); if (el) el.classList.add('hidden');
@@ -848,7 +848,7 @@
       renderTable(results[6].rows);
 
     } catch (err) {
-      errEl.textContent = 'Échec du chargement des graphiques : ' + err.message;
+      errEl.textContent = '无法加载图表：' + err.message;
       errEl.classList.remove('hidden');
     }
   }
@@ -893,10 +893,10 @@
           var opt = document.createElement('option'); opt.value = v; opt.textContent = v; sel.appendChild(opt);
         });
       }
-      populateSelect('f-country',   d.countries.map(function(c){ return c.name; }), 'Tous les pays');
-      populateSelect('f-requestor', d.requestors, 'Tous les types de demandeur');
-      populateSelect('f-product',   d.products,   'Tous les produits');
-      populateSelect('f-reason',    d.reasons,    'Tous les motifs');
+      populateSelect('f-country',   d.countries.map(function(c){ return c.name; }), '所有国家');
+      populateSelect('f-requestor', d.requestors, '所有请求方类型');
+      populateSelect('f-product',   d.products,   '所有产品');
+      populateSelect('f-reason',    d.reasons,    '所有理由');
 
       // Wire up filter events
       document.getElementById('f-from').addEventListener('change', function () {
@@ -926,7 +926,7 @@
       refresh();
 
     } catch (err) {
-      errEl.textContent = 'Échec du chargement du jeu de données : ' + err.message;
+      errEl.textContent = '无法加载数据集：' + err.message;
       errEl.classList.remove('hidden');
     }
   }

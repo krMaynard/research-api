@@ -2040,7 +2040,7 @@ def privacy_page() -> FileResponse:
 # _serve_page / per-page-CSP machinery as the English originals — the inline
 # <script> hashes are recomputed per file, so the strict CSP holds. The JSON API
 # (/api/*), Swagger (/docs) and the operational endpoints stay locale-agnostic.
-_LOCALES = ("es", "fr", "de")
+_LOCALES = ("es", "fr", "de", "ja", "zh", "ko")
 _PORTAL_CSP_HOSTS: dict[str, list[str]] = {
     "script_hosts": ["https://accounts.google.com"],
     "connect_hosts": ["https://accounts.google.com"],

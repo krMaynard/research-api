@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="fr">
+<html lang="zh">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Transparency Report API</title>
-<meta name="description" content="Les données de transparence des plateformes, rendues utiles. Analyse indépendante et API interrogeables pour les déclarations réglementaires des plus grandes plateformes en ligne du monde." />
+<meta name="description" content="让平台透明度数据变得有用。针对全球最大在线平台的监管披露，提供独立分析与可查询的 API。" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
@@ -338,32 +338,32 @@
 </style>
 </head>
 <body>
-<a class="skip-link" href="#main">Aller au contenu</a>
+<a class="skip-link" href="#main">跳到主要内容</a>
 
 <!-- ── Site banner ──────────────────────────────────────────────────────── -->
-<nav class="site-nav" aria-label="Site">
+<nav class="site-nav" aria-label="网站">
   <a href="https://kieranmaynard.com/" class="nav-name">Kieran Maynard</a>
   <div class="nav-right">
     <div class="nav-links">
-      <a href="https://kieranmaynard.com/work.html">Travaux</a>
-      <a href="https://kieranmaynard.com/transparency.html">Produits</a>
-      <a href="https://kieranmaynard.com/consulting.html">Conseil</a>
+      <a href="https://kieranmaynard.com/work.html">工作经历</a>
+      <a href="https://kieranmaynard.com/transparency.html">产品</a>
+      <a href="https://kieranmaynard.com/consulting.html">咨询服务</a>
       <a href="https://kieranmaynard.com/blog.html">Blog</a>
-      <a href="https://kieranmaynard.com/contact.html">Contact</a>
+      <a href="https://kieranmaynard.com/contact.html">联系我</a>
     </div>
     <details class="lang-switcher">
-      <summary class="lang-current" aria-label="Langue" title="Langue">
+      <summary class="lang-current" aria-label="语言" title="语言">
         <svg class="lang-globe" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.7 2.6 15.3 0 18"/><path d="M12 3c-2.6 2.7-2.6 15.3 0 18"/></svg>
-        <span>Français</span>
+        <span>中文</span>
         <svg class="lang-caret" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>
       </summary>
       <ul class="lang-menu">
         <li><a class="lang-opt" href="/"><span>English</span></a></li>
         <li><a class="lang-opt" href="/es/"><span>Español</span></a></li>
-        <li><a class="lang-opt is-current" href="/fr/" aria-current="page"><span>Français</span><svg class="lang-check" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M3.5 8.5l3 3 6-7"/></svg></a></li>
+        <li><a class="lang-opt" href="/fr/"><span>Français</span></a></li>
         <li><a class="lang-opt" href="/de/"><span>Deutsch</span></a></li>
         <li><a class="lang-opt" href="/ja/"><span>日本語</span></a></li>
-        <li><a class="lang-opt" href="/zh/"><span>中文</span></a></li>
+        <li><a class="lang-opt is-current" href="/zh/" aria-current="page"><span>中文</span><svg class="lang-check" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M3.5 8.5l3 3 6-7"/></svg></a></li>
         <li><a class="lang-opt" href="/ko/"><span>한국어</span></a></li>
       </ul>
     </details>
@@ -374,15 +374,15 @@
 <header class="topbar">
   <div class="topbar-left">
     <button type="button" class="hamburger" id="hamburger"
-            aria-label="Basculer la navigation" aria-expanded="false" aria-controls="sidebar">
+            aria-label="切换导航" aria-expanded="false" aria-controls="sidebar">
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
         <line x1="3" y1="5" x2="17" y2="5"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="15" x2="17" y2="15"/>
       </svg>
     </button>
-    <a href="/fr/" class="topbar-brand">Transparency Report API</a>
+    <a href="/zh/" class="topbar-brand">Transparency Report API</a>
   </div>
   <div class="topbar-right">
-    <button type="button" class="theme-toggle" aria-label="Basculer le mode sombre" data-theme-toggle>
+    <button type="button" class="theme-toggle" aria-label="切换深色模式" data-theme-toggle>
       <svg class="theme-icon-dark" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
         <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
       </svg>
@@ -396,57 +396,57 @@
 <div class="app-body">
 
 <!-- ── Sidebar ──────────────────────────────────────────────────────────── -->
-<aside class="sidebar" id="sidebar" aria-label="Navigation de l’application">
+<aside class="sidebar" id="sidebar" aria-label="应用导航">
   <nav>
-    <div class="nav-section">Jeux de données</div>
+    <div class="nav-section">数据集</div>
 
-    <a href="/fr/reports" class="nav-item">
+    <a href="/zh/reports" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
         <rect x="1" y="9" width="3" height="6" rx="1"/>
         <rect x="6" y="5" width="3" height="10" rx="1"/>
         <rect x="11" y="1" width="3" height="14" rx="1"/>
       </svg>
-      Rapports DSA
+      DSA 报告
     </a>
 
-    <a href="/fr/removals" class="nav-item">
+    <a href="/zh/removals" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
         <circle cx="8" cy="8" r="6.25"/>
         <path d="M5.5 10.5l5-5M5.5 5.5l5 5" stroke-linecap="round"/>
       </svg>
-      Retraits gouvernementaux
+      政府删除请求
     </a>
 
     <a href="#" class="nav-item is-soon" aria-disabled="true" tabindex="-1">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
         <path d="M2 8h12M8 2l4 6-4 6" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      Analyse des SoR
-      <span class="soon-badge">Bientôt</span>
+      SoR 分析
+      <span class="soon-badge">即将</span>
     </a>
 
     <hr class="nav-hr">
-    <div class="nav-section">Outils</div>
+    <div class="nav-section">工具</div>
 
-    <a href="/fr/portal" class="nav-item">
+    <a href="/zh/portal" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
         <path d="M8 1a3.5 3.5 0 1 0 0 7A3.5 3.5 0 0 0 8 1zM8 9C4.5 9 1.5 10.6 1.5 12.5v1a.5.5 0 0 0 .5.5h12a.5.5 0 0 0 .5-.5v-1C14.5 10.6 11.5 9 8 9z"/>
       </svg>
-      Portail chercheurs
+      研究者门户
     </a>
 
     <a href="/docs" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
         <path d="M3 1h8l3 3v11H3V1zm7 .5V4.5H12.5L10 1.5zM4 6h8v1H4zm0 2.5h8v1H4zm0 2.5h5v1H4z"/>
       </svg>
-      Documentation API
+      API 文档
     </a>
 
     <a href="/api" class="nav-item">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
         <path d="M5 4L1.5 8 5 12M11 4l3.5 4L11 12M9 3l-2 10"/>
       </svg>
-      Référence API
+      API 参考
     </a>
 
     <hr class="nav-hr">
@@ -466,7 +466,7 @@
     </a>
   </nav>
   <div class="sidebar-footer">
-    Par <a href="https://kieranmaynard.com/">Kieran Maynard</a> · <a href="/fr/privacy">Confidentialité</a>
+    作者：<a href="https://kieranmaynard.com/">Kieran Maynard</a> · <a href="/zh/privacy">隐私</a>
   </div>
 </aside>
 
@@ -481,25 +481,25 @@
 
     <!-- Hero -->
     <section class="hero" aria-labelledby="hero-heading">
-      <span class="hero-eyebrow">Transparence des plateformes</span>
-      <h1 id="hero-heading">Les données de transparence des plateformes,<br>rendues utiles.</h1>
-      <p>Analyse indépendante et API interrogeables pour les déclarations réglementaires des plus grandes plateformes en ligne du monde.</p>
+      <span class="hero-eyebrow">平台透明度</span>
+      <h1 id="hero-heading">让平台透明度数据，<br>变得有用。</h1>
+      <p>针对全球最大在线平台的监管披露，提供独立分析与可查询的 API。</p>
       <div class="hero-actions">
-        <a href="/fr/reports" class="btn-primary">
-          Explorer les données
+        <a href="/zh/reports" class="btn-primary">
+          探索数据
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
             <path d="M2 7h10M8 3l4 4-4 4"/>
           </svg>
         </a>
-        <a href="/api" class="btn-ghost">Référence de l’API</a>
+        <a href="/api" class="btn-ghost">API 参考</a>
       </div>
     </section>
 
     <!-- Feature cards -->
-    <p class="section-label">Au programme</p>
+    <p class="section-label">这里有什么</p>
     <div class="feature-grid" role="list">
 
-      <a href="/fr/reports" class="feature-card" role="listitem">
+      <a href="/zh/reports" class="feature-card" role="listitem">
         <div class="feature-card-icon" aria-hidden="true">
           <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
             <rect x="1" y="9" width="3" height="6" rx="1"/>
@@ -507,59 +507,59 @@
             <rect x="11" y="1" width="3" height="14" rx="1"/>
           </svg>
         </div>
-        <h3>Rapports DSA</h3>
-        <p>Statistiques de modération de contenu pour 33 très grandes plateformes en ligne désignées, issues des rapports de transparence du règlement européen sur les services numériques (DSA).</p>
+        <h3>DSA 报告</h3>
+        <p>来自欧盟《数字服务法》透明度报告中 33 家被指定的超大型在线平台的内容审核统计数据。</p>
         <span class="feature-card-meta">
-          Explorer les graphiques et requêtes
+          浏览图表并查询
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
             <path d="M2 6h8M6 2l4 4-4 4"/>
           </svg>
         </span>
       </a>
 
-      <a href="/fr/removals" class="feature-card" role="listitem">
+      <a href="/zh/removals" class="feature-card" role="listitem">
         <div class="feature-card-icon" aria-hidden="true">
           <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
             <circle cx="8" cy="8" r="6.25"/>
             <path d="M5.5 10.5l5-5M5.5 5.5l5 5" stroke-linecap="round"/>
           </svg>
         </div>
-        <h3>Retraits gouvernementaux</h3>
-        <p>Demandes gouvernementales de retrait de contenu sur les produits Google — 160 pays, 13 périodes de référence et explorateur de tendances pluriannuel.</p>
+        <h3>政府删除请求</h3>
+        <p>针对各类 Google 产品的政府内容删除请求——涵盖 160 个国家、13 个报告期，并提供多年趋势浏览器。</p>
         <span class="feature-card-meta">
-          Explorer les tendances
+          探索趋势
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
             <path d="M2 6h8M6 2l4 4-4 4"/>
           </svg>
         </span>
       </a>
 
-      <div class="feature-card is-soon" role="listitem" aria-label="Analyse des SoR — coming soon">
+      <div class="feature-card is-soon" role="listitem" aria-label="SoR 分析 — coming soon">
         <div class="feature-card-icon" aria-hidden="true">
           <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M2 12l4-4 3 3 5-7" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
-        <h3>Analyse des SoR <span class="card-soon-badge">Bientôt</span></h3>
-        <p>Agrégation indépendante des déclarations des motifs de l’UE, recoupées avec les chiffres publiés par les plateformes, second semestre 2025.</p>
-        <span class="feature-card-meta">Bientôt disponible</span>
+        <h3>SoR 分析 <span class="card-soon-badge">即将</span></h3>
+        <p>对欧盟理由声明（Statements of Reasons）进行独立汇总，并与平台公布的数据交叉核对，2025 年下半年。</p>
+        <span class="feature-card-meta">即将推出</span>
       </div>
 
     </div>
 
     <!-- Latest analysis -->
-    <p class="section-label">Dernière analyse</p>
+    <p class="section-label">最新分析</p>
     <div class="analysis-card">
       <div class="analysis-stat-pill" aria-hidden="true">
         <span class="num">10M+</span>
-        <span class="lbl">Déclarations<br>des motifs</span>
+        <span class="lbl">理由<br>声明</span>
       </div>
       <div class="analysis-card-body">
-        <p class="analysis-card-eyebrow">2e sem. 2025 · DSA de l’UE</p>
-        <h3>SoR vs. rapports publiés</h3>
-        <p>Agrégation indépendante de plus de 10 millions de déclarations des motifs déposées au titre du DSA de l’UE, recoupées avec les chiffres publiés dans les rapports de transparence des plateformes. Les écarts sont signalés par catégorie et par plateforme.</p>
+        <p class="analysis-card-eyebrow">2025 下半年 · 欧盟 DSA</p>
+        <h3>SoR 与已发布报告对比</h3>
+        <p>对依据欧盟 DSA 提交的逾 1000 万份理由声明进行独立汇总，并与平台透明度报告中公布的数据交叉核对。按类别和平台标注差异。</p>
         <a href="https://kieranmaynard.com/work/" class="analysis-link" target="_blank" rel="noopener noreferrer">
-          Lire l’analyse
+          阅读分析
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
             <path d="M2 6.5h9M7 2l4.5 4.5L7 11"/>
           </svg>
@@ -570,7 +570,7 @@
   </main>
 
   <footer>
-    <p>Conçu par <a href="https://kieranmaynard.com/">Kieran Maynard</a> · Données : <a href="https://transparency.dsa.ec.europa.eu/" target="_blank" rel="noopener noreferrer">DSA Transparency Database</a> · <a href="/api">API</a> · <a href="https://github.com/krMaynard/transparency-report-api" target="_blank" rel="noopener noreferrer">GitHub</a> · <a href="/fr/privacy">Confidentialité</a></p>
+    <p>构建者：<a href="https://kieranmaynard.com/">Kieran Maynard</a> · 数据：<a href="https://transparency.dsa.ec.europa.eu/" target="_blank" rel="noopener noreferrer">DSA Transparency Database</a> · <a href="/api">API</a> · <a href="https://github.com/krMaynard/transparency-report-api" target="_blank" rel="noopener noreferrer">GitHub</a> · <a href="/zh/privacy">隐私</a></p>
   </footer>
 
 </div>
