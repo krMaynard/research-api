@@ -29,7 +29,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC = os.path.join(ROOT, "static")
 
-PAGES_FILES = ["home.html", "index.html", "removals.html", "portal.html", "privacy.html"]
+PAGES_FILES = ["home.html", "index.html", "removals.html", "portal.html", "privacy.html", "mcp.html"]
 # page file -> path suffix (home is the locale root, "")
 SUFFIX = {
     "home.html": "",
@@ -37,6 +37,7 @@ SUFFIX = {
     "removals.html": "removals",
     "portal.html": "portal",
     "privacy.html": "privacy",
+    "mcp.html": "mcp",
 }
 
 # Order of languages shown in every switcher; values are autonyms (each language
@@ -91,7 +92,7 @@ def build_switcher(active: str, suffix: str) -> str:
 
 # Internal links that gain the locale prefix on translated pages. The JSON API
 # (/api, /api/*), Swagger (/docs), anchors (#main) and external URLs stay as-is.
-INTERNAL_HREFS = ['/', '/reports', '/removals', '/portal', '/privacy']
+INTERNAL_HREFS = ['/', '/reports', '/removals', '/portal', '/mcp', '/privacy']
 
 
 def prefix_links(text: str, locale: str) -> str:
@@ -125,6 +126,9 @@ COMMON = {
         ('''      Privacy
     </a>''', '''      Privacidad
     </a>'''),
+        ('''      MCP Server
+    </a>''', '''      Servidor MCP
+    </a>'''),
     ],
     "fr": [
         ('''>Skip to content</a>''', '''>Aller au contenu</a>'''),
@@ -149,6 +153,9 @@ COMMON = {
         ('''      Privacy
     </a>''', '''      Confidentialité
     </a>'''),
+        ('''      MCP Server
+    </a>''', '''      Serveur MCP
+    </a>'''),
     ],
     "de": [
         ('''>Skip to content</a>''', '''>Zum Inhalt springen</a>'''),
@@ -172,6 +179,9 @@ COMMON = {
         ('''>Privacy</a>''', '''>Datenschutz</a>'''),
         ('''      Privacy
     </a>''', '''      Datenschutz
+    </a>'''),
+        ('''      MCP Server
+    </a>''', '''      MCP-Server
     </a>'''),
     ],
 }
@@ -982,6 +992,54 @@ PAGES["es"]["privacy.html"] = [
     ('''Privacy Policy''', '''Política de privacidad'''),
 ]
 
+PAGES["es"]["mcp.html"] = [
+    ('''Connect Claude Desktop or Claude Code directly to the DSA VLOP transparency dataset via the native MCP stdio server.''',
+     '''Conecta Claude Desktop o Claude Code directamente al conjunto de datos de transparencia DSA VLOP a través del servidor MCP stdio nativo.'''),
+    ('''<p class="page-eyebrow">Integrations</p>''', '''<p class="page-eyebrow">Integraciones</p>'''),
+    ('''<h1>MCP Server</h1>''', '''<h1>Servidor MCP</h1>'''),
+    ('''Connect Claude Desktop or Claude Code directly to the DSA VLOP transparency dataset.''',
+     '''Conecta Claude Desktop o Claude Code directamente al conjunto de datos de transparencia DSA VLOP.'''),
+    ('''The native MCP stdio server (<code>mcp_server.py</code>) exposes 8 tools so an AI agent can explore, query, and export the transparency data without writing SQL or reading docs — start with <code>list_tables</code>, build a query, get results back in one turn.''',
+     '''El servidor MCP stdio nativo (<code>mcp_server.py</code>) expone 8 herramientas para que un agente de IA explore, consulte y exporte los datos de transparencia sin escribir SQL ni leer documentación: empieza con <code>list_tables</code>, construye una consulta y obtén los resultados en un turno.'''),
+    ('''<h2>How it works</h2>''', '''<h2>Cómo funciona</h2>'''),
+    ('''The MCP server is a thin HTTP client over the running API: every tool call maps to a real endpoint, so all queries pass through the same <code>compile_query</code> validation as the web UI and the REST API — no SQL is ever accepted, every field and operation is checked against the table registry. The server has a tiny dependency footprint (<code>mcp</code> + <code>httpx</code>) and never imports the FastAPI app.''',
+     '''El servidor MCP es un cliente HTTP ligero sobre la API en ejecución: cada llamada a herramienta corresponde a un endpoint real, por lo que todas las consultas pasan por la misma validación <code>compile_query</code> que la interfaz web y la API REST — nunca se acepta SQL, y cada campo y operación se verifica contra el registro de tablas. El servidor tiene una huella de dependencias mínima (<code>mcp</code> + <code>httpx</code>) y nunca importa la aplicación FastAPI.'''),
+    ('''<h2>Quick setup</h2>''', '''<h2>Configuración rápida</h2>'''),
+    ('''<strong>Install into a separate venv</strong>''', '''<strong>Instalar en un entorno virtual separado</strong>'''),
+    ('''<strong>Start the API</strong> (or point at the hosted instance)''', '''<strong>Iniciar la API</strong> (o apuntar a la instancia alojada)'''),
+    ('''<strong>Get an API key</strong> (needed for <code>submit_query</code>, <code>poll_job</code>, <code>ask</code>)''',
+     '''<strong>Obtener una clave de API</strong> (necesaria para <code>submit_query</code>, <code>poll_job</code>, <code>ask</code>)'''),
+    ('''Call <code>register</code> from within your MCP client, or use the <a href="/portal">Researcher Portal</a> — no sign-in required for demo keys.''',
+     '''Llama a <code>register</code> desde tu cliente MCP, o usa el <a href="/portal">Portal de investigadores</a> — no se requiere inicio de sesión para claves de demostración.'''),
+    ('''<h2>Tools</h2>''', '''<h2>Herramientas</h2>'''),
+    ('''<tr><th>Tool</th><th>Auth</th><th>Description</th></tr>''', '''<tr><th>Herramienta</th><th>Autenticación</th><th>Descripción</th></tr>'''),
+    ('''List all queryable DSA report tables with their dimensions, measures, and available aggregate functions. Start here.''',
+     '''Lista todas las tablas de informes DSA consultables con sus dimensiones, medidas y funciones de agregación disponibles. Empieza aquí.'''),
+    ('''Describe one table's fields, valid operations, and a runnable example query. Returns the full field registry when an API key is set.''',
+     '''Describe los campos de una tabla, las operaciones válidas y una consulta de ejemplo ejecutable. Devuelve el registro completo de campos cuando se configura una clave de API.'''),
+    ('''Headline aggregates: reporting period, platform count, total Article 16 notices, top platforms and categories.''',
+     '''Agregados principales: período de informes, recuento de plataformas, total de notificaciones del artículo 16, principales plataformas y categorías.'''),
+    ('''Run a structured query synchronously via <code>POST /api/explore</code>. Row-capped; no API key needed. Good for quick exploration.''',
+     '''Ejecuta una consulta estructurada de forma síncrona a través de <code>POST /api/explore</code>. Con límite de filas; sin necesidad de clave de API. Ideal para exploración rápida.'''),
+    ('''Ask a natural-language question. An LLM translates it into a structured query (never SQL) that runs through the same validation as <code>run_query</code>.''',
+     '''Haz una pregunta en lenguaje natural. Un LLM la traduce a una consulta estructurada (nunca SQL) que pasa por la misma validación que <code>run_query</code>.'''),
+    ('''Register for a demo API key (calls <code>POST /api/portal/register</code>). Returns <code>{"api_key": "rk_…", "expires_at": "…"}</code>. No sign-in required.''',
+     '''Regístrate para obtener una clave de API de demostración (llama a <code>POST /api/portal/register</code>). Devuelve <code>{"api_key": "rk_…", "expires_at": "…"}</code>. No se requiere inicio de sesión.'''),
+    ('''Submit a structured query to the async job queue (<code>POST /api/query</code>). No row cap. Returns immediately with a <code>job_id</code>.''',
+     '''Envía una consulta estructurada a la cola de trabajos asíncronos (<code>POST /api/query</code>). Sin límite de filas. Devuelve inmediatamente un <code>job_id</code>.'''),
+    ('''Poll a submitted job until it completes, then return the result rows. Uses exponential back-off; configurable timeout (default 60 s).''',
+     '''Sondea un trabajo enviado hasta que se completa y devuelve las filas de resultados. Usa retroceso exponencial; tiempo de espera configurable (predeterminado 60 s).'''),
+    ('''<h2>Configuration</h2>''', '''<h2>Configuración</h2>'''),
+    ('''Base URL of the running API.''', '''URL base de la API en ejecución.'''),
+    ('''Your API key. Required for <code>submit_query</code>, <code>poll_job</code>, <code>ask</code>, and the full <code>describe_table</code> field registry.''',
+     '''Tu clave de API. Necesaria para <code>submit_query</code>, <code>poll_job</code>, <code>ask</code> y el registro completo de campos de <code>describe_table</code>.'''),
+    ('''Per-request timeout in seconds.''', '''Tiempo de espera por solicitud en segundos.'''),
+    ('''<a href="https://github.com/krMaynard/transparency-report-api/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">Full MCP documentation on GitHub →</a>''',
+     '''<a href="https://github.com/krMaynard/transparency-report-api/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">Documentación completa de MCP en GitHub →</a>'''),
+    ('''<p><a href="/">Home</a> · <a href="/reports">DSA Reports</a> · <a href="/portal">Researcher Portal</a> · <a href="/docs">API Reference</a></p>''',
+     '''<p><a href="/">Inicio</a> · <a href="/reports">Informes DSA</a> · <a href="/portal">Portal de investigadores</a> · <a href="/docs">Referencia de la API</a></p>'''),
+]
+
 PAGES["fr"]["privacy.html"] = [
     ('''What data the Transparency Report API collects, why you're asked to sign in, and what happens to prompts.''',
      '''Quelles données Transparency Report API collecte, pourquoi l’on vous demande de vous connecter et ce qu’il advient des invites.'''),
@@ -1056,6 +1114,54 @@ PAGES["fr"]["privacy.html"] = [
     ('''<p><a href="/">Home</a> ·''', '''<p><a href="/">Accueil</a> ·'''),
     # Bare title/h1 term — must run last (see Spanish note above).
     ('''Privacy Policy''', '''Politique de confidentialité'''),
+]
+
+PAGES["fr"]["mcp.html"] = [
+    ('''Connect Claude Desktop or Claude Code directly to the DSA VLOP transparency dataset via the native MCP stdio server.''',
+     '''Connectez Claude Desktop ou Claude Code directement au jeu de données de transparence DSA VLOP via le serveur MCP stdio natif.'''),
+    ('''<p class="page-eyebrow">Integrations</p>''', '''<p class="page-eyebrow">Intégrations</p>'''),
+    ('''<h1>MCP Server</h1>''', '''<h1>Serveur MCP</h1>'''),
+    ('''Connect Claude Desktop or Claude Code directly to the DSA VLOP transparency dataset.''',
+     '''Connectez Claude Desktop ou Claude Code directement au jeu de données de transparence DSA VLOP.'''),
+    ('''The native MCP stdio server (<code>mcp_server.py</code>) exposes 8 tools so an AI agent can explore, query, and export the transparency data without writing SQL or reading docs — start with <code>list_tables</code>, build a query, get results back in one turn.''',
+     '''Le serveur MCP stdio natif (<code>mcp_server.py</code>) expose 8 outils pour qu'un agent IA puisse explorer, interroger et exporter les données de transparence sans écrire de SQL ni lire de documentation — commencez par <code>list_tables</code>, construisez une requête et obtenez les résultats en un tour.'''),
+    ('''<h2>How it works</h2>''', '''<h2>Comment ça fonctionne</h2>'''),
+    ('''The MCP server is a thin HTTP client over the running API: every tool call maps to a real endpoint, so all queries pass through the same <code>compile_query</code> validation as the web UI and the REST API — no SQL is ever accepted, every field and operation is checked against the table registry. The server has a tiny dependency footprint (<code>mcp</code> + <code>httpx</code>) and never imports the FastAPI app.''',
+     '''Le serveur MCP est un client HTTP léger sur l'API en cours d'exécution : chaque appel d'outil correspond à un endpoint réel, de sorte que toutes les requêtes passent par la même validation <code>compile_query</code> que l'interface web et l'API REST — aucun SQL n'est jamais accepté, chaque champ et opération est vérifié dans le registre des tables. Le serveur a une empreinte de dépendances minimale (<code>mcp</code> + <code>httpx</code>) et n'importe jamais l'application FastAPI.'''),
+    ('''<h2>Quick setup</h2>''', '''<h2>Configuration rapide</h2>'''),
+    ('''<strong>Install into a separate venv</strong>''', '''<strong>Installer dans un environnement virtuel séparé</strong>'''),
+    ('''<strong>Start the API</strong> (or point at the hosted instance)''', '''<strong>Démarrer l'API</strong> (ou pointer vers l'instance hébergée)'''),
+    ('''<strong>Get an API key</strong> (needed for <code>submit_query</code>, <code>poll_job</code>, <code>ask</code>)''',
+     '''<strong>Obtenir une clé API</strong> (requise pour <code>submit_query</code>, <code>poll_job</code>, <code>ask</code>)'''),
+    ('''Call <code>register</code> from within your MCP client, or use the <a href="/portal">Researcher Portal</a> — no sign-in required for demo keys.''',
+     '''Appelez <code>register</code> depuis votre client MCP, ou utilisez le <a href="/portal">Portail chercheurs</a> — aucune connexion requise pour les clés de démonstration.'''),
+    ('''<h2>Tools</h2>''', '''<h2>Outils</h2>'''),
+    ('''<tr><th>Tool</th><th>Auth</th><th>Description</th></tr>''', '''<tr><th>Outil</th><th>Auth</th><th>Description</th></tr>'''),
+    ('''List all queryable DSA report tables with their dimensions, measures, and available aggregate functions. Start here.''',
+     '''Liste toutes les tables de rapports DSA interrogeables avec leurs dimensions, mesures et fonctions d'agrégation disponibles. Commencez ici.'''),
+    ('''Describe one table's fields, valid operations, and a runnable example query. Returns the full field registry when an API key is set.''',
+     '''Décrit les champs d'une table, les opérations valides et un exemple de requête exécutable. Retourne le registre complet des champs quand une clé API est configurée.'''),
+    ('''Headline aggregates: reporting period, platform count, total Article 16 notices, top platforms and categories.''',
+     '''Agrégats principaux : période de rapport, nombre de plateformes, total des avis de l'article 16, principales plateformes et catégories.'''),
+    ('''Run a structured query synchronously via <code>POST /api/explore</code>. Row-capped; no API key needed. Good for quick exploration.''',
+     '''Exécute une requête structurée de façon synchrone via <code>POST /api/explore</code>. Limitée en lignes ; sans clé API. Idéal pour l'exploration rapide.'''),
+    ('''Ask a natural-language question. An LLM translates it into a structured query (never SQL) that runs through the same validation as <code>run_query</code>.''',
+     '''Posez une question en langage naturel. Un LLM la traduit en requête structurée (jamais SQL) qui passe par la même validation que <code>run_query</code>.'''),
+    ('''Register for a demo API key (calls <code>POST /api/portal/register</code>). Returns <code>{"api_key": "rk_…", "expires_at": "…"}</code>. No sign-in required.''',
+     '''S'inscrire pour obtenir une clé API de démonstration (appelle <code>POST /api/portal/register</code>). Retourne <code>{"api_key": "rk_…", "expires_at": "…"}</code>. Aucune connexion requise.'''),
+    ('''Submit a structured query to the async job queue (<code>POST /api/query</code>). No row cap. Returns immediately with a <code>job_id</code>.''',
+     '''Soumettre une requête structurée à la file d'attente des tâches asynchrones (<code>POST /api/query</code>). Sans limite de lignes. Retourne immédiatement avec un <code>job_id</code>.'''),
+    ('''Poll a submitted job until it completes, then return the result rows. Uses exponential back-off; configurable timeout (default 60 s).''',
+     '''Sonde un travail soumis jusqu'à sa complétion, puis retourne les lignes de résultats. Utilise le recul exponentiel ; délai d'attente configurable (par défaut 60 s).'''),
+    ('''<h2>Configuration</h2>''', '''<h2>Configuration</h2>'''),
+    ('''Base URL of the running API.''', '''URL de base de l'API en cours d'exécution.'''),
+    ('''Your API key. Required for <code>submit_query</code>, <code>poll_job</code>, <code>ask</code>, and the full <code>describe_table</code> field registry.''',
+     '''Votre clé API. Requise pour <code>submit_query</code>, <code>poll_job</code>, <code>ask</code>, et le registre complet des champs de <code>describe_table</code>.'''),
+    ('''Per-request timeout in seconds.''', '''Délai d'attente par requête en secondes.'''),
+    ('''<a href="https://github.com/krMaynard/transparency-report-api/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">Full MCP documentation on GitHub →</a>''',
+     '''<a href="https://github.com/krMaynard/transparency-report-api/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">Documentation MCP complète sur GitHub →</a>'''),
+    ('''<p><a href="/">Home</a> · <a href="/reports">DSA Reports</a> · <a href="/portal">Researcher Portal</a> · <a href="/docs">API Reference</a></p>''',
+     '''<p><a href="/">Accueil</a> · <a href="/reports">Rapports DSA</a> · <a href="/portal">Portail chercheurs</a> · <a href="/docs">Référence API</a></p>'''),
 ]
 
 PAGES["de"]["privacy.html"] = [
@@ -1134,6 +1240,54 @@ PAGES["de"]["privacy.html"] = [
     ('''Privacy Policy''', '''Datenschutzerklärung'''),
 ]
 
+PAGES["de"]["mcp.html"] = [
+    ('''Connect Claude Desktop or Claude Code directly to the DSA VLOP transparency dataset via the native MCP stdio server.''',
+     '''Verbinden Sie Claude Desktop oder Claude Code direkt mit dem DSA-VLOP-Transparenzdatensatz über den nativen MCP-stdio-Server.'''),
+    ('''<p class="page-eyebrow">Integrations</p>''', '''<p class="page-eyebrow">Integrationen</p>'''),
+    ('''<h1>MCP Server</h1>''', '''<h1>MCP-Server</h1>'''),
+    ('''Connect Claude Desktop or Claude Code directly to the DSA VLOP transparency dataset.''',
+     '''Verbinden Sie Claude Desktop oder Claude Code direkt mit dem DSA-VLOP-Transparenzdatensatz.'''),
+    ('''The native MCP stdio server (<code>mcp_server.py</code>) exposes 8 tools so an AI agent can explore, query, and export the transparency data without writing SQL or reading docs — start with <code>list_tables</code>, build a query, get results back in one turn.''',
+     '''Der native MCP-stdio-Server (<code>mcp_server.py</code>) stellt 8 Werkzeuge bereit, damit ein KI-Agent Transparenzdaten erkunden, abfragen und exportieren kann, ohne SQL zu schreiben oder Dokumentation zu lesen — beginnen Sie mit <code>list_tables</code>, erstellen Sie eine Abfrage und erhalten Sie die Ergebnisse in einem Schritt.'''),
+    ('''<h2>How it works</h2>''', '''<h2>Wie es funktioniert</h2>'''),
+    ('''The MCP server is a thin HTTP client over the running API: every tool call maps to a real endpoint, so all queries pass through the same <code>compile_query</code> validation as the web UI and the REST API — no SQL is ever accepted, every field and operation is checked against the table registry. The server has a tiny dependency footprint (<code>mcp</code> + <code>httpx</code>) and never imports the FastAPI app.''',
+     '''Der MCP-Server ist ein leichter HTTP-Client über der laufenden API: Jeder Werkzeugaufruf entspricht einem echten Endpunkt, sodass alle Abfragen dieselbe <code>compile_query</code>-Validierung durchlaufen wie die Web-UI und die REST-API — SQL wird nie akzeptiert, jedes Feld und jede Operation wird gegen das Tabellen-Registry geprüft. Der Server hat einen minimalen Abhängigkeits-Fußabdruck (<code>mcp</code> + <code>httpx</code>) und importiert niemals die FastAPI-App.'''),
+    ('''<h2>Quick setup</h2>''', '''<h2>Schnelleinrichtung</h2>'''),
+    ('''<strong>Install into a separate venv</strong>''', '''<strong>In einer separaten virtuellen Umgebung installieren</strong>'''),
+    ('''<strong>Start the API</strong> (or point at the hosted instance)''', '''<strong>API starten</strong> (oder auf die gehostete Instanz verweisen)'''),
+    ('''<strong>Get an API key</strong> (needed for <code>submit_query</code>, <code>poll_job</code>, <code>ask</code>)''',
+     '''<strong>API-Schlüssel erhalten</strong> (benötigt für <code>submit_query</code>, <code>poll_job</code>, <code>ask</code>)'''),
+    ('''Call <code>register</code> from within your MCP client, or use the <a href="/portal">Researcher Portal</a> — no sign-in required for demo keys.''',
+     '''Rufen Sie <code>register</code> aus Ihrem MCP-Client auf oder verwenden Sie das <a href="/portal">Forschungsportal</a> — für Demo-Schlüssel ist keine Anmeldung erforderlich.'''),
+    ('''<h2>Tools</h2>''', '''<h2>Werkzeuge</h2>'''),
+    ('''<tr><th>Tool</th><th>Auth</th><th>Description</th></tr>''', '''<tr><th>Werkzeug</th><th>Authentifizierung</th><th>Beschreibung</th></tr>'''),
+    ('''List all queryable DSA report tables with their dimensions, measures, and available aggregate functions. Start here.''',
+     '''Listet alle abfragbaren DSA-Berichtstabellen mit Dimensionen, Kennzahlen und verfügbaren Aggregatfunktionen auf. Hier beginnen.'''),
+    ('''Describe one table's fields, valid operations, and a runnable example query. Returns the full field registry when an API key is set.''',
+     '''Beschreibt die Felder einer Tabelle, gültige Operationen und eine ausführbare Beispielabfrage. Gibt das vollständige Feld-Registry zurück, wenn ein API-Schlüssel gesetzt ist.'''),
+    ('''Headline aggregates: reporting period, platform count, total Article 16 notices, top platforms and categories.''',
+     '''Zusammenfassende Kennzahlen: Berichtszeitraum, Plattformanzahl, Gesamtzahl der Artikel-16-Meldungen, Top-Plattformen und -Kategorien.'''),
+    ('''Run a structured query synchronously via <code>POST /api/explore</code>. Row-capped; no API key needed. Good for quick exploration.''',
+     '''Führt eine strukturierte Abfrage synchron über <code>POST /api/explore</code> aus. Zeilenlimit; kein API-Schlüssel erforderlich. Gut für schnelle Erkundungen.'''),
+    ('''Ask a natural-language question. An LLM translates it into a structured query (never SQL) that runs through the same validation as <code>run_query</code>.''',
+     '''Stellt eine Frage in natürlicher Sprache. Ein LLM übersetzt sie in eine strukturierte Abfrage (nie SQL), die dieselbe Validierung wie <code>run_query</code> durchläuft.'''),
+    ('''Register for a demo API key (calls <code>POST /api/portal/register</code>). Returns <code>{"api_key": "rk_…", "expires_at": "…"}</code>. No sign-in required.''',
+     '''Für einen Demo-API-Schlüssel registrieren (ruft <code>POST /api/portal/register</code> auf). Gibt <code>{"api_key": "rk_…", "expires_at": "…"}</code> zurück. Keine Anmeldung erforderlich.'''),
+    ('''Submit a structured query to the async job queue (<code>POST /api/query</code>). No row cap. Returns immediately with a <code>job_id</code>.''',
+     '''Sendet eine strukturierte Abfrage an die asynchrone Job-Warteschlange (<code>POST /api/query</code>). Kein Zeilenlimit. Gibt sofort eine <code>job_id</code> zurück.'''),
+    ('''Poll a submitted job until it completes, then return the result rows. Uses exponential back-off; configurable timeout (default 60 s).''',
+     '''Fragt einen eingereichten Job ab, bis er abgeschlossen ist, und gibt dann die Ergebniszeilen zurück. Verwendet exponentielles Backoff; konfigurierbarer Timeout (Standard 60 s).'''),
+    ('''<h2>Configuration</h2>''', '''<h2>Konfiguration</h2>'''),
+    ('''Base URL of the running API.''', '''Basis-URL der laufenden API.'''),
+    ('''Your API key. Required for <code>submit_query</code>, <code>poll_job</code>, <code>ask</code>, and the full <code>describe_table</code> field registry.''',
+     '''Ihr API-Schlüssel. Erforderlich für <code>submit_query</code>, <code>poll_job</code>, <code>ask</code> und das vollständige <code>describe_table</code>-Feld-Registry.'''),
+    ('''Per-request timeout in seconds.''', '''Timeout pro Anfrage in Sekunden.'''),
+    ('''<a href="https://github.com/krMaynard/transparency-report-api/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">Full MCP documentation on GitHub →</a>''',
+     '''<a href="https://github.com/krMaynard/transparency-report-api/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">Vollständige MCP-Dokumentation auf GitHub →</a>'''),
+    ('''<p><a href="/">Home</a> · <a href="/reports">DSA Reports</a> · <a href="/portal">Researcher Portal</a> · <a href="/docs">API Reference</a></p>''',
+     '''<p><a href="/">Startseite</a> · <a href="/reports">DSA-Berichte</a> · <a href="/portal">Forschungsportal</a> · <a href="/docs">API-Referenz</a></p>'''),
+]
+
 
 def localize(text: str, locale: str, page: str) -> str:
     # 1. stash the switcher so translation / link-rewriting never touch it
@@ -1206,6 +1360,9 @@ COMMON["ja"] = [
      r'''>プライバシー</a>'''),
     (r'''      Privacy
     </a>''', r'''      プライバシー
+    </a>'''),
+    (r'''      MCP Server
+    </a>''', r'''      MCP サーバー
     </a>'''),
 ]
 PAGES["ja"] = {}
@@ -1717,6 +1874,55 @@ PAGES["ja"]["privacy.html"] = [
     (r'''Privacy Policy''',
      r'''プライバシーポリシー'''),
 ]
+
+PAGES["ja"]["mcp.html"] = [
+    (r'''Connect Claude Desktop or Claude Code directly to the DSA VLOP transparency dataset via the native MCP stdio server.''',
+     r'''ネイティブ MCP stdio サーバーを使用して、Claude Desktop または Claude Code を DSA VLOP 透明性データセットに直接接続します。'''),
+    (r'''<p class="page-eyebrow">Integrations</p>''', r'''<p class="page-eyebrow">インテグレーション</p>'''),
+    (r'''<h1>MCP Server</h1>''', r'''<h1>MCP サーバー</h1>'''),
+    (r'''Connect Claude Desktop or Claude Code directly to the DSA VLOP transparency dataset.''',
+     r'''Claude Desktop または Claude Code を DSA VLOP 透明性データセットに直接接続します。'''),
+    (r'''The native MCP stdio server (<code>mcp_server.py</code>) exposes 8 tools so an AI agent can explore, query, and export the transparency data without writing SQL or reading docs — start with <code>list_tables</code>, build a query, get results back in one turn.''',
+     r'''ネイティブ MCP stdio サーバー（<code>mcp_server.py</code>）は 8 つのツールを公開しており、AI エージェントが SQL を書いたりドキュメントを読んだりせずに透明性データを探索・クエリ・エクスポートできます。<code>list_tables</code> から始め、クエリを構築して一度のターンで結果を取得できます。'''),
+    (r'''<h2>How it works</h2>''', r'''<h2>仕組み</h2>'''),
+    (r'''The MCP server is a thin HTTP client over the running API: every tool call maps to a real endpoint, so all queries pass through the same <code>compile_query</code> validation as the web UI and the REST API — no SQL is ever accepted, every field and operation is checked against the table registry. The server has a tiny dependency footprint (<code>mcp</code> + <code>httpx</code>) and never imports the FastAPI app.''',
+     r'''MCP サーバーは実行中の API 上の軽量 HTTP クライアントです。すべてのツール呼び出しは実際のエンドポイントに対応しており、すべてのクエリは Web UI および REST API と同じ <code>compile_query</code> バリデーションを通過します。SQL は一切受け付けられず、すべてのフィールドと操作はテーブルレジストリに対して検証されます。サーバーの依存関係は最小限（<code>mcp</code> + <code>httpx</code>）で、FastAPI アプリをインポートすることはありません。'''),
+    (r'''<h2>Quick setup</h2>''', r'''<h2>クイックセットアップ</h2>'''),
+    (r'''<strong>Install into a separate venv</strong>''', r'''<strong>別の仮想環境にインストール</strong>'''),
+    (r'''<strong>Start the API</strong> (or point at the hosted instance)''', r'''<strong>API を起動</strong>（またはホスト済みインスタンスを指定）'''),
+    (r'''<strong>Get an API key</strong> (needed for <code>submit_query</code>, <code>poll_job</code>, <code>ask</code>)''',
+     r'''<strong>API キーを取得</strong>（<code>submit_query</code>、<code>poll_job</code>、<code>ask</code> に必要）'''),
+    (r'''Call <code>register</code> from within your MCP client, or use the <a href="/portal">Researcher Portal</a> — no sign-in required for demo keys.''',
+     r'''MCP クライアント内から <code>register</code> を呼び出すか、<a href="/portal">研究者ポータル</a>を使用してください。デモキーにはサインインは不要です。'''),
+    (r'''<h2>Tools</h2>''', r'''<h2>ツール</h2>'''),
+    (r'''<tr><th>Tool</th><th>Auth</th><th>Description</th></tr>''', r'''<tr><th>ツール</th><th>認証</th><th>説明</th></tr>'''),
+    (r'''List all queryable DSA report tables with their dimensions, measures, and available aggregate functions. Start here.''',
+     r'''すべてのクエリ可能な DSA レポートテーブルとその次元、測定値、使用可能な集計関数を一覧表示します。ここから始めてください。'''),
+    (r'''Describe one table's fields, valid operations, and a runnable example query. Returns the full field registry when an API key is set.''',
+     r'''テーブルのフィールド、有効な操作、実行可能なサンプルクエリを説明します。API キーが設定されている場合は完全なフィールドレジストリを返します。'''),
+    (r'''Headline aggregates: reporting period, platform count, total Article 16 notices, top platforms and categories.''',
+     r'''主要な集計：レポート期間、プラットフォーム数、第 16 条通知の合計、上位プラットフォームとカテゴリー。'''),
+    (r'''Run a structured query synchronously via <code>POST /api/explore</code>. Row-capped; no API key needed. Good for quick exploration.''',
+     r'''<code>POST /api/explore</code> を通じて構造化クエリを同期的に実行します。行数上限あり；API キー不要。クイック探索に最適。'''),
+    (r'''Ask a natural-language question. An LLM translates it into a structured query (never SQL) that runs through the same validation as <code>run_query</code>.''',
+     r'''自然言語で質問します。LLM がそれを構造化クエリ（SQL ではない）に変換し、<code>run_query</code> と同じバリデーションを通過します。'''),
+    (r'''Register for a demo API key (calls <code>POST /api/portal/register</code>). Returns <code>{"api_key": "rk_…", "expires_at": "…"}</code>. No sign-in required.''',
+     r'''デモ API キーに登録します（<code>POST /api/portal/register</code> を呼び出し）。<code>{"api_key": "rk_…", "expires_at": "…"}</code> を返します。サインイン不要。'''),
+    (r'''Submit a structured query to the async job queue (<code>POST /api/query</code>). No row cap. Returns immediately with a <code>job_id</code>.''',
+     r'''構造化クエリを非同期ジョブキューに送信します（<code>POST /api/query</code>）。行数制限なし。<code>job_id</code> を即座に返します。'''),
+    (r'''Poll a submitted job until it completes, then return the result rows. Uses exponential back-off; configurable timeout (default 60 s).''',
+     r'''送信されたジョブが完了するまでポーリングし、結果行を返します。指数バックオフを使用；タイムアウト設定可能（デフォルト 60 秒）。'''),
+    (r'''<h2>Configuration</h2>''', r'''<h2>設定</h2>'''),
+    (r'''Base URL of the running API.''', r'''実行中の API のベース URL。'''),
+    (r'''Your API key. Required for <code>submit_query</code>, <code>poll_job</code>, <code>ask</code>, and the full <code>describe_table</code> field registry.''',
+     r'''あなたの API キー。<code>submit_query</code>、<code>poll_job</code>、<code>ask</code>、および完全な <code>describe_table</code> フィールドレジストリに必要です。'''),
+    (r'''Per-request timeout in seconds.''', r'''リクエストごとのタイムアウト（秒）。'''),
+    (r'''<a href="https://github.com/krMaynard/transparency-report-api/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">Full MCP documentation on GitHub →</a>''',
+     r'''<a href="https://github.com/krMaynard/transparency-report-api/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">GitHub の完全な MCP ドキュメント →</a>'''),
+    (r'''<p><a href="/">Home</a> · <a href="/reports">DSA Reports</a> · <a href="/portal">Researcher Portal</a> · <a href="/docs">API Reference</a></p>''',
+     r'''<p><a href="/">ホーム</a> · <a href="/reports">DSA レポート</a> · <a href="/portal">研究者ポータル</a> · <a href="/docs">API リファレンス</a></p>'''),
+]
+
 COMMON["zh"] = [
     (r'''>Skip to content</a>''',
      r'''>跳到主要内容</a>'''),
@@ -1760,6 +1966,9 @@ COMMON["zh"] = [
      r'''>隐私</a>'''),
     (r'''      Privacy
     </a>''', r'''      隐私
+    </a>'''),
+    (r'''      MCP Server
+    </a>''', r'''      MCP 服务器
     </a>'''),
 ]
 PAGES["zh"] = {}
@@ -2271,6 +2480,55 @@ PAGES["zh"]["privacy.html"] = [
     (r'''Privacy Policy''',
      r'''隐私政策'''),
 ]
+
+PAGES["zh"]["mcp.html"] = [
+    (r'''Connect Claude Desktop or Claude Code directly to the DSA VLOP transparency dataset via the native MCP stdio server.''',
+     r'''通过原生 MCP stdio 服务器，将 Claude Desktop 或 Claude Code 直接连接到 DSA VLOP 透明度数据集。'''),
+    (r'''<p class="page-eyebrow">Integrations</p>''', r'''<p class="page-eyebrow">集成</p>'''),
+    (r'''<h1>MCP Server</h1>''', r'''<h1>MCP 服务器</h1>'''),
+    (r'''Connect Claude Desktop or Claude Code directly to the DSA VLOP transparency dataset.''',
+     r'''将 Claude Desktop 或 Claude Code 直接连接到 DSA VLOP 透明度数据集。'''),
+    (r'''The native MCP stdio server (<code>mcp_server.py</code>) exposes 8 tools so an AI agent can explore, query, and export the transparency data without writing SQL or reading docs — start with <code>list_tables</code>, build a query, get results back in one turn.''',
+     r'''原生 MCP stdio 服务器（<code>mcp_server.py</code>）提供 8 个工具，让 AI 代理无需编写 SQL 或阅读文档即可探索、查询和导出透明度数据——从 <code>list_tables</code> 开始，构建查询，一次返回结果。'''),
+    (r'''<h2>How it works</h2>''', r'''<h2>工作原理</h2>'''),
+    (r'''The MCP server is a thin HTTP client over the running API: every tool call maps to a real endpoint, so all queries pass through the same <code>compile_query</code> validation as the web UI and the REST API — no SQL is ever accepted, every field and operation is checked against the table registry. The server has a tiny dependency footprint (<code>mcp</code> + <code>httpx</code>) and never imports the FastAPI app.''',
+     r'''MCP 服务器是运行中 API 的轻量 HTTP 客户端：每次工具调用都对应一个真实端点，因此所有查询都经过与 Web UI 和 REST API 相同的 <code>compile_query</code> 验证——永远不接受 SQL，每个字段和操作都根据表注册表进行检查。服务器的依赖项极少（<code>mcp</code> + <code>httpx</code>），从不导入 FastAPI 应用。'''),
+    (r'''<h2>Quick setup</h2>''', r'''<h2>快速设置</h2>'''),
+    (r'''<strong>Install into a separate venv</strong>''', r'''<strong>安装到独立虚拟环境</strong>'''),
+    (r'''<strong>Start the API</strong> (or point at the hosted instance)''', r'''<strong>启动 API</strong>（或指向托管实例）'''),
+    (r'''<strong>Get an API key</strong> (needed for <code>submit_query</code>, <code>poll_job</code>, <code>ask</code>)''',
+     r'''<strong>获取 API 密钥</strong>（<code>submit_query</code>、<code>poll_job</code>、<code>ask</code> 所需）'''),
+    (r'''Call <code>register</code> from within your MCP client, or use the <a href="/portal">Researcher Portal</a> — no sign-in required for demo keys.''',
+     r'''从 MCP 客户端调用 <code>register</code>，或使用<a href="/portal">研究者门户</a>——演示密钥无需登录。'''),
+    (r'''<h2>Tools</h2>''', r'''<h2>工具</h2>'''),
+    (r'''<tr><th>Tool</th><th>Auth</th><th>Description</th></tr>''', r'''<tr><th>工具</th><th>认证</th><th>说明</th></tr>'''),
+    (r'''List all queryable DSA report tables with their dimensions, measures, and available aggregate functions. Start here.''',
+     r'''列出所有可查询的 DSA 报告表及其维度、指标和可用聚合函数。从这里开始。'''),
+    (r'''Describe one table's fields, valid operations, and a runnable example query. Returns the full field registry when an API key is set.''',
+     r'''描述某张表的字段、有效操作和可运行的示例查询。设置 API 密钥后返回完整字段注册表。'''),
+    (r'''Headline aggregates: reporting period, platform count, total Article 16 notices, top platforms and categories.''',
+     r'''主要聚合：报告期、平台数量、第 16 条通知总数、顶级平台和分类。'''),
+    (r'''Run a structured query synchronously via <code>POST /api/explore</code>. Row-capped; no API key needed. Good for quick exploration.''',
+     r'''通过 <code>POST /api/explore</code> 同步运行结构化查询。有行数上限；无需 API 密钥。适合快速探索。'''),
+    (r'''Ask a natural-language question. An LLM translates it into a structured query (never SQL) that runs through the same validation as <code>run_query</code>.''',
+     r'''提出自然语言问题。LLM 将其翻译为结构化查询（非 SQL），经过与 <code>run_query</code> 相同的验证后运行。'''),
+    (r'''Register for a demo API key (calls <code>POST /api/portal/register</code>). Returns <code>{"api_key": "rk_…", "expires_at": "…"}</code>. No sign-in required.''',
+     r'''注册演示 API 密钥（调用 <code>POST /api/portal/register</code>）。返回 <code>{"api_key": "rk_…", "expires_at": "…"}</code>。无需登录。'''),
+    (r'''Submit a structured query to the async job queue (<code>POST /api/query</code>). No row cap. Returns immediately with a <code>job_id</code>.''',
+     r'''将结构化查询提交到异步作业队列（<code>POST /api/query</code>）。无行数上限。立即返回 <code>job_id</code>。'''),
+    (r'''Poll a submitted job until it completes, then return the result rows. Uses exponential back-off; configurable timeout (default 60 s).''',
+     r'''轮询已提交的作业直到完成，然后返回结果行。使用指数退避；可配置超时（默认 60 秒）。'''),
+    (r'''<h2>Configuration</h2>''', r'''<h2>配置</h2>'''),
+    (r'''Base URL of the running API.''', r'''运行中 API 的基础 URL。'''),
+    (r'''Your API key. Required for <code>submit_query</code>, <code>poll_job</code>, <code>ask</code>, and the full <code>describe_table</code> field registry.''',
+     r'''您的 API 密钥。<code>submit_query</code>、<code>poll_job</code>、<code>ask</code> 以及完整的 <code>describe_table</code> 字段注册表所需。'''),
+    (r'''Per-request timeout in seconds.''', r'''每请求超时时间（秒）。'''),
+    (r'''<a href="https://github.com/krMaynard/transparency-report-api/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">Full MCP documentation on GitHub →</a>''',
+     r'''<a href="https://github.com/krMaynard/transparency-report-api/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">GitHub 上的完整 MCP 文档 →</a>'''),
+    (r'''<p><a href="/">Home</a> · <a href="/reports">DSA Reports</a> · <a href="/portal">Researcher Portal</a> · <a href="/docs">API Reference</a></p>''',
+     r'''<p><a href="/">首页</a> · <a href="/reports">DSA 报告</a> · <a href="/portal">研究者门户</a> · <a href="/docs">API 参考</a></p>'''),
+]
+
 COMMON["ko"] = [
     (r'''>Skip to content</a>''',
      r'''>본문 바로가기</a>'''),
@@ -2314,6 +2572,9 @@ COMMON["ko"] = [
      r'''>개인정보</a>'''),
     (r'''      Privacy
     </a>''', r'''      개인정보
+    </a>'''),
+    (r'''      MCP Server
+    </a>''', r'''      MCP 서버
     </a>'''),
 ]
 PAGES["ko"] = {}
@@ -2824,6 +3085,54 @@ PAGES["ko"]["privacy.html"] = [
      r'''<p><a href="/">홈</a> ·'''),
     (r'''Privacy Policy''',
      r'''개인정보 처리방침'''),
+]
+
+PAGES["ko"]["mcp.html"] = [
+    (r'''Connect Claude Desktop or Claude Code directly to the DSA VLOP transparency dataset via the native MCP stdio server.''',
+     r'''네이티브 MCP stdio 서버를 통해 Claude Desktop 또는 Claude Code를 DSA VLOP 투명성 데이터셋에 직접 연결하세요.'''),
+    (r'''<p class="page-eyebrow">Integrations</p>''', r'''<p class="page-eyebrow">통합</p>'''),
+    (r'''<h1>MCP Server</h1>''', r'''<h1>MCP 서버</h1>'''),
+    (r'''Connect Claude Desktop or Claude Code directly to the DSA VLOP transparency dataset.''',
+     r'''Claude Desktop 또는 Claude Code를 DSA VLOP 투명성 데이터셋에 직접 연결하세요.'''),
+    (r'''The native MCP stdio server (<code>mcp_server.py</code>) exposes 8 tools so an AI agent can explore, query, and export the transparency data without writing SQL or reading docs — start with <code>list_tables</code>, build a query, get results back in one turn.''',
+     r'''네이티브 MCP stdio 서버(<code>mcp_server.py</code>)는 8개의 도구를 제공하여 AI 에이전트가 SQL을 작성하거나 문서를 읽지 않고도 투명성 데이터를 탐색·쿼리·내보내기 할 수 있습니다. <code>list_tables</code>부터 시작해 쿼리를 구성하고 한 번에 결과를 받으세요.'''),
+    (r'''<h2>How it works</h2>''', r'''<h2>작동 방식</h2>'''),
+    (r'''The MCP server is a thin HTTP client over the running API: every tool call maps to a real endpoint, so all queries pass through the same <code>compile_query</code> validation as the web UI and the REST API — no SQL is ever accepted, every field and operation is checked against the table registry. The server has a tiny dependency footprint (<code>mcp</code> + <code>httpx</code>) and never imports the FastAPI app.''',
+     r'''MCP 서버는 실행 중인 API 위에 있는 경량 HTTP 클라이언트입니다. 모든 도구 호출은 실제 엔드포인트에 매핑되므로 모든 쿼리는 웹 UI 및 REST API와 동일한 <code>compile_query</code> 유효성 검사를 통과합니다. SQL은 절대 허용되지 않으며 모든 필드와 작업은 테이블 레지스트리에 대해 검증됩니다. 서버의 의존성은 최소화되어 있으며(<code>mcp</code> + <code>httpx</code>) FastAPI 앱을 임포트하지 않습니다.'''),
+    (r'''<h2>Quick setup</h2>''', r'''<h2>빠른 설정</h2>'''),
+    (r'''<strong>Install into a separate venv</strong>''', r'''<strong>별도 가상 환경에 설치</strong>'''),
+    (r'''<strong>Start the API</strong> (or point at the hosted instance)''', r'''<strong>API 시작</strong> (또는 호스팅된 인스턴스 지정)'''),
+    (r'''<strong>Get an API key</strong> (needed for <code>submit_query</code>, <code>poll_job</code>, <code>ask</code>)''',
+     r'''<strong>API 키 발급</strong> (<code>submit_query</code>, <code>poll_job</code>, <code>ask</code>에 필요)'''),
+    (r'''Call <code>register</code> from within your MCP client, or use the <a href="/portal">Researcher Portal</a> — no sign-in required for demo keys.''',
+     r'''MCP 클라이언트 내에서 <code>register</code>를 호출하거나 <a href="/portal">연구자 포털</a>을 사용하세요. 데모 키는 로그인이 필요 없습니다.'''),
+    (r'''<h2>Tools</h2>''', r'''<h2>도구</h2>'''),
+    (r'''<tr><th>Tool</th><th>Auth</th><th>Description</th></tr>''', r'''<tr><th>도구</th><th>인증</th><th>설명</th></tr>'''),
+    (r'''List all queryable DSA report tables with their dimensions, measures, and available aggregate functions. Start here.''',
+     r'''쿼리 가능한 모든 DSA 보고서 테이블과 해당 차원, 측정값 및 사용 가능한 집계 함수를 나열합니다. 여기서 시작하세요.'''),
+    (r'''Describe one table's fields, valid operations, and a runnable example query. Returns the full field registry when an API key is set.''',
+     r'''테이블의 필드, 유효한 작업, 실행 가능한 예시 쿼리를 설명합니다. API 키가 설정된 경우 전체 필드 레지스트리를 반환합니다.'''),
+    (r'''Headline aggregates: reporting period, platform count, total Article 16 notices, top platforms and categories.''',
+     r'''주요 집계: 보고 기간, 플랫폼 수, 제16조 통지 총계, 상위 플랫폼 및 카테고리.'''),
+    (r'''Run a structured query synchronously via <code>POST /api/explore</code>. Row-capped; no API key needed. Good for quick exploration.''',
+     r'''<code>POST /api/explore</code>를 통해 구조화 쿼리를 동기적으로 실행합니다. 행 수 제한 있음; API 키 불필요. 빠른 탐색에 적합합니다.'''),
+    (r'''Ask a natural-language question. An LLM translates it into a structured query (never SQL) that runs through the same validation as <code>run_query</code>.''',
+     r'''자연어 질문을 합니다. LLM이 이를 구조화 쿼리(SQL 아님)로 변환하여 <code>run_query</code>와 동일한 유효성 검사를 통과합니다.'''),
+    (r'''Register for a demo API key (calls <code>POST /api/portal/register</code>). Returns <code>{"api_key": "rk_…", "expires_at": "…"}</code>. No sign-in required.''',
+     r'''데모 API 키에 등록합니다(<code>POST /api/portal/register</code> 호출). <code>{"api_key": "rk_…", "expires_at": "…"}</code>를 반환합니다. 로그인 불필요.'''),
+    (r'''Submit a structured query to the async job queue (<code>POST /api/query</code>). No row cap. Returns immediately with a <code>job_id</code>.''',
+     r'''구조화 쿼리를 비동기 작업 대기열에 제출합니다(<code>POST /api/query</code>). 행 수 제한 없음. <code>job_id</code>와 함께 즉시 반환합니다.'''),
+    (r'''Poll a submitted job until it completes, then return the result rows. Uses exponential back-off; configurable timeout (default 60 s).''',
+     r'''제출된 작업이 완료될 때까지 폴링한 후 결과 행을 반환합니다. 지수 백오프 사용; 구성 가능한 타임아웃(기본 60초).'''),
+    (r'''<h2>Configuration</h2>''', r'''<h2>구성</h2>'''),
+    (r'''Base URL of the running API.''', r'''실행 중인 API의 기본 URL.'''),
+    (r'''Your API key. Required for <code>submit_query</code>, <code>poll_job</code>, <code>ask</code>, and the full <code>describe_table</code> field registry.''',
+     r'''API 키. <code>submit_query</code>, <code>poll_job</code>, <code>ask</code> 및 전체 <code>describe_table</code> 필드 레지스트리에 필요합니다.'''),
+    (r'''Per-request timeout in seconds.''', r'''요청당 타임아웃(초).'''),
+    (r'''<a href="https://github.com/krMaynard/transparency-report-api/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">Full MCP documentation on GitHub →</a>''',
+     r'''<a href="https://github.com/krMaynard/transparency-report-api/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">GitHub의 전체 MCP 문서 →</a>'''),
+    (r'''<p><a href="/">Home</a> · <a href="/reports">DSA Reports</a> · <a href="/portal">Researcher Portal</a> · <a href="/docs">API Reference</a></p>''',
+     r'''<p><a href="/">홈</a> · <a href="/reports">DSA 보고서</a> · <a href="/portal">연구자 포털</a> · <a href="/docs">API 레퍼런스</a></p>'''),
 ]
 
 

@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MCP Server — Transparency Report API</title>
+<meta name="description" content="Conecta Claude Desktop o Claude Code directamente al conjunto de datos de transparencia DSA VLOP a través del servidor MCP stdio nativo." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem('theme');
+      if (!t) t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); }
+  })();
+</script>
+<style>
+  :root {
+    --bg: #f2f2f2; --panel: #fff; --panel2: #f5f5f5; --border: #e8e8e8;
+    --fg: #333; --muted: #666; --accent: #2a9d8f; --accent-dark: #1e7268; --accent2: #1e7268;
+    --on-accent: #fff; --shadow: rgba(0,0,0,.07);
+    --mono: ui-monospace, SFMono-Regular, "DejaVu Sans Mono", Menlo, monospace;
+    --topbar-h: 52px; --header-h: var(--topbar-h);
+    --sidebar-w: 220px;
+  }
+  [data-theme="dark"] {
+    --bg: #15181c; --panel: #1d2025; --panel2: #2a2f35; --border: #2c3138;
+    --fg: #e8e8e8; --muted: #b0b0b0; --accent: #4ec1b1; --accent-dark: #6ed3c4; --accent2: #6ed3c4;
+    --on-accent: #08110f; --shadow: rgba(0,0,0,.45);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg);
+    color: var(--fg); font: 15px/1.6 'Open Sans', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── Site banner ─────────────────────────────────────────────── */
+  .page-header { position: sticky; top: 0; z-index: 200; }
+  .site-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.9rem 1.5rem; background: var(--panel); border-bottom: 1px solid var(--border);
+  }
+  .site-nav .nav-name { font-weight: 700; font-size: 1rem; color: var(--fg); text-decoration: none; }
+  .site-nav .nav-links { display: flex; gap: 1.4rem; align-items: center; }
+  .site-nav .nav-links a { color: var(--muted); text-decoration: none; font-size: .9rem; }
+  .site-nav .nav-links a:hover { color: var(--accent); }
+  .nav-right { display: flex; align-items: center; gap: 1.4rem; }
+
+  /* ── Language switcher ───────────────────────────────────────── */
+  .lang-switcher { position: relative; }
+  .lang-switcher > summary {
+    list-style: none; cursor: pointer; display: flex; align-items: center; gap: 4px;
+    font-size: .85rem; color: var(--muted); border: 1px solid var(--border);
+    border-radius: 6px; padding: .3rem .55rem; background: var(--panel); transition: border-color .15s, color .15s;
+  }
+  .lang-switcher > summary::-webkit-details-marker { display: none; }
+  .lang-switcher > summary:hover,
+  .lang-switcher[open] > summary { border-color: var(--accent); color: var(--accent); }
+  .lang-switcher .lang-globe { width: 17px; height: 17px; }
+  .lang-switcher .lang-caret { width: 11px; height: 11px; opacity: .75; transition: transform .2s ease; }
+  .lang-switcher[open] .lang-caret { transform: rotate(180deg); }
+  .lang-menu {
+    position: absolute; right: 0; top: calc(100% + 6px); margin: 0; padding: 4px 0;
+    list-style: none; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 8px; box-shadow: 0 4px 14px var(--shadow); min-width: 130px; z-index: 300;
+  }
+  .lang-menu a { display: flex; align-items: center; justify-content: space-between; gap: 6px;
+    padding: .42rem .85rem; text-decoration: none; color: var(--fg); font-size: .875rem; white-space: nowrap; }
+  .lang-menu a:hover { background: var(--panel2); }
+  .lang-menu a.is-current { color: var(--accent); }
+  .lang-check { width: 14px; height: 14px; flex-shrink: 0; }
+
+  /* ── Top bar ─────────────────────────────────────────────────── */
+  .topbar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 1.25rem; height: var(--topbar-h); background: var(--panel); border-bottom: 1px solid var(--border);
+  }
+  .topbar-left { display: flex; align-items: center; gap: .75rem; }
+  .topbar-brand { font-weight: 600; font-size: .95rem; color: var(--fg); text-decoration: none; }
+  .topbar-brand:hover { color: var(--accent); }
+  .hamburger {
+    display: none; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 6px;
+    background: transparent; color: var(--fg); cursor: pointer;
+  }
+  .hamburger svg { width: 18px; height: 18px; }
+  .theme-toggle {
+    display: flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 6px;
+    background: transparent; color: var(--muted); cursor: pointer;
+  }
+  .theme-toggle:hover { color: var(--accent); border-color: var(--accent); }
+  .theme-icon-light { display: none; }
+  [data-theme="dark"] .theme-icon-dark  { display: none; }
+  [data-theme="dark"] .theme-icon-light { display: block; }
+  .theme-icon-dark, .theme-icon-light { width: 18px; height: 18px; }
+
+  /* ── App layout ──────────────────────────────────────────────── */
+  .app-body { display: flex; min-height: calc(100vh - var(--header-h)); }
+  .sidebar {
+    width: var(--sidebar-w); flex-shrink: 0;
+    background: var(--panel); border-right: 1px solid var(--border);
+    position: sticky; top: var(--header-h); height: calc(100vh - var(--header-h));
+    overflow-y: auto; display: flex; flex-direction: column;
+  }
+  .sidebar nav { flex: 1; padding: 0.5rem 0; }
+  .nav-section { font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+    color: var(--muted); padding: 0.75rem 1rem 0.3rem; }
+  .nav-hr { border: none; border-top: 1px solid var(--border); margin: 0.3rem 0; }
+  .nav-item {
+    display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 1rem;
+    color: var(--fg); text-decoration: none; font-size: 13.5px;
+    border-radius: 0; transition: background .12s, color .12s;
+    position: relative;
+  }
+  .nav-item svg { flex-shrink: 0; color: var(--muted); }
+  .nav-item:hover { background: var(--panel2); color: var(--accent); }
+  .nav-item:hover svg { color: var(--accent); }
+  .nav-item.is-active {
+    color: var(--accent); font-weight: 600;
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+  }
+  [data-theme="dark"] .nav-item.is-active { color: var(--accent); }
+  .nav-item.is-active svg { color: var(--accent); }
+  .nav-item.is-active::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--accent); border-radius: 0 2px 2px 0;
+  }
+  .nav-item.is-ext { color: var(--muted); font-size: 12.5px; }
+  .nav-item.is-ext:hover { color: var(--accent); }
+  .sidebar-footer { padding: 0.75rem 1rem; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+  .sidebar-footer a { color: var(--muted); text-decoration: none; }
+  .sidebar-footer a:hover { color: var(--accent); }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.3); z-index: 205; }
+  .sidebar-overlay.is-open { display: block; }
+
+  /* ── Content ─────────────────────────────────────────────────── */
+  .main-area { flex: 1; min-width: 0; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 32px 2rem 60px; }
+  .page-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 0.4rem; }
+  h1 { margin: 0 0 0.5rem; font-size: 1.75rem; line-height: 1.2; }
+  .page-subtitle { color: var(--muted); font-size: 14px; margin: 0 0 2rem; }
+  h2 { font-size: 1.15rem; margin: 2rem 0 0.6rem; }
+  h3 { font-size: 1rem; margin: 1.4rem 0 0.4rem; }
+  p { margin: 0 0 0.9rem; }
+  code { font-family: var(--mono); font-size: 0.875em; background: var(--panel2);
+    padding: 0.1em 0.35em; border-radius: 4px; }
+  pre { background: var(--panel2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 1rem 1.1rem; overflow-x: auto; font-family: var(--mono); font-size: 0.85em;
+    line-height: 1.55; margin: 0 0 1.2rem; }
+  pre code { background: none; padding: 0; font-size: inherit; }
+  .callout { background: color-mix(in srgb, var(--accent) 8%, transparent);
+    border-left: 3px solid var(--accent); border-radius: 0 6px 6px 0;
+    padding: 0.75rem 1rem; margin: 0 0 1.5rem; font-size: 14px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 0 0 1.2rem; }
+  th { background: var(--panel2); text-align: left; padding: 0.5rem 0.75rem; font-weight: 600;
+    border-bottom: 2px solid var(--border); }
+  td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .step { display: flex; gap: 0.9rem; margin: 0 0 1rem; }
+  .step-num { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%;
+    background: var(--accent); color: var(--on-accent); font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+  .step-body { flex: 1; }
+  .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 0 0 1.2rem; }
+  .config-card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; }
+  .config-card h3 { margin: 0 0 0.6rem; font-size: 0.9rem; }
+  .badge { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+  .badge-pub { background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent-dark); }
+  .badge-key { background: color-mix(in srgb, #e07b39 15%, transparent); color: #b05820; }
+  [data-theme="dark"] .badge-key { color: #f0976a; }
+  a { color: var(--accent); }
+  .skip-link { position: absolute; left: -9999px; top: 8px; z-index: 9999; padding: 6px 12px;
+    background: var(--accent); color: var(--on-accent); border-radius: 4px; font-size: 14px; text-decoration: none; }
+  .skip-link:focus { left: 1rem; }
+  footer { color: var(--muted); font-size: 13px; margin-top: 8px; }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 720px) {
+    .hamburger { display: flex; }
+    .sidebar { position: fixed; left: 0; top: var(--header-h); bottom: 0; z-index: 210; transform: translateX(calc(-1 * var(--sidebar-w))); }
+    .sidebar.is-open { transform: translateX(0); }
+    .wrap { padding: 24px 1rem 40px; }
+    .config-grid { grid-template-columns: 1fr; }
+    .lang-switcher > summary > span { display: none; }
+    .lang-switcher > summary { padding: .3rem .42rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Saltar al contenido</a>
+
+<!-- ── Site banner ──────────────────────────────────────────────────────── -->
+<div class="page-header">
+<nav class="site-nav" aria-label="Sitio">
+  <a href="https://kieranmaynard.com/" class="nav-name">Kieran Maynard</a>
+  <div class="nav-right">
+    <div class="nav-links">
+      <a href="https://kieranmaynard.com/work.html">Trabajo</a>
+      <a href="https://kieranmaynard.com/transparency.html">Productos</a>
+      <a href="https://kieranmaynard.com/consulting.html">Consultoría</a>
+      <a href="https://kieranmaynard.com/blog.html">Blog</a>
+      <a href="https://kieranmaynard.com/contact.html">Contacto</a>
+    </div>
+    <details class="lang-switcher">
+      <summary class="lang-current" aria-label="Idioma" title="Idioma">
+        <svg class="lang-globe" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.7 2.6 15.3 0 18"/><path d="M12 3c-2.6 2.7-2.6 15.3 0 18"/></svg>
+        <span>Español</span>
+        <svg class="lang-caret" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>
+      </summary>
+      <ul class="lang-menu">
+        <li><a class="lang-opt" href="/mcp"><span>English</span></a></li>
+        <li><a class="lang-opt is-current" href="/es/mcp" aria-current="page"><span>Español</span><svg class="lang-check" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M3.5 8.5l3 3 6-7"/></svg></a></li>
+        <li><a class="lang-opt" href="/fr/mcp"><span>Français</span></a></li>
+        <li><a class="lang-opt" href="/de/mcp"><span>Deutsch</span></a></li>
+        <li><a class="lang-opt" href="/ja/mcp"><span>日本語</span></a></li>
+        <li><a class="lang-opt" href="/zh/mcp"><span>中文</span></a></li>
+        <li><a class="lang-opt" href="/ko/mcp"><span>한국어</span></a></li>
+      </ul>
+    </details>
+  </div>
+</nav>
+
+<header class="topbar">
+  <div class="topbar-left">
+    <button type="button" class="hamburger" id="hamburger"
+            aria-label="Alternar navegación" aria-expanded="false" aria-controls="sidebar">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <line x1="3" y1="5" x2="17" y2="5"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="15" x2="17" y2="15"/>
+      </svg>
+    </button>
+    <a href="/es/" class="topbar-brand">Transparency Report API</a>
+  </div>
+  <div class="topbar-right">
+    <button type="button" class="theme-toggle" aria-label="Alternar modo oscuro" data-theme-toggle>
+      <svg class="theme-icon-dark" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+      <svg class="theme-icon-light" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/></svg>
+    </button>
+  </div>
+</header>
+</div>
+
+<div class="app-body">
+
+<aside class="sidebar" id="sidebar" aria-label="Navegación de la aplicación">
+  <nav>
+    <div class="nav-section">Conjuntos de datos</div>
+
+    <a href="/es/reports" class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <rect x="1" y="9" width="3" height="6" rx="1"/><rect x="6" y="5" width="3" height="10" rx="1"/><rect x="11" y="1" width="3" height="14" rx="1"/>
+      </svg>
+      Informes DSA
+    </a>
+
+    <a href="/es/removals" class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <circle cx="8" cy="8" r="6.25"/>
+        <path d="M5.5 10.5l5-5M5.5 5.5l5 5" stroke-linecap="round"/>
+      </svg>
+      Retiradas gubernamentales
+    </a>
+
+    <hr class="nav-hr">
+    <div class="nav-section">Herramientas</div>
+
+    <a href="/es/portal" class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <path d="M8 1a3.5 3.5 0 1 0 0 7A3.5 3.5 0 0 0 8 1zM8 9C4.5 9 1.5 10.6 1.5 12.5v1a.5.5 0 0 0 .5.5h12a.5.5 0 0 0 .5-.5v-1C14.5 10.6 11.5 9 8 9z"/>
+      </svg>
+      Portal de investigadores
+    </a>
+
+    <a href="/docs" class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+        <path d="M5 4L1.5 8 5 12M11 4l3.5 4L11 12M9 3l-2 10"/>
+      </svg>
+      Referencia de la API
+    </a>
+
+    <a href="/es/mcp" class="nav-item is-active" aria-current="page">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <rect x="1" y="4" width="6" height="5" rx="1"/>
+        <rect x="9" y="7" width="6" height="5" rx="1"/>
+        <path d="M4 9v3M12 4v3M4 12h8" stroke-linecap="round"/>
+      </svg>
+      Servidor MCP
+    </a>
+
+    <a href="/es/privacy" class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <path d="M8 1 3 3v4.5c0 3 2.1 5.8 5 6.5 2.9-.7 5-3.5 5-6.5V3L8 1z"/>
+      </svg>
+      Privacidad
+    </a>
+
+    <hr class="nav-hr">
+
+    <a href="https://kieranmaynard.com/" class="nav-item is-ext" target="_blank" rel="noopener noreferrer">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <path d="M9 1h6v6l-2-2-5 5-1.5-1.5 5-5L9 1zM2 5h4v1.5H3.5v7h7V10H12v4H2V5z"/>
+      </svg>
+      kieranmaynard.com
+    </a>
+
+    <a href="https://github.com/krMaynard/transparency-report-api" class="nav-item is-ext" target="_blank" rel="noopener noreferrer">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <path d="M8 .5a7.5 7.5 0 0 0-2.371 14.617c.375.069.512-.163.512-.362 0-.178-.006-.651-.01-1.278-2.086.454-2.526-1.006-2.526-1.006-.341-.866-.832-1.097-.832-1.097-.68-.465.051-.456.051-.456.752.053 1.147.772 1.147.772.668 1.145 1.753.814 2.18.623.068-.484.261-.814.475-1.001-1.665-.19-3.416-.833-3.416-3.707 0-.819.293-1.488.772-2.013-.077-.19-.334-.952.074-1.986 0 0 .629-.201 2.061.768a7.182 7.182 0 0 1 1.876-.252c.637.003 1.278.086 1.876.252 1.431-.969 2.059-.768 2.059-.768.409 1.034.152 1.796.075 1.986.481.525.771 1.194.771 2.013 0 2.882-1.754 3.516-3.424 3.702.269.232.508.69.508 1.39 0 1.003-.009 1.813-.009 2.059 0 .201.135.435.516.361A7.501 7.501 0 0 0 8 .5z"/>
+      </svg>
+      GitHub
+    </a>
+  </nav>
+  <div class="sidebar-footer">Por <a href="https://kieranmaynard.com/">Kieran Maynard</a> · <a href="/es/privacy">Privacidad</a></div>
+</aside>
+
+<!-- Mobile overlay -->
+<div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
+
+<div class="main-area">
+<div class="wrap">
+
+<main id="main" tabindex="-1">
+
+  <p class="page-eyebrow">Integraciones</p>
+  <h1>Servidor MCP</h1>
+  <p class="page-subtitle">Conecta Claude Desktop o Claude Code directamente al conjunto de datos de transparencia DSA VLOP.</p>
+
+  <div class="callout">
+    El servidor MCP stdio nativo (<code>mcp_server.py</code>) expone 8 herramientas para que un agente de IA explore, consulte y exporte los datos de transparencia sin escribir SQL ni leer documentación: empieza con <code>list_tables</code>, construye una consulta y obtén los resultados en un turno.
+  </div>
+
+  <h2>Cómo funciona</h2>
+  <p>El servidor MCP es un cliente HTTP ligero sobre la API en ejecución: cada llamada a herramienta corresponde a un endpoint real, por lo que todas las consultas pasan por la misma validación <code>compile_query</code> que la interfaz web y la API REST — nunca se acepta SQL, y cada campo y operación se verifica contra el registro de tablas. El servidor tiene una huella de dependencias mínima (<code>mcp</code> + <code>httpx</code>) y nunca importa la aplicación FastAPI.</p>
+
+  <pre>Claude Desktop / Claude Code
+        ↕ stdio (MCP)
+   mcp_server.py
+        ↕ HTTP (httpx)
+   Transparency Report API  →  SQLite DB</pre>
+
+  <h2>Configuración rápida</h2>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <strong>Instalar en un entorno virtual separado</strong>
+      <pre>python -m venv .venv-mcp
+source .venv-mcp/bin/activate   # Windows: .venv-mcp\Scripts\activate
+pip install mcp httpx</pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <strong>Iniciar la API</strong> (o apuntar a la instancia alojada)
+      <pre>uvicorn main:app --port 8000</pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <strong>Obtener una clave de API</strong> (necesaria para <code>submit_query</code>, <code>poll_job</code>, <code>ask</code>)
+      <p>Llama a <code>register</code> desde tu cliente MCP, o usa el <a href="/es/portal">Portal de investigadores</a> — no se requiere inicio de sesión para claves de demostración.</p>
+    </div>
+  </div>
+
+  <h2>Herramientas</h2>
+  <table aria-label="MCP tools">
+    <tr><th>Herramienta</th><th>Autenticación</th><th>Descripción</th></tr>
+    <tr>
+      <td><code>list_tables</code></td>
+      <td><span class="badge badge-pub">public</span></td>
+      <td>Lista todas las tablas de informes DSA consultables con sus dimensiones, medidas y funciones de agregación disponibles. Empieza aquí.</td>
+    </tr>
+    <tr>
+      <td><code>describe_table</code></td>
+      <td><span class="badge badge-pub">public</span></td>
+      <td>Describe los campos de una tabla, las operaciones válidas y una consulta de ejemplo ejecutable. Devuelve el registro completo de campos cuando se configura una clave de API.</td>
+    </tr>
+    <tr>
+      <td><code>dataset_overview</code></td>
+      <td><span class="badge badge-pub">public</span></td>
+      <td>Agregados principales: período de informes, recuento de plataformas, total de notificaciones del artículo 16, principales plataformas y categorías.</td>
+    </tr>
+    <tr>
+      <td><code>run_query</code></td>
+      <td><span class="badge badge-pub">public</span></td>
+      <td>Ejecuta una consulta estructurada de forma síncrona a través de <code>POST /api/explore</code>. Con límite de filas; sin necesidad de clave de API. Ideal para exploración rápida.</td>
+    </tr>
+    <tr>
+      <td><code>ask</code></td>
+      <td><span class="badge badge-key">API key</span></td>
+      <td>Haz una pregunta en lenguaje natural. Un LLM la traduce a una consulta estructurada (nunca SQL) que pasa por la misma validación que <code>run_query</code>.</td>
+    </tr>
+    <tr>
+      <td><code>register</code></td>
+      <td><span class="badge badge-pub">public</span></td>
+      <td>Regístrate para obtener una clave de API de demostración (llama a <code>POST /api/portal/register</code>). Devuelve <code>{"api_key": "rk_…", "expires_at": "…"}</code>. No se requiere inicio de sesión.</td>
+    </tr>
+    <tr>
+      <td><code>submit_query</code></td>
+      <td><span class="badge badge-key">API key</span></td>
+      <td>Envía una consulta estructurada a la cola de trabajos asíncronos (<code>POST /api/query</code>). Sin límite de filas. Devuelve inmediatamente un <code>job_id</code>.</td>
+    </tr>
+    <tr>
+      <td><code>poll_job</code></td>
+      <td><span class="badge badge-key">API key</span></td>
+      <td>Sondea un trabajo enviado hasta que se completa y devuelve las filas de resultados. Usa retroceso exponencial; tiempo de espera configurable (predeterminado 60 s).</td>
+    </tr>
+  </table>
+
+  <h2>Configuración</h2>
+
+  <div class="config-grid">
+    <div class="config-card">
+      <h3>Claude Desktop</h3>
+      <pre>{
+  "mcpServers": {
+    "transparency": {
+      "command": "/path/to/.venv-mcp/bin/python",
+      "args": ["/path/to/mcp_server.py"],
+      "env": {
+        "TRANSPARENCY_API_URL": "http://127.0.0.1:8000",
+        "TRANSPARENCY_API_KEY": "your-key"
+      }
+    }
+  }
+}</pre>
+    </div>
+    <div class="config-card">
+      <h3>Claude Code</h3>
+      <pre>claude mcp add transparency \
+  /path/to/.venv-mcp/bin/python \
+  /path/to/mcp_server.py \
+  -e TRANSPARENCY_API_URL=http://127.0.0.1:8000 \
+  -e TRANSPARENCY_API_KEY=your-key</pre>
+    </div>
+  </div>
+
+  <table aria-label="Environment variables">
+    <tr><th>Variable</th><th>Default</th><th>Description</th></tr>
+    <tr>
+      <td><code>TRANSPARENCY_API_URL</code></td>
+      <td><code>http://127.0.0.1:8000</code></td>
+      <td>URL base de la API en ejecución.</td>
+    </tr>
+    <tr>
+      <td><code>TRANSPARENCY_API_KEY</code></td>
+      <td>—</td>
+      <td>Tu clave de API. Necesaria para <code>submit_query</code>, <code>poll_job</code>, <code>ask</code> y el registro completo de campos de <code>describe_table</code>.</td>
+    </tr>
+    <tr>
+      <td><code>TRANSPARENCY_API_TIMEOUT</code></td>
+      <td><code>30</code></td>
+      <td>Tiempo de espera por solicitud en segundos.</td>
+    </tr>
+  </table>
+
+  <p><a href="https://github.com/krMaynard/transparency-report-api/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">Documentación completa de MCP en GitHub →</a></p>
+
+  <p><a href="/es/">Inicio</a> · <a href="/es/reports">Informes DSA</a> · <a href="/es/portal">Portal de investigadores</a> · <a href="/docs">Referencia de la API</a></p>
+
+</main>
+
+  <footer>
+    <p>Built by <a href="https://kieranmaynard.com/">Kieran Maynard</a> · Data: <a href="https://github.com/krMaynard/krMaynard.github.io" target="_blank" rel="noopener noreferrer">krMaynard/krMaynard.github.io</a> · <a href="/api">API</a> · <a href="https://github.com/krMaynard/transparency-report-api" target="_blank" rel="noopener noreferrer">GitHub</a> · <a href="/es/privacy">Privacidad</a></p>
+  </footer>
+
+</div>
+</div><!-- /.main-area -->
+
+</div><!-- /.app-body -->
+
+<script>
+(function () {
+  var btn = document.querySelector('[data-theme-toggle]');
+  if (btn) {
+    btn.addEventListener('click', function () {
+      var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('theme', next); } catch (e) {}
+    });
+  }
+    // Keep --header-h in sync with the actual rendered height of the site
+  // banner + topbar (which varies as the nav links wrap on narrow widths),
+  // so the fixed/sticky sidebar starts right below it instead of overlapping.
+  var pageHeader = document.querySelector('.page-header');
+  if (pageHeader) {
+    var syncHeaderHeight = function () {
+      document.documentElement.style.setProperty('--header-h', pageHeader.offsetHeight + 'px');
+    };
+    syncHeaderHeight();
+    if (window.ResizeObserver) {
+      new ResizeObserver(syncHeaderHeight).observe(pageHeader);
+    } else {
+      window.addEventListener('resize', syncHeaderHeight);
+    }
+  }
+  var hamburger = document.getElementById('hamburger');
+  var sidebar   = document.getElementById('sidebar');
+  var overlay   = document.getElementById('sidebar-overlay');
+  if (!hamburger || !sidebar || !overlay) return;
+  function openSidebar()  { sidebar.classList.add('is-open'); overlay.classList.add('is-open'); hamburger.setAttribute('aria-expanded','true'); overlay.removeAttribute('aria-hidden'); }
+  function closeSidebar() { sidebar.classList.remove('is-open'); overlay.classList.remove('is-open'); hamburger.setAttribute('aria-expanded','false'); overlay.setAttribute('aria-hidden','true'); }
+  hamburger.addEventListener('click', function () { sidebar.classList.contains('is-open') ? closeSidebar() : openSidebar(); });
+  overlay.addEventListener('click', closeSidebar);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && sidebar.classList.contains('is-open')) closeSidebar(); });
+})();
+</script>
+
+</body>
+</html>
