@@ -32,6 +32,27 @@ _DEFAULT_GR_SOURCE = os.getenv(
 )
 _DEFAULT_DB = os.getenv("DB_PATH", os.path.join(HERE, "demo.db"))
 
+
+def _category_label(code: str, labels: dict[str, str]) -> str:
+    """Human label for a category code.
+
+    Use the dataset's explicit label when present; otherwise normalize the raw
+    code (e.g. ``KEYWORD_OTHER_..._OR_DATA_VIOLATION``) into a readable label
+    instead of surfacing the SCREAMING_SNAKE_CASE code in the UI — strip the
+    namespace prefix, drop underscores, and sentence-case it.
+    """
+    explicit = labels.get(code)
+    if explicit:
+        return explicit
+    s = code
+    for prefix in ("STATEMENT_CATEGORY_", "KEYWORD_"):
+        if s.startswith(prefix):
+            s = s[len(prefix):]
+            break
+    s = s.replace("_", " ").strip().lower()
+    return (s[:1].upper() + s[1:]) if s else code
+
+
 SCHEMA = """
 CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT);
 
@@ -210,7 +231,7 @@ def build_db(data: dict[str, Any], db_path: str) -> dict[str, int]:
         labels = data.get("category_labels", {})
         conn.executemany(
             "INSERT INTO categories (id, code, label) VALUES (?, ?, ?)",
-            [(i, code, labels.get(code, code)) for i, code in enumerate(categories)],
+            [(i, code, _category_label(code, labels)) for i, code in enumerate(categories)],
         )
 
         for table, key in (("sections", "sections"), ("indicators", "indicators"),

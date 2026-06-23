@@ -211,6 +211,29 @@ class TestSchema:
         assert client.get("/api/schema/nonexistent", headers=ALICE).status_code == 404
 
 
+# ── Category label normalization ──────────────────────────────────────────────
+
+class TestCategoryLabels:
+    def test_explicit_label_is_used(self):
+        import seed
+        assert seed._category_label("KEYWORD_DEFAMATION", {"KEYWORD_DEFAMATION": "Defamation"}) == "Defamation"
+
+    def test_unlabelled_code_is_normalized(self):
+        import seed
+        # No explicit label → readable text, not the raw SCREAMING_SNAKE_CASE code.
+        out = seed._category_label(
+            "KEYWORD_OTHER_INTELLECTUAL_PROPERTY_INFRINGEMENTS_THIRD_PARTY_VIOLATION_OR_DATA_VIOLATION", {})
+        assert out == "Other intellectual property infringements third party violation or data violation"
+        assert "_" not in out
+
+    def test_no_category_label_is_a_raw_code(self):
+        # Every category served by the API has a human label, never a bare code.
+        import re
+        r = client.get("/api/overview")
+        for row in r.json()["by_category"]:
+            assert not re.fullmatch(r"[A-Z0-9_]+", row["category"]), row["category"]
+
+
 # ── Fields discovery ──────────────────────────────────────────────────────────
 
 class TestFields:
