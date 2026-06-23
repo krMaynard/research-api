@@ -765,15 +765,16 @@ display: flex; align-items: center; justify-content: space-between;
     }
     count.textContent = rows.length + ' filas';
     tbody.innerHTML = rows.map(function(r) {
-      var removed = (r[5]||0) + (r[6]||0) + (r[7]||0);
+      // cols: period, country, requestor, product, reason, reqs(5), items(6), legal(7), policy(8), already(9)
+      var removed = (r[7]||0) + (r[8]||0) + (r[9]||0);
       return '<tr>'
         + '<td>' + esc(r[0]) + '</td>'
         + '<td>' + esc(r[1]) + '</td>'
         + '<td>' + esc(r[2]) + '</td>'
         + '<td>' + esc(r[3]) + '</td>'
         + '<td>' + esc(r[4]) + '</td>'
-        + '<td class="num">' + fmt(r[8]) + '</td>'
-        + '<td class="num">' + fmt(r[9]) + '</td>'
+        + '<td class="num">' + fmt(r[5]) + '</td>'
+        + '<td class="num">' + fmt(r[6]) + '</td>'
         + '<td class="num">' + fmt(removed) + '</td>'
         + '</tr>';
     }).join('');
