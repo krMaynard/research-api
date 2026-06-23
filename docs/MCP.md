@@ -65,7 +65,7 @@ pip install -r requirements-mcp.txt
 # Point it at a running server (start one with `make serve` in another terminal).
 export TRANSPARENCY_API_URL=http://127.0.0.1:8000
 # Optional — enables `ask` and the full describe_table registry:
-export TRANSPARENCY_API_KEY=alice
+export TRANSPARENCY_API_KEY=momo
 
 python mcp_server.py        # speaks MCP over stdio
 ```
@@ -89,7 +89,7 @@ Add an entry to `claude_desktop_config.json` (see the example in
       "args": ["/absolute/path/to/transparency-report-api/mcp_server.py"],
       "env": {
         "TRANSPARENCY_API_URL": "http://127.0.0.1:8000",
-        "TRANSPARENCY_API_KEY": "alice"
+        "TRANSPARENCY_API_KEY": "momo"
       }
     }
   }
@@ -101,7 +101,7 @@ Add an entry to `claude_desktop_config.json` (see the example in
 ```bash
 claude mcp add transparency-report-api \
   -e TRANSPARENCY_API_URL=http://127.0.0.1:8000 \
-  -e TRANSPARENCY_API_KEY=alice \
+  -e TRANSPARENCY_API_KEY=momo \
   -- /absolute/path/to/.venv-mcp/bin/python /absolute/path/to/mcp_server.py
 ```
 

@@ -147,13 +147,13 @@ def main() -> None:
     _step("List the queryable report tables  (GET /api/tables)")
     _note("The dataset is the EU DSA VLOP transparency reports — one table per")
     _note("DSA report table (t3–t11). A query names a `table`, then its fields.")
-    get("/api/tables", key="alice")
+    get("/api/tables", key="momo")
 
     # 4. Inspect a table's fields
     _step("Discover a table's fields  (GET /api/fields?table=t4_notices)")
     _note("Clients never send SQL — they pick from these fields and operations.")
     _note("Dimensions support EQ/IN; measures also support GT/GTE/LT/LTE.")
-    get("/api/fields?table=t4_notices", key="alice")
+    get("/api/fields?table=t4_notices", key="momo")
 
     # 5. Submit a query — the core pattern
     _step("Submit a structured query — POST /api/query returns 202 immediately")
@@ -168,7 +168,7 @@ def main() -> None:
         "sort": [{"field_name": "notices", "order": "desc"}],
         "max_count": 5,
     }
-    _, job = post("/api/query", top5, key="alice")
+    _, job = post("/api/query", top5, key="momo")
     job_id: str = job["job_id"]
     print(f"  {DIM}job_id = {job_id}{RESET}")
     print(f"  {DIM}compiled_sql = {job.get('compiled_sql')}{RESET}")
@@ -176,25 +176,25 @@ def main() -> None:
     # 6. Poll for completion
     _step("Poll GET /api/jobs/{job_id} until status=done")
     _note("In a real client you'd sleep between polls — here we spin fast.")
-    _poll(job_id, key="alice")
+    _poll(job_id, key="momo")
 
     # 7. Fetch result as JSON
     _step("Fetch the result as JSON")
-    get(f"/api/jobs/{job_id}/result?format=json", key="alice")
+    get(f"/api/jobs/{job_id}/result?format=json", key="momo")
 
     # 7b. Secure download via a signed, expiring URL — no API key needed
     _step("Secure download — signed URL, no API key")
     _note("A done job exposes download_urls: capability links signed with HMAC.")
     _note("We fetch the link from the job status, then download it WITHOUT a key.")
-    _, status = get(f"/api/jobs/{job_id}", key="alice")
+    _, status = get(f"/api/jobs/{job_id}", key="momo")
     dl_url = status["download_urls"]["json"]
     print(f"  {DIM}download_url = {dl_url}{RESET}")
     get(dl_url)  # note: no key= — the signature alone authorises the download
 
     # 8. Job isolation
-    _step("Job isolation — bob cannot see alice's job")
+    _step("Job isolation — honggildong cannot see momo's job")
     _note("Foreign job IDs return 404 (not 403) so existence isn't leaked.")
-    get(f"/api/jobs/{job_id}", key="bob")
+    get(f"/api/jobs/{job_id}", key="honggildong")
 
     # 9. Arbitrary / invalid queries are rejected up front
     _step("Invalid query → 400 (no SQL, no unknown fields)")
@@ -203,18 +203,18 @@ def main() -> None:
     post(
         "/api/query",
         {"table": "t4_notices", "query": {"and": [{"operation": "EQ", "field_name": "secrets", "field_values": ["x"]}]}},
-        key="alice",
+        key="momo",
     )
 
     # 10. List jobs
-    _step("List all of alice's jobs")
-    _note("Bob's jobs are invisible; alice sees only her own.")
-    get("/api/jobs", key="alice")
+    _step("List all of momo's jobs")
+    _note("Honggildong's jobs are invisible; momo sees only their own.")
+    get("/api/jobs", key="momo")
 
     # 11. Cancel / clean up a finished job
     _step("Delete a finished job (also works mid-run to cancel)")
     _note("DELETE while running calls sqlite3.interrupt() to abort the query.")
-    delete(f"/api/jobs/{job_id}", key="alice")
+    delete(f"/api/jobs/{job_id}", key="momo")
 
     # 12. Bonus: a filtered breakdown to show off the data
     _step("Bonus query: top services by Average Monthly Active Recipients (t10_amar)")
@@ -225,13 +225,13 @@ def main() -> None:
         "sort": [{"field_name": "amar", "order": "desc"}],
         "max_count": 10,
     }
-    _, j2 = post("/api/query", amar, key="alice")
+    _, j2 = post("/api/query", amar, key="momo")
     j2_id: str = j2["job_id"]
-    _poll(j2_id, key="alice")
-    get(f"/api/jobs/{j2_id}/result?format=json", key="alice")
+    _poll(j2_id, key="momo")
+    get(f"/api/jobs/{j2_id}/result?format=json", key="momo")
 
     print(f"{BOLD}{GREEN}Demo complete!{RESET}")
-    print(f"  Interactive Swagger UI: {BASE}/docs  (Authorize with key 'alice' or 'bob')")
+    print(f"  Interactive Swagger UI: {BASE}/docs  (Authorize with key 'momo' or 'honggildong')")
     print()
 
 

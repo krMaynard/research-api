@@ -67,7 +67,7 @@ _GR_FIXTURE = {
 seed.build_gr_db(_GR_FIXTURE, _DB)
 
 os.environ.setdefault("DB_PATH", _DB)
-os.environ.setdefault("API_KEYS_JSON", '{"alice":{"name":"alice"},"bob":{"name":"bob"}}')
+os.environ.setdefault("API_KEYS_JSON", '{"momo":{"name":"momo"},"honggildong":{"name":"honggildong"}}')
 # Google sign-in config for the auth tests (token verification is monkeypatched).
 os.environ.setdefault("GOOGLE_CLIENT_ID", "test-client-id.apps.googleusercontent.com")
 os.environ.setdefault("ADMIN_EMAILS", "admin@example.com")

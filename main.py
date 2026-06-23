@@ -109,7 +109,7 @@ ADMIN_EMAILS = frozenset(
     e.strip().lower() for e in os.getenv("ADMIN_EMAILS", "").split(",") if e.strip()
 )
 GOOGLE_SESSION_TTL = int(os.getenv("GOOGLE_SESSION_TTL_SECONDS", str(7 * 24 * 3600)))
-# Demo auth (hardcoded alice/bob keys + the open /portal/register flow). Handy for
+# Demo auth (hardcoded momo/honggildong keys + the open /portal/register flow). Handy for
 # local dev; set ALLOW_DEMO_KEYS=0 in production so only Google sign-in works.
 ALLOW_DEMO_KEYS = os.getenv("ALLOW_DEMO_KEYS", "1").lower() in ("1", "true", "yes")
 # Deployed build identifier — the CD workflow injects the commit SHA as APP_VERSION
@@ -228,7 +228,7 @@ def _load_api_keys() -> dict[str, dict[str, str]]:
         return json.loads(raw)
     if ALLOW_DEMO_KEYS:
         # Demo fallback — disabled when ALLOW_DEMO_KEYS=0 (production).
-        return {"alice": {"name": "alice"}, "bob": {"name": "bob"}}
+        return {"momo": {"name": "momo"}, "honggildong": {"name": "honggildong"}}
     return {}
 
 

@@ -323,11 +323,11 @@ def main() -> None:
             "sort":       [{"field_name": "notices", "order": "desc"}],
             "max_count":  10,
         }
-        _, job = _api("POST", f"{base}/api/query", payload=query, key="alice")
+        _, job = _api("POST", f"{base}/api/query", payload=query, key="momo")
         job_id: str = job["job_id"]
         print(f"  job submitted: {job_id}")
 
-        done = _poll(base, job_id, "alice")
+        done = _poll(base, job_id, "momo")
         print(f"  job status:    {done['status']}")
         if done.get("status") != "done":
             raise RuntimeError(f"Job failed with status '{done.get('status')}': {done.get('error')}")

@@ -158,7 +158,7 @@ verify() {
     info "version: $(curl -fsS --max-time 15 "${base}/version" 2>/dev/null || echo '?')"
     local code
     code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 \
-      -H 'X-API-Key: alice' "${base}/api/tables" || true)"
+      -H 'X-API-Key: momo' "${base}/api/tables" || true)"
     if [[ "$code" == "401" || "$code" == "403" ]]; then
       ok "Demo key rejected (HTTP $code) — ALLOW_DEMO_KEYS=0 in effect"
     else

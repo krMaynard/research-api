@@ -73,7 +73,7 @@ in supporting browsers, with non-FedCM fallback elsewhere:
 
 ### Demo keys (local dev)
 
-With `ALLOW_DEMO_KEYS=1` (default), the built-in `alice`/`bob` keys and the open,
+With `ALLOW_DEMO_KEYS=1` (default), the built-in `momo`/`honggildong` keys and the open,
 no-auth `POST /api/portal/register` flow (rate-limited per IP/email, keys expiring after
 `ISSUED_KEY_TTL_SECONDS`) remain available. Set `ALLOW_DEMO_KEYS=0` in production so
 only Google sign-in works.
@@ -259,10 +259,10 @@ X-Webhook-Signature: sha256=<hmac of the raw body>
 
 Every endpoint except the public pages (`/`, `/reports`, `/removals`, `/schema`, `/api-key`, `/privacy`), `/docs`, and `/openapi.json` requires a key in the
 `X-API-Key` header. To keep the demo obviously-not-production, the keys are
-just the two researcher names: `alice` and `bob`.
+just the two researcher names: `momo` and `honggildong`.
 
-Jobs are scoped per key — `bob` cannot list, view, fetch, or cancel jobs
-submitted with `alice`'s key (foreign job ids return `404`, not `403`, so the
+Jobs are scoped per key — `honggildong` cannot list, view, fetch, or cancel jobs
+submitted with `momo`'s key (foreign job ids return `404`, not `403`, so the
 existence of other researchers' jobs isn't leaked).
 
 In production, set `API_KEYS_JSON` to a JSON object loaded from a secret
@@ -303,7 +303,7 @@ python demo.py --pause   # press Enter to advance each step (live demo mode)
 
 ```bash
 # 3. Set your key once so you don't have to repeat it
-export KEY='alice'
+export KEY='momo'
 
 # 4. Look around — list report tables and a table's queryable fields
 curl -H "X-API-Key: $KEY" http://127.0.0.1:8000/api/tables
@@ -336,7 +336,7 @@ curl -H "X-API-Key: $KEY" "http://127.0.0.1:8000/api/jobs/$JOB/result?format=csv
 ### One-liner (capture id, poll, fetch)
 
 ```bash
-KEY='alice'
+KEY='momo'
 JOB=$(curl -s -X POST http://127.0.0.1:8000/api/query \
   -H "X-API-Key: $KEY" -H 'Content-Type: application/json' \
   -d '{"table":"t4_notices","query":{"and":[{"operation":"EQ","field_name":"category_code","field_values":["TOTAL"]}]},"group_by":["service_name"],"aggregates":[{"function":"SUM","field_name":"notices","alias":"notices"}],"sort":[{"field_name":"notices","order":"desc"}],"max_count":5}' \
@@ -365,8 +365,8 @@ curl -s -X POST http://127.0.0.1:8000/api/query \
   -d '{"table":"t4_notices","query":{"and":[{"operation":"EQ","field_name":"service_name","field_values":["X%27%3B DROP TABLE services"]}]}}'
 # (then GET /api/jobs/<id> -> {"status":"done","row_count":0})
 
-# Bob cannot see Alice's job
-curl -i -H 'X-API-Key: bob' "http://127.0.0.1:8000/api/jobs/$JOB"   # -> 404
+# Honggildong cannot see Momo's job
+curl -i -H 'X-API-Key: honggildong' "http://127.0.0.1:8000/api/jobs/$JOB"   # -> 404
 
 # Or just open the Swagger UI in a browser:  http://127.0.0.1:8000/docs
 # (click "Authorize" and paste a key)
@@ -389,7 +389,7 @@ go build -o dsa-research ./cmd/dsa-research-pp-cli
 
 # Point it at a local server and use a demo key:
 export DSA_RESEARCH_BASE_URL=http://localhost:8000
-export DSA_RESEARCH_APIKEY_HEADER=alice
+export DSA_RESEARCH_APIKEY_HEADER=momo
 ./dsa-research overview --agent          # public, no key needed
 ./dsa-research tables --agent            # authenticated
 ```
@@ -418,7 +418,7 @@ uvicorn main:app --port 8000
 python -m venv .venv-mcp && . .venv-mcp/bin/activate
 pip install -r requirements-mcp.txt
 export TRANSPARENCY_API_URL=http://127.0.0.1:8000
-export TRANSPARENCY_API_KEY=alice      # optional — enables `ask`
+export TRANSPARENCY_API_KEY=momo      # optional — enables `ask`
 python mcp_server.py                    # speaks MCP over stdio
 ```
 
@@ -637,11 +637,11 @@ All tuneable values are read from environment variables at startup:
 | `QUERY_TIMEOUT_SECONDS` | `300` | SQLite busy timeout |
 | `REDIS_URL` | _(unset — uses memory)_ | Redis connection URL for persistent job storage |
 | `JOB_TTL_SECONDS` | `86400` | How long to retain jobs in Redis (24 h) |
-| `API_KEYS_JSON` | `alice` / `bob` demo keys | JSON object: `{"<key>": {"name": "<name>"}, …}` |
+| `API_KEYS_JSON` | `momo` / `honggildong` demo keys | JSON object: `{"<key>": {"name": "<name>"}, …}` |
 | `GOOGLE_CLIENT_ID` | _(unset — sign-in disabled)_ | OAuth 2.0 Web client ID; the `aud` Google ID tokens are verified against |
 | `ADMIN_EMAILS` | _(empty)_ | Comma-separated admin allowlist — can revoke/restore other accounts |
 | `GOOGLE_SESSION_TTL_SECONDS` | `604800` | Lifetime of a first-party session minted after Google sign-in (7 days) |
-| `ALLOW_DEMO_KEYS` | `1` | Demo `alice`/`bob` keys + open `/api/portal/register`; set `0` in production |
+| `ALLOW_DEMO_KEYS` | `1` | Demo `momo`/`honggildong` keys + open `/api/portal/register`; set `0` in production |
 | `ALLOWED_ORIGINS` | _(empty — same-origin only)_ | Comma-separated browser origins allowed for cross-origin API calls (CORS) |
 | `DOWNLOAD_URL_SECRET` | _(random per process)_ | HMAC secret for signing download URLs — set a stable value in production |
 | `DOWNLOAD_URL_TTL_SECONDS` | `3600` | How long a signed download URL stays valid |

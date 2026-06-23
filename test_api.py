@@ -13,8 +13,8 @@ from fastapi.testclient import TestClient
 from main import app
 
 client = TestClient(app)
-ALICE = {"X-API-Key": "alice"}
-BOB = {"X-API-Key": "bob"}
+MOMO = {"X-API-Key": "momo"}
+HONG = {"X-API-Key": "honggildong"}
 
 # A trivial valid query: count rows in t4_notices (3 in the conftest fixture).
 COUNT_ALL = {"table": "t4_notices", "aggregates": [{"function": "COUNT", "alias": "n"}]}
@@ -32,7 +32,7 @@ def _wait_for_job(job_id: str, headers: dict, timeout: float = 5.0) -> dict:
     pytest.fail(f"Job {job_id} did not reach a terminal state within {timeout}s")
 
 
-def _submit_and_wait(query: dict, headers: dict = ALICE) -> dict:
+def _submit_and_wait(query: dict, headers: dict = MOMO) -> dict:
     r = client.post("/api/query", json=query, headers=headers)
     assert r.status_code == 202
     return _wait_for_job(r.json()["job_id"], headers)
@@ -104,7 +104,7 @@ class TestPortal:
         assert client.get("/api/jobs", headers=hdr).status_code == 401
 
     def test_configured_key_cannot_be_revoked(self):
-        assert client.delete("/api/portal/key", headers=ALICE).status_code == 400
+        assert client.delete("/api/portal/key", headers=MOMO).status_code == 400
 
     def test_register_bad_email_is_400(self):
         r = client.post("/api/portal/register", json={"name": "Ada", "email": "not-an-email"})
@@ -198,7 +198,7 @@ class TestAuth:
     def test_valid_key_ok(self):
         # Use a gated endpoint so this actually exercises key validation
         # (schema endpoints are public now).
-        r = client.get("/api/jobs", headers=ALICE)
+        r = client.get("/api/jobs", headers=MOMO)
         assert r.status_code == 200
         assert "jobs" in r.json()
 
@@ -207,7 +207,7 @@ class TestAuth:
 
 class TestSchema:
     def test_tables_lists_report_tables(self):
-        r = client.get("/api/tables", headers=ALICE)
+        r = client.get("/api/tables", headers=MOMO)
         assert r.status_code == 200
         body = r.json()
         names = [t["name"] for t in body["tables"]]
@@ -215,14 +215,14 @@ class TestSchema:
         assert body["period"] == "2025-07-01/2025-12-31"
 
     def test_known_table_schema(self):
-        r = client.get("/api/schema/t4_notices", headers=ALICE)
+        r = client.get("/api/schema/t4_notices", headers=MOMO)
         assert r.status_code == 200
         body = r.json()
         assert "service_name" in body["dimensions"]["fields"]
         assert "notices" in body["measures"]["fields"]
 
     def test_missing_table_is_404(self):
-        assert client.get("/api/schema/nonexistent", headers=ALICE).status_code == 404
+        assert client.get("/api/schema/nonexistent", headers=MOMO).status_code == 404
 
 
 # ── Category label normalization ──────────────────────────────────────────────
@@ -252,12 +252,12 @@ class TestCategoryLabels:
 
 class TestFields:
     def test_overview_lists_tables(self):
-        r = client.get("/api/fields", headers=ALICE)
+        r = client.get("/api/fields", headers=MOMO)
         assert r.status_code == 200
         assert "t4_notices" in r.json()["tables"]
 
     def test_per_table_fields(self):
-        r = client.get("/api/fields?table=t4_notices", headers=ALICE)
+        r = client.get("/api/fields?table=t4_notices", headers=MOMO)
         assert r.status_code == 200
         body = r.json()
         assert "service_name" in body["dimensions"]["fields"]
@@ -265,7 +265,7 @@ class TestFields:
         assert "SUM" in body["aggregate_functions"]
 
     def test_unknown_table_is_404(self):
-        assert client.get("/api/fields?table=nope", headers=ALICE).status_code == 404
+        assert client.get("/api/fields?table=nope", headers=MOMO).status_code == 404
 
     def test_schema_endpoints_are_public(self):
         # Schema discovery needs no API key — the same structure is already public
@@ -280,7 +280,7 @@ class TestFields:
 
 class TestQueryLifecycle:
     def test_submit_returns_202_with_location(self):
-        r = client.post("/api/query", json=COUNT_ALL, headers=ALICE)
+        r = client.post("/api/query", json=COUNT_ALL, headers=MOMO)
         assert r.status_code == 202
         assert "job_id" in r.json()
         assert r.headers.get("location", "").startswith("/api/jobs/")
@@ -288,7 +288,7 @@ class TestQueryLifecycle:
     def test_happy_path_json(self):
         job = _submit_and_wait(COUNT_ALL)
         assert job["status"] == "done"
-        r = client.get(f"/api/jobs/{job['job_id']}/result?format=json", headers=ALICE)
+        r = client.get(f"/api/jobs/{job['job_id']}/result?format=json", headers=MOMO)
         assert r.status_code == 200
         body = r.json()
         assert body["row_count"] == 1
@@ -303,7 +303,7 @@ class TestQueryLifecycle:
                 "sort": [{"field_name": "service_name", "order": "asc"}],
             }
         )
-        r = client.get(f"/api/jobs/{job['job_id']}/result?format=csv", headers=ALICE)
+        r = client.get(f"/api/jobs/{job['job_id']}/result?format=csv", headers=MOMO)
         assert r.status_code == 200
         assert "text/csv" in r.headers["content-type"]
         lines = r.text.strip().splitlines()
@@ -329,7 +329,7 @@ class TestQueryLifecycle:
             }
         )
         assert job["status"] == "done"
-        r = client.get(f"/api/jobs/{job['job_id']}/result?format=json", headers=ALICE)
+        r = client.get(f"/api/jobs/{job['job_id']}/result?format=json", headers=MOMO)
         body = r.json()
         assert body["columns"] == ["service_name", "notices"]
         # YouTube t4 rows in conftest: notices 100 + 40 = 140.
@@ -346,24 +346,24 @@ class TestQueryLifecycle:
                     ]
                 }
             },
-            headers=ALICE,
+            headers=MOMO,
         )
-        job = _wait_for_job(r.json()["job_id"], ALICE)
+        job = _wait_for_job(r.json()["job_id"], MOMO)
         # Value is bound, not interpolated — 'YouTube' must not appear in the SQL.
         assert "?" in job["compiled_sql"]
         assert "YouTube" not in job["compiled_sql"]
 
     def test_result_before_done_is_409(self):
-        r = client.post("/api/query", json=COUNT_ALL, headers=ALICE)
+        r = client.post("/api/query", json=COUNT_ALL, headers=MOMO)
         job_id = r.json()["job_id"]
         # Job may already be done by the time we hit the result endpoint,
         # but if it's still in-flight we expect 409.
-        r2 = client.get(f"/api/jobs/{job_id}/result", headers=ALICE)
+        r2 = client.get(f"/api/jobs/{job_id}/result", headers=MOMO)
         assert r2.status_code in (200, 409)
 
     def test_list_jobs(self):
         _submit_and_wait(COUNT_ALL)
-        r = client.get("/api/jobs", headers=ALICE)
+        r = client.get("/api/jobs", headers=MOMO)
         assert r.status_code == 200
         assert len(r.json()["jobs"]) >= 1
 
@@ -433,13 +433,13 @@ class TestSecureDownload:
 # ── Job isolation ─────────────────────────────────────────────────────────────
 
 class TestJobIsolation:
-    def test_bob_cannot_see_alices_job(self):
+    def test_hong_cannot_see_momos_job(self):
         job = _submit_and_wait(COUNT_ALL)
-        assert client.get(f"/api/jobs/{job['job_id']}", headers=BOB).status_code == 404
+        assert client.get(f"/api/jobs/{job['job_id']}", headers=HONG).status_code == 404
 
-    def test_bob_cannot_fetch_alices_result(self):
+    def test_hong_cannot_fetch_momos_result(self):
         job = _submit_and_wait(COUNT_ALL)
-        r = client.get(f"/api/jobs/{job['job_id']}/result", headers=BOB)
+        r = client.get(f"/api/jobs/{job['job_id']}/result", headers=HONG)
         assert r.status_code == 404
 
 
@@ -447,11 +447,11 @@ class TestJobIsolation:
 
 class TestSafety:
     def test_missing_table_is_400(self):
-        r = client.post("/api/query", json={"aggregates": [{"function": "COUNT", "alias": "n"}]}, headers=ALICE)
+        r = client.post("/api/query", json={"aggregates": [{"function": "COUNT", "alias": "n"}]}, headers=MOMO)
         assert r.status_code == 400
 
     def test_unknown_table_is_400(self):
-        r = client.post("/api/query", json={"table": "t99_nope", "fields": ["service_name"]}, headers=ALICE)
+        r = client.post("/api/query", json={"table": "t99_nope", "fields": ["service_name"]}, headers=MOMO)
         assert r.status_code == 400
 
     def test_field_from_other_table_is_400(self):
@@ -459,7 +459,7 @@ class TestSafety:
         r = client.post(
             "/api/query",
             json={"table": "t3_member_state_orders", "fields": ["notices"]},
-            headers=ALICE,
+            headers=MOMO,
         )
         assert r.status_code == 400
 
@@ -467,7 +467,7 @@ class TestSafety:
         r = client.post(
             "/api/query",
             json={"table": "t4_notices", "query": {"and": [{"operation": "EQ", "field_name": "secrets", "field_values": ["x"]}]}},
-            headers=ALICE,
+            headers=MOMO,
         )
         assert r.status_code == 400
 
@@ -475,7 +475,7 @@ class TestSafety:
         r = client.post(
             "/api/query",
             json={"table": "t4_notices", "query": {"and": [{"operation": "GT", "field_name": "service_name", "field_values": [5]}]}},
-            headers=ALICE,
+            headers=MOMO,
         )
         assert r.status_code == 400
 
@@ -483,7 +483,7 @@ class TestSafety:
         r = client.post(
             "/api/query",
             json={"table": "t4_notices", "aggregates": [{"function": "SUM", "field_name": "notices", "alias": "x); DROP"}]},
-            headers=ALICE,
+            headers=MOMO,
         )
         assert r.status_code == 400
 
@@ -505,11 +505,11 @@ class TestSafety:
             }
         )
         assert job["status"] == "done"
-        r = client.get(f"/api/jobs/{job['job_id']}/result?format=json", headers=ALICE)
+        r = client.get(f"/api/jobs/{job['job_id']}/result?format=json", headers=MOMO)
         assert r.json()["row_count"] == 0
         # DB still intact afterwards — a follow-up count still works.
         again = _submit_and_wait(COUNT_ALL)
-        r2 = client.get(f"/api/jobs/{again['job_id']}/result?format=json", headers=ALICE)
+        r2 = client.get(f"/api/jobs/{again['job_id']}/result?format=json", headers=MOMO)
         assert r2.json()["rows"][0][0] == 3
 
     def test_dimension_requires_string(self):
@@ -518,7 +518,7 @@ class TestSafety:
         r = client.post(
             "/api/query",
             json={"table": "t4_notices", "query": {"and": [{"operation": "EQ", "field_name": "service_name", "field_values": [123]}]}},
-            headers=ALICE,
+            headers=MOMO,
         )
         assert r.status_code == 400
 
@@ -530,7 +530,7 @@ class TestSafety:
                 "group_by": ["service_name", "service_name"],
                 "aggregates": [{"function": "COUNT", "alias": "n"}],
             },
-            headers=ALICE,
+            headers=MOMO,
         )
         assert r.status_code == 400
 
@@ -542,7 +542,7 @@ class TestSafety:
                 "group_by": ["service_name"],
                 "aggregates": [{"function": "SUM", "field_name": "notices", "alias": "service_name"}],
             },
-            headers=ALICE,
+            headers=MOMO,
         )
         assert r.status_code == 400
 
@@ -550,20 +550,20 @@ class TestSafety:
         r = client.post(
             "/api/query",
             json={"table": "t4_notices", "fields": ["service_name", "service_name"]},
-            headers=ALICE,
+            headers=MOMO,
         )
         assert r.status_code == 400
 
     def test_extra_sql_field_ignored(self):
         # The model has no free-form `sql` field; an extra one is ignored, and the
         # query runs the validated default SELECT for the named table.
-        r = client.post("/api/query", json={"table": "t4_notices", "sql": "DROP TABLE services"}, headers=ALICE)
+        r = client.post("/api/query", json={"table": "t4_notices", "sql": "DROP TABLE services"}, headers=MOMO)
         assert r.status_code == 202
-        job = _wait_for_job(r.json()["job_id"], ALICE)
+        job = _wait_for_job(r.json()["job_id"], MOMO)
         assert job["status"] == "done"  # ran the default SELECT, not the DROP
 
     def test_unknown_job_is_404(self):
-        assert client.get("/api/jobs/doesnotexist", headers=ALICE).status_code == 404
+        assert client.get("/api/jobs/doesnotexist", headers=MOMO).status_code == 404
 
 
 # ── Abuse hardening: complexity caps, body cap, CSV escaping ─────────────────────
@@ -601,8 +601,8 @@ class TestAbuseHardening:
         assert r.status_code == 413
 
     def test_jobs_limit_bounds_enforced(self):
-        assert client.get("/api/jobs?limit=0", headers=ALICE).status_code == 422
-        assert client.get("/api/jobs?limit=501", headers=ALICE).status_code == 422
+        assert client.get("/api/jobs?limit=0", headers=MOMO).status_code == 422
+        assert client.get("/api/jobs?limit=501", headers=MOMO).status_code == 422
 
     def test_csv_safe_neutralises_formula_sigils(self):
         import main
@@ -625,7 +625,7 @@ class TestAbuseHardening:
             "fields": ["qualitative_text"],
         })
         assert job["status"] == "done"
-        r = client.get(f"/api/jobs/{job['job_id']}/result?format=csv", headers=ALICE)
+        r = client.get(f"/api/jobs/{job['job_id']}/result?format=csv", headers=MOMO)
         assert r.status_code == 200
         import csv as csv_mod
         import io
@@ -642,10 +642,10 @@ class TestDelete:
     def test_delete_completed_job(self):
         job = _submit_and_wait(COUNT_ALL)
         job_id = job["job_id"]
-        r = client.delete(f"/api/jobs/{job_id}", headers=ALICE)
+        r = client.delete(f"/api/jobs/{job_id}", headers=MOMO)
         assert r.status_code == 200
         assert r.json()["deleted"] is True
-        assert client.get(f"/api/jobs/{job_id}", headers=ALICE).status_code == 404
+        assert client.get(f"/api/jobs/{job_id}", headers=MOMO).status_code == 404
 
 
 # ── Query rate limiting ─────────────────────────────────────────────────────────
@@ -658,9 +658,9 @@ class TestQueryRateLimit:
         main._key_store = main.MemoryKeyStore()  # isolated, so it doesn't affect other tests
         main.QUERY_RATE_MAX = 2
         try:
-            statuses = [client.post("/api/query", json=COUNT_ALL, headers=ALICE).status_code for _ in range(4)]
+            statuses = [client.post("/api/query", json=COUNT_ALL, headers=MOMO).status_code for _ in range(4)]
             assert statuses == [202, 202, 429, 429]
-            r = client.post("/api/query", json=COUNT_ALL, headers=ALICE)
+            r = client.post("/api/query", json=COUNT_ALL, headers=MOMO)
             assert r.status_code == 429 and r.headers["Retry-After"] == str(main.QUERY_RATE_WINDOW)
         finally:
             main._key_store, main.QUERY_RATE_MAX = original_store, original_max
@@ -672,10 +672,10 @@ class TestQueryRateLimit:
         main._key_store = main.MemoryKeyStore()
         main.QUERY_RATE_MAX = 1
         try:
-            assert client.post("/api/query", json=COUNT_ALL, headers=ALICE).status_code == 202
-            assert client.post("/api/query", json=COUNT_ALL, headers=ALICE).status_code == 429
+            assert client.post("/api/query", json=COUNT_ALL, headers=MOMO).status_code == 202
+            assert client.post("/api/query", json=COUNT_ALL, headers=MOMO).status_code == 429
             # bob has his own bucket and is unaffected
-            assert client.post("/api/query", json=COUNT_ALL, headers=BOB).status_code == 202
+            assert client.post("/api/query", json=COUNT_ALL, headers=HONG).status_code == 202
         finally:
             main._key_store, main.QUERY_RATE_MAX = original_store, original_max
 
@@ -789,7 +789,7 @@ class TestMetrics:
     def test_request_counter_uses_route_template_not_raw_path(self):
         # A job id in the URL must not leak into label cardinality.
         job = _submit_and_wait(COUNT_ALL)
-        client.get(f"/api/jobs/{job['job_id']}", headers=ALICE)
+        client.get(f"/api/jobs/{job['job_id']}", headers=MOMO)
         body = client.get("/metrics").text
         assert 'path="/api/jobs/{job_id}"' in body
         assert job["job_id"] not in body  # the literal id is never a label value
@@ -815,13 +815,13 @@ class TestMetrics:
 class TestCallbacks:
     def test_bad_scheme_rejected_at_submit(self):
         r = client.post(
-            "/api/query", json={**COUNT_ALL, "callback_url": "ftp://example.com/hook"}, headers=ALICE
+            "/api/query", json={**COUNT_ALL, "callback_url": "ftp://example.com/hook"}, headers=MOMO
         )
         assert r.status_code == 400
 
     def test_missing_host_rejected_at_submit(self):
         r = client.post(
-            "/api/query", json={**COUNT_ALL, "callback_url": "http:///nohost"}, headers=ALICE
+            "/api/query", json={**COUNT_ALL, "callback_url": "http:///nohost"}, headers=MOMO
         )
         assert r.status_code == 400
 
@@ -1251,7 +1251,7 @@ class TestCompositeQueries:
     def test_submitted_as_async_job(self):
         job = _submit_and_wait(_ratio_query())
         assert job["status"] == "done"
-        res = client.get(f"/api/jobs/{job['job_id']}/result?format=json", headers=ALICE)
+        res = client.get(f"/api/jobs/{job['job_id']}/result?format=json", headers=MOMO)
         assert res.status_code == 200
         assert res.json()["columns"] == ["service_name", "a", "p", "ratio"]
 
@@ -1323,7 +1323,7 @@ class TestCompositeQueries:
         r = client.post("/api/explore", json=q)
         assert r.status_code == 400 and "legs" in r.json()["detail"]
         # The keyed job API accepts the same 4-leg query.
-        assert client.post("/api/query", json=q, headers=ALICE).status_code == 202
+        assert client.post("/api/query", json=q, headers=MOMO).status_code == 202
 
     def test_options_advertises_composite(self):
         d = client.get("/api/explore/options").json()
@@ -1353,7 +1353,7 @@ class TestAsk:
         yield
 
     def test_ask_runs_generated_query(self):
-        r = client.post("/api/ask", json={"question": "top platforms by notices?"}, headers=ALICE)
+        r = client.post("/api/ask", json={"question": "top platforms by notices?"}, headers=MOMO)
         assert r.status_code == 200
         d = r.json()
         assert d["question"] == "top platforms by notices?"
@@ -1378,7 +1378,7 @@ class TestAsk:
             "derived": [{"alias": "ratio", "expr": "actions.a / appeals.p"}],
             "sort": [{"field": "ratio", "order": "desc"}],
         })
-        r = client.post("/api/ask", json={"question": "ratio of actions to appeals?"}, headers=ALICE)
+        r = client.post("/api/ask", json={"question": "ratio of actions to appeals?"}, headers=MOMO)
         assert r.status_code == 200
         d = r.json()
         assert d["columns"] == ["service_name", "a", "p", "ratio"]
@@ -1391,7 +1391,7 @@ class TestAsk:
             "table": "t4_notices", "filters": [], "group_by": [],
             "aggregates": [], "sort": [], "max_count": 100000,
         })
-        r = client.post("/api/ask", json={"question": "everything"}, headers=ALICE)
+        r = client.post("/api/ask", json={"question": "everything"}, headers=MOMO)
         # raw (non-aggregated) query, capped at EXPLORE_MAX_ROWS
         assert r.status_code == 200 and r.json()["row_count"] <= 500
 
@@ -1400,7 +1400,7 @@ class TestAsk:
         bad = {"table": "t4_notices", "filters": [], "group_by": ["not_a_field"],
                "aggregates": [], "sort": [], "max_count": 10}
         monkeypatch.setattr(main, "_translate_question", lambda q: bad)
-        r = client.post("/api/ask", json={"question": "huh"}, headers=ALICE)
+        r = client.post("/api/ask", json={"question": "huh"}, headers=MOMO)
         assert r.status_code == 422
         assert r.json()["detail"]["generated"] == bad  # surfaces the model's attempt
 
@@ -1409,12 +1409,12 @@ class TestAsk:
         def boom(q):
             raise RuntimeError("model unavailable")
         monkeypatch.setattr(main, "_translate_question", boom)
-        assert client.post("/api/ask", json={"question": "x"}, headers=ALICE).status_code == 502
+        assert client.post("/api/ask", json={"question": "x"}, headers=MOMO).status_code == 502
 
     def test_ask_disabled_is_503(self, monkeypatch):
         import main
         monkeypatch.setattr(main, "NL_QUERY_ENABLED", False)
-        assert client.post("/api/ask", json={"question": "x"}, headers=ALICE).status_code == 503
+        assert client.post("/api/ask", json={"question": "x"}, headers=MOMO).status_code == 503
 
     def test_ask_caches_translation(self, monkeypatch):
         import main
@@ -1425,14 +1425,14 @@ class TestAsk:
                     "aggregates": [{"function": "SUM", "field": "notices", "alias": "v"}],
                     "sort": [{"field": "v", "order": "desc"}], "max_count": 3}
         monkeypatch.setattr(main, "_translate_question", counting)
-        r1 = client.post("/api/ask", json={"question": "Top platforms?"}, headers=ALICE)
-        r2 = client.post("/api/ask", json={"question": "  top   PLATFORMS? "}, headers=ALICE)  # same, normalized
+        r1 = client.post("/api/ask", json={"question": "Top platforms?"}, headers=MOMO)
+        r2 = client.post("/api/ask", json={"question": "  top   PLATFORMS? "}, headers=MOMO)  # same, normalized
         assert r1.status_code == 200 and r2.status_code == 200
         assert calls["n"] == 1  # second served from cache
         assert r1.json()["cached"] is False and r2.json()["cached"] is True
 
     def test_ask_reports_truncated(self):
-        r = client.post("/api/ask", json={"question": "top platforms by notices?"}, headers=ALICE)
+        r = client.post("/api/ask", json={"question": "top platforms by notices?"}, headers=MOMO)
         assert "truncated" in r.json()  # cap indicator present
 
     def test_ask_requires_key(self):
@@ -1600,13 +1600,13 @@ class TestLocalization:
 
 class TestGRTable:
     def test_gr_table_listed(self):
-        r = client.get("/api/tables", headers=ALICE)
+        r = client.get("/api/tables", headers=MOMO)
         assert r.status_code == 200
         names = [t["name"] for t in r.json()["tables"]]
         assert "gr_removals" in names
 
     def test_gr_fields_endpoint(self):
-        r = client.get("/api/fields?table=gr_removals", headers=ALICE)
+        r = client.get("/api/fields?table=gr_removals", headers=MOMO)
         assert r.status_code == 200
         body = r.json()
         assert {"period", "country_code", "country_name", "requestor", "product", "reason"} <= set(body["dimensions"]["fields"])
@@ -1618,7 +1618,7 @@ class TestGRTable:
             "aggregates": [{"function": "COUNT", "alias": "n"}],
         })
         assert job["status"] == "done"
-        r = client.get(f"/api/jobs/{job['job_id']}/result?format=json", headers=ALICE)
+        r = client.get(f"/api/jobs/{job['job_id']}/result?format=json", headers=MOMO)
         body = r.json()
         assert body["columns"] == ["n"]
         assert body["rows"][0][0] == 3  # 3 rows in the fixture
@@ -1630,7 +1630,7 @@ class TestGRTable:
             "aggregates": [{"function": "SUM", "field_name": "num_requests", "alias": "reqs"}],
         })
         assert job["status"] == "done"
-        r = client.get(f"/api/jobs/{job['job_id']}/result?format=json", headers=ALICE)
+        r = client.get(f"/api/jobs/{job['job_id']}/result?format=json", headers=MOMO)
         body = r.json()
         # US rows in fixture: period0/US (num_requests=5) + period1/US (num_requests=7) = 12
         assert body["rows"][0][0] == 12
@@ -1643,7 +1643,7 @@ class TestGRTable:
             "sort": [{"field_name": "period", "order": "asc"}],
         })
         assert job["status"] == "done"
-        r = client.get(f"/api/jobs/{job['job_id']}/result?format=json", headers=ALICE)
+        r = client.get(f"/api/jobs/{job['job_id']}/result?format=json", headers=MOMO)
         body = r.json()
         assert body["columns"] == ["period", "reqs"]
         assert len(body["rows"]) == 2
@@ -1655,7 +1655,7 @@ class TestGRTable:
         r = client.post("/api/query", json={
             "table": "gr_removals",
             "query": {"and": [{"operation": "EQ", "field_name": "nonexistent_field", "field_values": ["x"]}]},
-        }, headers=ALICE)
+        }, headers=MOMO)
         assert r.status_code == 400
 
     def test_gr_overview_removals(self):

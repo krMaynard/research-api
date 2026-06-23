@@ -44,7 +44,7 @@ def test_describe_table_public(monkeypatch):
 
 
 def test_describe_table_keyed(monkeypatch):
-    _bind(monkeypatch, api_key="alice")  # keyed → full field registry
+    _bind(monkeypatch, api_key="momo")  # keyed → full field registry
     out = mcp_server.describe_table("t4_notices")
     assert out["table"] == "t4_notices"
     assert "notices" in out["measures"]["fields"]
@@ -153,7 +153,7 @@ def test_submit_query_without_key_raises(monkeypatch):
 
 
 def test_submit_query_and_poll_job(monkeypatch):
-    _bind(monkeypatch, api_key="alice")
+    _bind(monkeypatch, api_key="momo")
     job = mcp_server.submit_query(
         {
             "table": "t4_notices",
@@ -181,7 +181,7 @@ def test_poll_job_without_key_raises(monkeypatch):
 
 
 def test_poll_job_missing_job_raises(monkeypatch):
-    _bind(monkeypatch, api_key="alice")
+    _bind(monkeypatch, api_key="momo")
     with pytest.raises(mcp_server.ApiError) as exc:
         mcp_server.poll_job("nonexistent-job-id-xyz")
     assert "failed (404" in str(exc.value)
