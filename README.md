@@ -7,11 +7,17 @@ parameters** (no SQL), runs it asynchronously on a worker thread, and serves the
 results back as JSON or CSV. Backed by a read-only SQLite database seeded from
 public transparency-reporting datasets:
 
-- **EU Digital Services Act (DSA) VLOP transparency reports** — content-moderation
-  statistics for 25 designated Very Large Online Platforms / Search Engines (H2 2025,
-  tables 3–11 of the DSA Implementing Regulation template). The vendored snapshot lives
-  at `data/vlop-dsa.json`; coverage expands as more platforms self-publish harmonized
-  reports and are ingested via the harvesting pipeline.
+- **EU Digital Services Act (DSA) transparency reports** — content-moderation
+  statistics for the 25 designated Very Large Online Platforms / Search Engines
+  (H2 2025, tables 3–11 of the DSA Implementing Regulation template; vendored at
+  `data/vlop-dsa.json`), **plus 26 non-VLOP platforms** that file the same EU
+  harmonised template (Ceneo, Cloudflare, Dailymotion, Carrefour, DuckDuckGo,
+  Expedia, Roblox, Vinted, …; vendored at `data/harmonised-reports.json`, loaded
+  by `seed_harmonised.py`). All share the `t3`–`t11` star schema, so the query API
+  spans both — while the VLOP dashboard's headline `/api/overview` stays scoped to
+  VLOP-tier reports. Sourced from the companion
+  [dsa-transparency-data](https://github.com/krMaynard/dsa-transparency-data)
+  catalogue (214 non-VLOP platforms, 54 of which file the harmonised template).
 - **Google Government content-removal requests** — 160 countries, 13 reporting
   periods (2019–2025), 42 products, 22 stated reasons.
 
@@ -528,7 +534,11 @@ structured query API.
 ### DSA VLOP transparency reports
 
 Star schema — shared dimension tables plus one fact table per Annex I report
-part (H2 2025, currently 25 services, expanding as more platforms publish).
+part. The `reports` table carries a `tier` per submitted report, so the same
+`t3`–`t11` tables hold both the 25 VLOP services (tier `vlop`) and the non-VLOP
+harmonised reports (tier `online-platform`/`hosting`/`intermediary`) appended by
+`seed_harmonised.py` — 51 services across 27 reports today, growing as more
+non-VLOP platforms are ingested.
 DSA dimensions: `services(id, name, platform)` (platform = parent company),
 `categories(id, code, label)`, `sections`, `indicators`, `scopes`, `surfaces`.
 

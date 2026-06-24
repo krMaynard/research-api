@@ -40,6 +40,8 @@ SKIP_SLUGS = {"linkedin", "pinterest", "wikipedia"}
 # hosting / intermediary); none of these are VLOPs.
 SLUG_META = {
     "aboutyou": ("AboutYou", "online-platform"),
+    "dailymotion": ("Dailymotion", "online-platform"),
+    "carrefour": ("Carrefour Marketplace", "online-platform"),
     "ceneo": ("Ceneo", "online-platform"),
     "cloudflare": ("Cloudflare", "intermediary"),
     "duckduckgo": ("DuckDuckGo", "online-platform"),
@@ -151,6 +153,26 @@ def _ident(rows: list[list[str]]) -> tuple[str, str]:
     return start, end
 
 
+def _period_from_sections(sections: list[list[list[str]]]) -> tuple[str, str] | None:
+    """Most-common "Reporting period" value (col 2) across the filled data sheets
+    (sections 3-11). More reliable than section 1, which some publishers leave as
+    a "YYYY-MM-DD/YYYY-MM-DD" placeholder or fill with a wrong year."""
+    from collections import Counter
+    vals: list[str] = []
+    for i in range(2, 11):
+        if i < len(sections):
+            for r in sections[i]:
+                if len(r) > 2:
+                    v = r[2].strip()
+                    if v and "Y" not in v.upper() and any(c.isdigit() for c in v) and "/" in v:
+                        vals.append(v)
+    if not vals:
+        return None
+    best = Counter(vals).most_common(1)[0][0]
+    parts = [p.strip()[:10] for p in best.split("/")]
+    return (parts[0], parts[1]) if len(parts) == 2 else None
+
+
 def read_extracted(extracted_dir: str = _DEFAULT_EXTRACTED) -> dict[str, list[list[list[str]]]]:
     """{slug: [section-1 rows, …, section-11 rows]} read from the extracted CSVs
     (headers dropped). Used to build the vendored snapshot."""
@@ -204,7 +226,10 @@ def build_harmonised_facts(db_path: str, snapshot_path: str = _DEFAULT_SNAPSHOT,
                 return sections[i] if i < len(sections) else []
 
             name, tier = SLUG_META.get(slug, (slug, "online-platform"))
-            start, end = _ident(sec(0))
+            # Prefer the period from the filled data sheets' "Reporting period"
+            # column (sections 3-11, col 2) over section 1 — it's more reliable
+            # against publisher typos / unfilled template placeholders in sheet 1.
+            start, end = _period_from_sections(sections) or _ident(sec(0))
             period = f"{start}/{end}" if start or end else ""
             svc_id, rep_id = next_service, next_report
             next_service += 1

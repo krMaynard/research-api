@@ -1798,7 +1798,16 @@ class TestHarmonisedFacts:
 
     def test_appends_non_vlop_services(self, tmp_path):
         db, counts, conn = self._build(tmp_path)
-        assert counts["services"] == 24 and counts["reports"] == 24  # 27 minus 3 VLOPs
+        # Every non-VLOP slug in the snapshot loads as one service + one report
+        # (the snapshot's 3 already-VLOP platforms — LinkedIn/Pinterest/Wikipedia
+        # — are skipped). Assert it tracks the snapshot rather than a fixed count.
+        import os
+        import json as _json
+        import seed_harmonised as _sh
+        snap = _json.load(open(os.path.join(os.path.dirname(_sh.__file__), "data",
+                                            "harmonised-reports.json")))
+        expected = len([s for s in snap if s not in _sh.SKIP_SLUGS])
+        assert counts["services"] == expected and counts["reports"] == expected
         names = {r[0] for r in conn.execute("SELECT name FROM services")}
         assert {"ManoMano", "Roblox", "Web.de", "Skroutz"} <= names
         # The three already-VLOP platforms are skipped (not re-added).

@@ -310,8 +310,8 @@ PAGES["es"]["index.html"] = [
     ('''Notices grouped by the category of allegedly illegal content.''',
      '''Notificaciones agrupadas por la categoría de contenido presuntamente ilícito.'''),
     ('''<h2>Explore the data</h2>''', '''<h2>Explorar los datos</h2>'''),
-    ('''Build a query against any DSA report table — it runs live through the same\n      validated structured-query API (<code>POST /api/explore</code>), no SQL.''',
-     '''Crea una consulta sobre cualquier tabla de informes del DSA: se ejecuta en vivo por la misma\n      API de consultas estructuradas validada (<code>POST /api/explore</code>), sin SQL.'''),
+    ('''Build a query against any DSA report table — now spanning the VLOP reports plus\n      non-VLOP platforms that file the EU harmonised template. Runs live through the same\n      validated structured-query API (<code>POST /api/explore</code>), no SQL.''',
+     '''Crea una consulta sobre cualquier tabla de informes del DSA: ahora abarca los informes de las VLOP y\n      plataformas no VLOP que presentan la plantilla armonizada de la UE. Se ejecuta en vivo por la misma\n      API de consultas estructuradas validada (<code>POST /api/explore</code>), sin SQL.'''),
     ('''<label>Table <select''', '''<label>Tabla <select'''),
     ('''<label>Group by <select''', '''<label>Agrupar por <select'''),
     ('''<label>Aggregate <select''', '''<label>Agregación <select'''),
@@ -432,8 +432,8 @@ PAGES["fr"]["index.html"] = [
     ('''Notices grouped by the category of allegedly illegal content.''',
      '''Signalements regroupés par catégorie de contenu présumé illicite.'''),
     ('''<h2>Explore the data</h2>''', '''<h2>Explorer les données</h2>'''),
-    ('''Build a query against any DSA report table — it runs live through the same\n      validated structured-query API (<code>POST /api/explore</code>), no SQL.''',
-     '''Construisez une requête sur n’importe quelle table de rapport du DSA — elle s’exécute en direct via la même\n      API de requêtes structurées validée (<code>POST /api/explore</code>), sans SQL.'''),
+    ('''Build a query against any DSA report table — now spanning the VLOP reports plus\n      non-VLOP platforms that file the EU harmonised template. Runs live through the same\n      validated structured-query API (<code>POST /api/explore</code>), no SQL.''',
+     '''Construisez une requête sur n’importe quelle table de rapport du DSA — couvrant désormais les rapports des VLOP et\n      les plateformes non-VLOP qui utilisent le modèle harmonisé de l’UE. Exécutée en direct via la même\n      API de requêtes structurées validée (<code>POST /api/explore</code>), sans SQL.'''),
     ('''<label>Table <select''', '''<label>Table <select'''),
     ('''<label>Group by <select''', '''<label>Grouper par <select'''),
     ('''<label>Aggregate <select''', '''<label>Agrégation <select'''),
@@ -553,8 +553,8 @@ PAGES["de"]["index.html"] = [
     ('''Notices grouped by the category of allegedly illegal content.''',
      '''Meldungen gruppiert nach der Kategorie mutmaßlich rechtswidriger Inhalte.'''),
     ('''<h2>Explore the data</h2>''', '''<h2>Daten erkunden</h2>'''),
-    ('''Build a query against any DSA report table — it runs live through the same\n      validated structured-query API (<code>POST /api/explore</code>), no SQL.''',
-     '''Erstelle eine Abfrage über jede DSA-Berichtstabelle – sie läuft live über dieselbe\n      validierte API für strukturierte Abfragen (<code>POST /api/explore</code>), ohne SQL.'''),
+    ('''Build a query against any DSA report table — now spanning the VLOP reports plus\n      non-VLOP platforms that file the EU harmonised template. Runs live through the same\n      validated structured-query API (<code>POST /api/explore</code>), no SQL.''',
+     '''Erstelle eine Abfrage über jede DSA-Berichtstabelle – jetzt für die VLOP-Berichte und\n      Nicht-VLOP-Plattformen, die die harmonisierte EU-Vorlage einreichen. Sie läuft live über dieselbe\n      validierte API für strukturierte Abfragen (<code>POST /api/explore</code>), ohne SQL.'''),
     ('''<label>Table <select''', '''<label>Tabelle <select'''),
     ('''<label>Group by <select''', '''<label>Gruppieren nach <select'''),
     ('''<label>Aggregate <select''', '''<label>Aggregation <select'''),
@@ -1442,9 +1442,11 @@ PAGES["ja"]["index.html"] = [
      r'''違法とされるコンテンツのカテゴリ別にまとめた通知。'''),
     (r'''<h2>Explore the data</h2>''',
      r'''<h2>データを探索</h2>'''),
-    (r'''Build a query against any DSA report table — it runs live through the same
+    (r'''Build a query against any DSA report table — now spanning the VLOP reports plus
+      non-VLOP platforms that file the EU harmonised template. Runs live through the same
       validated structured-query API (<code>POST /api/explore</code>), no SQL.''',
-     r'''任意の DSA レポート表に対してクエリを作成 — 同じ検証済みの
+     r'''任意の DSA レポート表に対してクエリを作成 — VLOP のレポートに加え、EU の調和テンプレートを
+      提出する非 VLOP プラットフォームも対象になりました。同じ検証済みの
       構造化クエリ API（<code>POST /api/explore</code>）でその場で実行されます。SQL は不要です。'''),
     (r'''<label>Table <select''',
      r'''<label>表 <select'''),
@@ -2055,9 +2057,11 @@ PAGES["zh"]["index.html"] = [
      r'''按所称违法内容的类别分组的通知。'''),
     (r'''<h2>Explore the data</h2>''',
      r'''<h2>探索数据</h2>'''),
-    (r'''Build a query against any DSA report table — it runs live through the same
+    (r'''Build a query against any DSA report table — now spanning the VLOP reports plus
+      non-VLOP platforms that file the EU harmonised template. Runs live through the same
       validated structured-query API (<code>POST /api/explore</code>), no SQL.''',
-     r'''针对任意 DSA 报告表构建查询——它会通过同一条
+     r'''针对任意 DSA 报告表构建查询——现已涵盖 VLOP 报告以及
+      提交欧盟统一模板的非 VLOP 平台。它会通过同一条
       经过验证的结构化查询 API（<code>POST /api/explore</code>）实时运行，无需 SQL。'''),
     (r'''<label>Table <select''',
      r'''<label>表 <select'''),
@@ -2667,9 +2671,11 @@ PAGES["ko"]["index.html"] = [
      r'''위법 의심 콘텐츠의 카테고리별로 분류한 통지.'''),
     (r'''<h2>Explore the data</h2>''',
      r'''<h2>데이터 탐색</h2>'''),
-    (r'''Build a query against any DSA report table — it runs live through the same
+    (r'''Build a query against any DSA report table — now spanning the VLOP reports plus
+      non-VLOP platforms that file the EU harmonised template. Runs live through the same
       validated structured-query API (<code>POST /api/explore</code>), no SQL.''',
-     r'''어떤 DSA 보고서 테이블이든 쿼리를 작성하세요 — 동일하게
+     r'''어떤 DSA 보고서 테이블이든 쿼리를 작성하세요 — 이제 VLOP 보고서와 함께
+      EU 표준 템플릿을 제출하는 비 VLOP 플랫폼까지 포함합니다. 동일하게
       검증된 구조화 쿼리 API(<code>POST /api/explore</code>)로 실시간 실행되며, SQL은 없습니다.'''),
     (r'''<label>Table <select''',
      r'''<label>테이블 <select'''),
