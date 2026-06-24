@@ -1470,7 +1470,7 @@ class TestAccessibility:
 
 class TestLocalization:
     LOCALES = ("es", "fr", "de", "ja", "zh", "ko")
-    SUFFIXES = ("", "reports", "removals", "portal", "mcp", "privacy")
+    SUFFIXES = ("", "reports", "removals", "comparison", "portal", "mcp", "privacy")
 
     def _path(self, loc, suffix):
         # Home is served with a trailing slash (/es/); sub-pages without.
@@ -1635,3 +1635,110 @@ class TestGRTable:
         assert r.status_code == 200 and "text/html" in r.headers["content-type"]
         assert "/api/overview/removals" in r.text
         assert "Government Requests" in r.text
+
+
+class TestSorComparison:
+    def test_sor_table_listed(self):
+        r = client.get("/api/tables")
+        assert r.status_code == 200
+        names = [t["name"] for t in r.json()["tables"]]
+        assert "sor_comparison" in names
+        assert "vlop_registry" in names
+
+    def test_sor_fields_endpoint(self):
+        r = client.get("/api/fields?table=sor_comparison")
+        assert r.status_code == 200
+        body = r.json()
+        assert "dimensions" in body and "measures" in body
+        assert "service_name" in body["dimensions"]["fields"]
+        assert "worst_flag" in body["dimensions"]["fields"]
+        assert "rep_notices" in body["measures"]["fields"]
+        assert "delta_notices" in body["measures"]["fields"]
+
+    def test_sor_explore_all(self):
+        r = client.post("/api/explore", json={"table": "sor_comparison", "max_count": 100})
+        assert r.status_code == 200
+        body = r.json()
+        assert "columns" in body and "rows" in body
+        assert len(body["rows"]) == 2  # 2 rows in the fixture
+
+    def test_sor_filter_by_service(self):
+        r = client.post("/api/explore", json={
+            "table": "sor_comparison",
+            "query": {"and": [{"operation": "EQ", "field_name": "service_name", "field_values": ["YouTube"]}]},
+        })
+        assert r.status_code == 200
+        body = r.json()
+        assert len(body["rows"]) == 1
+        cols = body["columns"]
+        row = body["rows"][0]
+        assert row[cols.index("service_name")] == "YouTube"
+        assert row[cols.index("worst_flag")] == "amber"
+
+    def test_sor_filter_by_worst_flag(self):
+        r = client.post("/api/explore", json={
+            "table": "sor_comparison",
+            "query": {"and": [{"operation": "EQ", "field_name": "worst_flag", "field_values": ["red"]}]},
+        })
+        assert r.status_code == 200
+        body = r.json()
+        assert len(body["rows"]) == 1
+        cols = body["columns"]
+        assert body["rows"][0][cols.index("service_name")] == "Facebook"
+
+    def test_sor_aggregate_sum(self):
+        r = client.post("/api/explore", json={
+            "table": "sor_comparison",
+            "aggregates": [{"function": "SUM", "field_name": "rep_notices", "alias": "total_rep"}],
+        })
+        assert r.status_code == 200
+        body = r.json()
+        assert body["columns"] == ["total_rep"]
+        assert body["rows"][0][0] == 300  # YouTube(100) + Facebook(200)
+
+    def test_sor_invalid_field_via_query_rejected(self):
+        # The /api/query endpoint (authenticated) rejects unknown fields with 400.
+        r = client.post("/api/query", json={
+            "table": "sor_comparison",
+            "query": {"and": [{"operation": "EQ", "field_name": "nonexistent", "field_values": ["x"]}]},
+        }, headers={"X-API-Key": "alice"})
+        assert r.status_code == 400
+
+    def test_comparison_overview(self):
+        r = client.get("/api/comparison/overview")
+        assert r.status_code == 200
+        d = r.json()
+        assert "period" in d and "flag_counts" in d and "services" in d
+        assert d["period"] == "H2-2025"
+        assert d["is_synthetic"] is True
+        fc = d["flag_counts"]
+        assert fc.get("red", 0) == 1
+        assert fc.get("amber", 0) == 1
+        svcs = {s["service_name"]: s for s in d["services"]}
+        assert "YouTube" in svcs and "Facebook" in svcs
+        assert svcs["Facebook"]["red"] == 1
+
+    def test_comparison_page_served(self):
+        r = client.get("/comparison")
+        assert r.status_code == 200 and "text/html" in r.headers["content-type"]
+        assert "/api/comparison/overview" in r.text
+        assert "DSA Comparison" in r.text
+
+    def test_vlop_registry_explore(self):
+        r = client.post("/api/explore", json={"table": "vlop_registry", "max_count": 50})
+        assert r.status_code == 200
+        body = r.json()
+        assert len(body["rows"]) == 2  # 2 rows in the fixture
+        cols = body["columns"]
+        svc_col = cols.index("service_name")
+        names = {row[svc_col] for row in body["rows"]}
+        assert "YouTube" in names and "Facebook" in names
+
+    def test_vlop_registry_filter_by_tier(self):
+        r = client.post("/api/explore", json={
+            "table": "vlop_registry",
+            "query": {"and": [{"operation": "EQ", "field_name": "tier", "field_values": ["VLOP"]}]},
+        })
+        assert r.status_code == 200
+        body = r.json()
+        assert len(body["rows"]) == 2

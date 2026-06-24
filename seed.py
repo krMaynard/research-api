@@ -171,6 +171,48 @@ CREATE TABLE gr_removals (
 
 CREATE INDEX idx_gr_period  ON gr_removals(period_id);
 CREATE INDEX idx_gr_country ON gr_removals(country_id);
+
+-- SoR Comparison: self-reported DSA report figures vs EUDSATDB Statement of Reasons aggregates
+CREATE TABLE sor_comparison (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    period          TEXT NOT NULL,
+    service_name    TEXT NOT NULL,
+    category_code   TEXT NOT NULL,
+    category_label  TEXT NOT NULL,
+    rep_notices     INTEGER,
+    rep_tf_notices  INTEGER,
+    rep_own_illegal INTEGER,
+    rep_own_tos     INTEGER,
+    sor_notices     INTEGER,
+    sor_tf_notices  INTEGER,
+    sor_own_illegal INTEGER,
+    sor_own_tos     INTEGER,
+    delta_notices     REAL,
+    delta_tf_notices  REAL,
+    delta_own_illegal REAL,
+    delta_own_tos     REAL,
+    flag_notices     TEXT,
+    flag_tf_notices  TEXT,
+    flag_own_illegal TEXT,
+    flag_own_tos     TEXT,
+    worst_flag       TEXT,
+    is_synthetic     INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX idx_sor_service  ON sor_comparison(service_name);
+CREATE INDEX idx_sor_worst    ON sor_comparison(worst_flag);
+
+-- VLOP/VLOSE platform registry (catalogue of designated platforms + transparency report links)
+CREATE TABLE vlop_registry (
+    id                    INTEGER PRIMARY KEY AUTOINCREMENT,
+    service_name          TEXT NOT NULL,
+    platform              TEXT NOT NULL,
+    tier                  TEXT NOT NULL,
+    period_start          TEXT,
+    period_end            TEXT,
+    transparency_page_url TEXT,
+    report_url            TEXT,
+    notes                 TEXT
+);
 """
 
 # fact table name → (number of columns, source JSON key)
@@ -297,11 +339,96 @@ def build_gr_db(data: dict[str, Any], db_path: str) -> int:
         conn.close()
 
 
+_DEFAULT_SOR_SOURCE = os.getenv(
+    "SEED_SOR_SOURCE_JSON",
+    os.path.normpath(os.path.join(HERE, "data", "sor-comparison.json")),
+)
+_DEFAULT_REGISTRY_SOURCE = os.getenv(
+    "SEED_REGISTRY_SOURCE_JSON",
+    os.path.normpath(os.path.join(HERE, "data", "registry.json")),
+)
+
+
+def build_sor_db(data: dict[str, Any], db_path: str) -> int:
+    """Populate sor_comparison in an existing DB at db_path.
+
+    build_db() must have been called first (SCHEMA creates the table).
+    Returns the number of rows inserted.
+    """
+    period = data.get("period", "")
+    is_synthetic = 1 if data.get("_fixture") else 0
+    rows = data.get("rows", [])
+    conn = sqlite3.connect(db_path)
+    try:
+        with conn:
+            conn.executemany(
+                "INSERT INTO sor_comparison ("
+                "period, service_name, category_code, category_label, "
+                "rep_notices, rep_tf_notices, rep_own_illegal, rep_own_tos, "
+                "sor_notices, sor_tf_notices, sor_own_illegal, sor_own_tos, "
+                "delta_notices, delta_tf_notices, delta_own_illegal, delta_own_tos, "
+                "flag_notices, flag_tf_notices, flag_own_illegal, flag_own_tos, "
+                "worst_flag, is_synthetic"
+                ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                [
+                    (
+                        period,
+                        r["service_name"], r["category_code"], r["category_label"],
+                        r.get("rep_notices"), r.get("rep_tf_notices"),
+                        r.get("rep_own_illegal"), r.get("rep_own_tos"),
+                        r.get("sor_notices"), r.get("sor_tf_notices"),
+                        r.get("sor_own_illegal"), r.get("sor_own_tos"),
+                        r.get("delta_notices"), r.get("delta_tf_notices"),
+                        r.get("delta_own_illegal"), r.get("delta_own_tos"),
+                        r.get("flag_notices"), r.get("flag_tf_notices"),
+                        r.get("flag_own_illegal"), r.get("flag_own_tos"),
+                        r.get("worst_flag"), is_synthetic,
+                    )
+                    for r in rows
+                ],
+            )
+        return len(rows)
+    finally:
+        conn.close()
+
+
+def build_registry_db(data: list[dict[str, Any]], db_path: str) -> int:
+    """Populate vlop_registry in an existing DB at db_path.
+
+    build_db() must have been called first. Returns the number of rows inserted.
+    """
+    conn = sqlite3.connect(db_path)
+    try:
+        with conn:
+            conn.executemany(
+                "INSERT INTO vlop_registry ("
+                "service_name, platform, tier, period_start, period_end, "
+                "transparency_page_url, report_url, notes"
+                ") VALUES (?,?,?,?,?,?,?,?)",
+                [
+                    (
+                        r["service_name"], r["platform"], r["tier"],
+                        r.get("period_start"), r.get("period_end"),
+                        r.get("transparency_page_url"), r.get("report_url"),
+                        r.get("notes"),
+                    )
+                    for r in data
+                ],
+            )
+        return len(data)
+    finally:
+        conn.close()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Seed demo.db from the VLOP DSA dataset.")
     parser.add_argument("--source", default=_DEFAULT_SOURCE, help="Path to vlop-dsa.json")
     parser.add_argument("--gr-source", default=_DEFAULT_GR_SOURCE,
                         help="Path to google-government-removals.json")
+    parser.add_argument("--sor-source", default=_DEFAULT_SOR_SOURCE,
+                        help="Path to sor-comparison.json")
+    parser.add_argument("--registry-source", default=_DEFAULT_REGISTRY_SOURCE,
+                        help="Path to registry.json")
     parser.add_argument("--db", default=_DEFAULT_DB, help="Output SQLite database path")
     args = parser.parse_args()
 
@@ -329,6 +456,23 @@ def main() -> None:
         )
     else:
         print(f"  (skipping Google removals — not found: {args.gr_source})")
+
+    if os.path.isfile(args.sor_source):
+        with open(args.sor_source, "r", encoding="utf-8") as f:
+            sor_data = json.load(f)
+        sor_rows = build_sor_db(sor_data, args.db)
+        synthetic = " (synthetic fixture)" if sor_data.get("_fixture") else ""
+        print(f"  sor_comparison: {sor_rows} rows{synthetic}")
+    else:
+        print(f"  (skipping SoR comparison — not found: {args.sor_source})")
+
+    if os.path.isfile(args.registry_source):
+        with open(args.registry_source, "r", encoding="utf-8") as f:
+            reg_data = json.load(f)
+        reg_rows = build_registry_db(reg_data, args.db)
+        print(f"  vlop_registry: {reg_rows} platform entries")
+    else:
+        print(f"  (skipping VLOP registry — not found: {args.registry_source})")
 
 
 if __name__ == "__main__":

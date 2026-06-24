@@ -66,6 +66,82 @@ _GR_FIXTURE = {
 }
 seed.build_gr_db(_GR_FIXTURE, _DB)
 
+_SOR_FIXTURE = {
+    "_fixture": True,
+    "period": "H2-2025",
+    "rows": [
+        {
+            "service_name": "YouTube",
+            "category_code": "TOTAL",
+            "category_label": "All the entries",
+            "rep_notices": 100,
+            "rep_tf_notices": 10,
+            "rep_own_illegal": 50,
+            "rep_own_tos": 30,
+            "sor_notices": 110,
+            "sor_tf_notices": 11,
+            "sor_own_illegal": 60,
+            "sor_own_tos": 31,
+            "delta_notices": 0.09,
+            "delta_tf_notices": 0.09,
+            "delta_own_illegal": 0.17,
+            "delta_own_tos": 0.03,
+            "flag_notices": "amber",
+            "flag_tf_notices": "amber",
+            "flag_own_illegal": "amber",
+            "flag_own_tos": "ok",
+            "worst_flag": "amber",
+        },
+        {
+            "service_name": "Facebook",
+            "category_code": "TOTAL",
+            "category_label": "All the entries",
+            "rep_notices": 200,
+            "rep_tf_notices": 20,
+            "rep_own_illegal": 100,
+            "rep_own_tos": 50,
+            "sor_notices": 300,
+            "sor_tf_notices": 30,
+            "sor_own_illegal": 200,
+            "sor_own_tos": 51,
+            "delta_notices": 0.33,
+            "delta_tf_notices": 0.33,
+            "delta_own_illegal": 0.50,
+            "delta_own_tos": 0.02,
+            "flag_notices": "red",
+            "flag_tf_notices": "red",
+            "flag_own_illegal": "red",
+            "flag_own_tos": "ok",
+            "worst_flag": "red",
+        },
+    ],
+}
+seed.build_sor_db(_SOR_FIXTURE, _DB)
+
+_REGISTRY_FIXTURE = [
+    {
+        "service_name": "YouTube",
+        "platform": "Google",
+        "tier": "VLOP",
+        "period_start": "2025-07-01",
+        "period_end": "2025-12-31",
+        "transparency_page_url": "https://transparencyreport.google.com/",
+        "report_url": None,
+        "notes": None,
+    },
+    {
+        "service_name": "Facebook",
+        "platform": "Meta",
+        "tier": "VLOP",
+        "period_start": "2025-07-01",
+        "period_end": "2025-12-31",
+        "transparency_page_url": "https://transparency.fb.com/",
+        "report_url": None,
+        "notes": None,
+    },
+]
+seed.build_registry_db(_REGISTRY_FIXTURE, _DB)
+
 os.environ.setdefault("DB_PATH", _DB)
 os.environ.setdefault("API_KEYS_JSON", '{"alice":{"name":"alice"},"bob":{"name":"bob"}}')
 # Google sign-in config for the auth tests (token verification is monkeypatched).
