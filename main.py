@@ -2134,14 +2134,31 @@ def _compute_overview() -> dict[str, Any]:
     conn = _connect_ro()
     try:
         meta = _dataset_meta()
-        services = conn.execute("SELECT COUNT(*) FROM services").fetchone()[0]
-        platforms = conn.execute("SELECT COUNT(DISTINCT platform) FROM services").fetchone()[0]
-        total_notices = conn.execute("SELECT COALESCE(SUM(notices), 0) FROM t4_notices").fetchone()[0]
+        # The dashboard is the VLOP dashboard, so its headline figures stay scoped
+        # to VLOP-tier reports even though non-VLOP harmonised reports now share the
+        # star schema (reachable via the query/explore API). VLOP services are those
+        # appearing in a vlop-tier report's facts.
+        _vlop_union = " UNION ".join(
+            f"SELECT t.service_id FROM {t} t JOIN reports r ON r.id = t.report_id "
+            "WHERE r.tier = 'vlop'"
+            for t in ("t3_member_state_orders", "t4_notices", "t5_own_initiative_illegal",
+                      "t6_own_initiative_tos", "t7_appeals_recidivism", "t8_automated_means",
+                      "t9_human_resources", "t10_amar", "t11_qualitative"))
+        vlop_ids = [r[0] for r in conn.execute(_vlop_union).fetchall()]
+        ph = ",".join("?" * len(vlop_ids)) or "NULL"
+        services = conn.execute(
+            f"SELECT COUNT(*) FROM services WHERE id IN ({ph})", vlop_ids).fetchone()[0]
+        platforms = conn.execute(
+            f"SELECT COUNT(DISTINCT platform) FROM services WHERE id IN ({ph})", vlop_ids).fetchone()[0]
+        total_notices = conn.execute(
+            "SELECT COALESCE(SUM(t.notices), 0) FROM t4_notices t "
+            "JOIN reports r ON r.id = t.report_id WHERE r.tier = 'vlop'").fetchone()[0]
         top_platforms = [
             {"platform": p, "notices": n}
             for p, n in conn.execute(
                 "SELECT s.platform, COALESCE(SUM(t.notices), 0) AS n "
                 "FROM t4_notices t JOIN services s ON s.id = t.service_id "
+                "JOIN reports r ON r.id = t.report_id WHERE r.tier = 'vlop' "
                 "GROUP BY s.platform ORDER BY n DESC LIMIT 10"
             ).fetchall()
         ]
@@ -2150,6 +2167,7 @@ def _compute_overview() -> dict[str, Any]:
             for c, n in conn.execute(
                 "SELECT cat.label, COALESCE(SUM(t.notices), 0) AS n "
                 "FROM t4_notices t JOIN categories cat ON cat.id = t.category_id "
+                "JOIN reports r ON r.id = t.report_id WHERE r.tier = 'vlop' "
                 "GROUP BY cat.label ORDER BY n DESC LIMIT 8"
             ).fetchall()
         ]

@@ -29,8 +29,10 @@ Built to demonstrate two things:
 | File | Purpose |
 |------|---------|
 | `main.py` | FastAPI app — all endpoints, job runner, in-memory job registry |
-| `seed.py` | Build `demo.db` from a `vlop-dsa.json` (`--source`/`SEED_SOURCE_JSON`; default = sibling repo) — `build_db()` is reused by `conftest.py` |
+| `seed.py` | Build `demo.db` from a `vlop-dsa.json` (`--source`/`SEED_SOURCE_JSON`; default = sibling repo) — `build_db()` is reused by `conftest.py`. Also loads gr removals, `report_locations`, and the non-VLOP harmonised reports |
+| `seed_harmonised.py` | Append the **non-VLOP harmonised-template reports** into the same `t3`–`t11` star schema (`build_harmonised_facts()`): one new `reports` row (tier ≠ `vlop`) + `services` row per platform, dimensions interned/extended. Reads the vendored `data/harmonised-reports.json` snapshot (or the sibling repo's extracted CSVs in dev); `write_snapshot()` rebuilds the snapshot |
 | `data/vlop-dsa.json` | Vendored dataset snapshot — what the Docker image is seeded from (refresh via `scripts/refresh-dataset.sh`) |
+| `data/harmonised-reports.json` | Vendored snapshot of the 27 extracted non-VLOP harmonised-template reports (sibling `dsa-transparency-data/harmonised-reports/extracted/`) — seeded into `t3`–`t11` by `seed_harmonised.py` |
 | `data/report-locations.csv` | Vendored snapshot of the non-VLOP DSA report-locations catalogue (sibling `dsa-transparency-data/dsa_reports.csv`) — seeded into the read-only `report_locations` table by `seed.py` |
 | `demo.py` | Narrated walkthrough script (run after starting the server) |
 | `static/index.html` | Public VLOP dashboard (served at `/reports`) — Chart.js overview + interactive query builder + "Compare tables" composite panel + NL "Ask" box (`GET /api/overview`, `POST /api/explore`, `POST /api/ask`) |
@@ -164,6 +166,17 @@ key/value table (`period`, `generated`). One **fact table per DSA report table**
 
 Fact-row leading values are indices into the lookup arrays (= the dimension row
 id), so seeding is positional. The DB is opened `mode=ro` as defence in depth.
+
+**Multi-tier reports.** The `reports` table (one row per submitted report, with a
+`tier`) lets the same `t3`–`t11` schema hold more than the VLOP set. After the
+VLOP load, `seed_harmonised.build_harmonised_facts()` appends the **non-VLOP
+harmonised-template reports** (24 platforms — the 27 extracted minus LinkedIn /
+Pinterest / Wikipedia, which are already VLOP services): a new `reports` row
+(tier `online-platform`/`hosting`/`intermediary`) + `services` row per platform,
+with the shared dimensions interned/extended. So `POST /api/query` and
+`/api/explore` span **both** VLOP and non-VLOP data, while the VLOP dashboard's
+`GET /api/overview` stays scoped to `tier = 'vlop'` (it derives the VLOP service
+set from vlop-tier facts) so its headline figures don't silently absorb them.
 
 A standalone **`report_locations`** table (flat, not part of the star schema) is
 also seeded — from `data/report-locations.csv` via `build_report_locations()` —

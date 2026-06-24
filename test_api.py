@@ -1768,3 +1768,58 @@ class TestGRTable:
         assert r.status_code == 200 and "text/html" in r.headers["content-type"]
         assert "/api/overview/removals" in r.text
         assert "Government Requests" in r.text
+
+
+# ── Non-VLOP harmonised-template reports loaded into the star schema ──────────
+
+class TestHarmonisedFacts:
+    """build_harmonised_facts() appends the extracted non-VLOP reports (from the
+    vendored snapshot) into the same t3-t11 model, queryable alongside the VLOPs."""
+
+    def _build(self, tmp_path):
+        import os
+        import sqlite3
+        import seed
+        import seed_harmonised
+        db = str(tmp_path / "h.db")
+        # Minimal VLOP base so the dimension tables + a vlop-tier report exist.
+        seed.build_db({
+            "meta": {"period": "2025-07-01/2025-12-31", "tier": "vlop"},
+            "services": ["YouTube"], "service_platforms": ["Google"],
+            "categories": ["TOTAL"], "category_labels": {"TOTAL": "All the entries"},
+            "sections": ["AMAR"], "indicators": ["x"], "scopes": ["TOTAL"], "surfaces": ["All"],
+            "t3": [], "t4": [[0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0]], "t5": [], "t6": [],
+            "t7": [], "t8": [], "t9": [], "t10": [[0, 0, 999]], "t11": [],
+        }, db)
+        snap = os.path.join(os.path.dirname(seed_harmonised.__file__), "data",
+                            "harmonised-reports.json")
+        counts = seed_harmonised.build_harmonised_facts(db, snapshot_path=snap)
+        return db, counts, sqlite3.connect(db)
+
+    def test_appends_non_vlop_services(self, tmp_path):
+        db, counts, conn = self._build(tmp_path)
+        assert counts["services"] == 24 and counts["reports"] == 24  # 27 minus 3 VLOPs
+        names = {r[0] for r in conn.execute("SELECT name FROM services")}
+        assert {"ManoMano", "Roblox", "Web.de", "Skroutz"} <= names
+        # The three already-VLOP platforms are skipped (not re-added).
+        assert sum(1 for n in names if n == "Wikipedia") == 0
+
+    def test_non_vlop_facts_queryable(self, tmp_path):
+        db, counts, conn = self._build(tmp_path)
+        # ManoMano's Article 16 notices landed in t4.
+        n = conn.execute(
+            "SELECT COALESCE(SUM(t.notices), 0) FROM t4_notices t JOIN services s "
+            "ON s.id = t.service_id WHERE s.name = 'ManoMano'").fetchone()[0]
+        assert n > 0
+        # New reports carry a non-vlop tier.
+        tiers = {r[0] for r in conn.execute("SELECT DISTINCT tier FROM reports")}
+        assert "vlop" in tiers and tiers - {"vlop"}
+
+    def test_overview_stays_vlop_scoped(self, tmp_path):
+        # The vlop-tier base report has one service / 100 notices; the harmonised
+        # load must not change a tier-scoped headline count.
+        db, counts, conn = self._build(tmp_path)
+        vlop_notices = conn.execute(
+            "SELECT COALESCE(SUM(t.notices), 0) FROM t4_notices t JOIN reports r "
+            "ON r.id = t.report_id WHERE r.tier = 'vlop'").fetchone()[0]
+        assert vlop_notices == 100
