@@ -18,7 +18,7 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Application code + the vendored dataset snapshot.
-COPY main.py seed.py ./
+COPY main.py seed.py seed_harmonised.py ./
 COPY static/ ./static/
 COPY data/ ./data/
 

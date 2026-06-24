@@ -410,6 +410,16 @@ def main() -> None:
     else:
         print(f"  (skipping report locations — not found: {args.report_locations})")
 
+    # Append the non-VLOP harmonised-template reports into the same star schema
+    # (from the vendored snapshot, or the sibling repo's extracted CSVs in dev).
+    import seed_harmonised
+    h = seed_harmonised.build_harmonised_facts(args.db)
+    if h:
+        print(f"  harmonised reports: {h['services']} services, {h['reports']} reports, "
+              f"{h['facts']} fact rows")
+    else:
+        print("  (skipping harmonised reports — no snapshot or extracted dir found)")
+
 
 if __name__ == "__main__":
     main()

@@ -20,7 +20,7 @@ test:
 
 # Same lint CI runs on every PR/push.
 lint:
-	python -m pyflakes main.py seed.py demo.py conftest.py mcp_server.py test_api.py test_mcp_server.py
+	python -m pyflakes main.py seed.py seed_harmonised.py demo.py conftest.py mcp_server.py test_api.py test_mcp_server.py
 
 # Static type check (config in mypy.ini); also runs in CI.
 typecheck:
