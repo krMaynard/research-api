@@ -709,10 +709,13 @@ async function setupScope(table, breakdown) {
         sort: [{ field_name: "n", order: "desc" }], max_count: 100 }),
     });
     const d = await res.json();
-    if (res.ok) scopes = d.rows.map(r => String(r[0]))
-      .filter(s => s && !/^\d+$/.test(s) && !SCOPE_JUNK.has(s.toLowerCase()));
+    if (res.ok) scopes = d.rows.map(r => r[0] != null ? String(r[0]) : "")
+      .filter(s => s && s !== "null" && s !== "undefined"
+                && !/^\d+$/.test(s) && !SCOPE_JUNK.has(s.toLowerCase()));
   } catch (_) { /* leave scopes empty → picker hidden, query spans all scopes */ }
-  if (!scopes.length) { wrap.classList.add("hidden"); sel.innerHTML = ""; return; }
+  // No usable scopes (failed fetch / none valid): hide the picker AND the caveat,
+  // since the query then spans all scopes and a "one scope at a time" note would mislead.
+  if (!scopes.length) { wrap.classList.add("hidden"); caveat.classList.add("hidden"); sel.innerHTML = ""; return; }
   fillSelect(sel, scopes);
   if (scopes.includes("Total number")) sel.value = "Total number";
   wrap.classList.remove("hidden");
