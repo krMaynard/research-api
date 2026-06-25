@@ -500,11 +500,13 @@
       <label>分组依据 <select id="ex-dim"></select></label>
       <label>聚合 <select id="ex-agg"></select></label>
       <label>度量 <select id="ex-measure"></select></label>
+      <label id="ex-scope-wrap" class="hidden">范围 <select id="ex-scope"></select></label>
       <label>显示前 <select id="ex-top">
         <option>5</option><option selected>10</option><option>20</option><option>50</option>
       </select></label>
       <button id="ex-run" type="button">运行查询</button>
     </div>
+    <p class="sub hidden" id="ex-caveat"></p>
     <div class="error" id="ex-error" role="alert"></div>
     <canvas id="ex-chart" height="150" aria-hidden="true"></canvas>
     <div id="ex-out" aria-live="polite"></div>
@@ -652,9 +654,25 @@ function fillSelect(el, items) {
   el.innerHTML = items.map((v) => `<option>${esc(v)}</option>`).join("");
 }
 
-function onTableChange() {
-  const t = exOptions.tables.find(x => x.table === $("#ex-table").value);
+// These tables store one value per (indicator × scope × surface) breakdown row —
+// e.g. t7 splits each appeal indicator into "Total number" / "Decisions upheld" /
+// "Decisions reversed" / median-time rows. A blind SUM over the measure mixes
+// those non-comparable rows (that's how you'd get a bogus "Roblox: 12M appeals"),
+// so for these tables we group by indicator and pin a single scope by default.
+const NON_ADDITIVE = new Set(["t7_appeals_recidivism", "t8_automated_means", "t9_human_resources"]);
+
+// Scope labels that are header rows / stray cells from the non-VLOP harmonised
+// extracts, not real scopes — kept out of the Scope picker.
+const SCOPE_JUNK = new Set(["scope", "champ d'application", "geltungsbereich"]);
+
+async function onTableChange() {
+  const table = $("#ex-table").value;
+  const t = exOptions.tables.find(x => x.table === table);
+  const breakdown = NON_ADDITIVE.has(table) && t.dimensions.includes("scope");
   fillSelect($("#ex-dim"), t.dimensions);
+  // For breakdown tables, default to one bar per metric (group by indicator)
+  // rather than per service, which would sum across scopes.
+  if (breakdown && t.dimensions.includes("indicator")) $("#ex-dim").value = "indicator";
   const mSel = $("#ex-measure"), aggSel = $("#ex-agg");
   if (t.measures.length) {
     fillSelect(aggSel, ["SUM", "AVG", "MAX", "MIN", "COUNT"]);
@@ -666,18 +684,59 @@ function onTableChange() {
     fillSelect(mSel, ["(行)"]);
     mSel.disabled = true;
   }
+  await setupScope(table, breakdown);
+}
+
+// Populate the Scope picker for a breakdown table from its distinct scope values,
+// defaulting to the headline "Total number" scope so the figures are comparable.
+async function setupScope(table, breakdown) {
+  const wrap = $("#ex-scope-wrap"), caveat = $("#ex-caveat"), sel = $("#ex-scope");
+  if (!breakdown) {
+    wrap.classList.add("hidden");
+    caveat.classList.add("hidden");
+    sel.innerHTML = "";
+    return;
+  }
+  caveat.textContent = "按指标 × 范围报告 — 跨范围求和会导致重复计算，因此每次仅显示一个范围。";
+  caveat.classList.remove("hidden");
+  let scopes = [];
+  try {
+    const res = await fetch("/api/explore", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ table, group_by: ["scope"],
+        aggregates: [{ function: "COUNT", field_name: "*", alias: "n" }],
+        sort: [{ field_name: "n", order: "desc" }], max_count: 100 }),
+    });
+    const d = await res.json();
+    if (res.ok) scopes = d.rows.map(r => r[0] != null ? String(r[0]) : "")
+      .filter(s => s && s !== "null" && s !== "undefined"
+                && !/^\d+$/.test(s) && !SCOPE_JUNK.has(s.toLowerCase()));
+  } catch (_) { /* leave scopes empty → picker hidden, query spans all scopes */ }
+  // No usable scopes (failed fetch / none valid): hide the picker AND the caveat,
+  // since the query then spans all scopes and a "one scope at a time" note would mislead.
+  if (!scopes.length) { wrap.classList.add("hidden"); caveat.classList.add("hidden"); sel.innerHTML = ""; return; }
+  fillSelect(sel, scopes);
+  if (scopes.includes("Total number")) sel.value = "Total number";
+  wrap.classList.remove("hidden");
 }
 
 function buildQuery() {
   const agg = $("#ex-agg").value;
   const field_name = (agg === "COUNT" || $("#ex-measure").disabled) ? "*" : $("#ex-measure").value;
-  return {
+  const q = {
     table: $("#ex-table").value,
     group_by: [$("#ex-dim").value],
     aggregates: [{ function: agg, field_name, alias: "value" }],
     sort: [{ field_name: "value", order: "desc" }],
     max_count: Number($("#ex-top").value),
   };
+  // Pin the chosen scope on the breakdown tables so the measure isn't summed
+  // across non-comparable scope rows (Total / upheld / reversed / median-time…).
+  const scopeWrap = $("#ex-scope-wrap");
+  if (!scopeWrap.classList.contains("hidden") && $("#ex-scope").value) {
+    q.query = { and: [{ operation: "EQ", field_name: "scope", field_values: [$("#ex-scope").value] }] };
+  }
+  return q;
 }
 
 async function runExplore() {
@@ -739,8 +798,9 @@ async function setupExplore() {
   }
   fillSelect($("#ex-table"), exOptions.tables.map(t => t.table));
   if (exOptions.tables.some(t => t.table === "t4_notices")) $("#ex-table").value = "t4_notices";
-  onTableChange();
-  $("#ex-table").addEventListener("change", () => { onTableChange(); runExplore(); });
+  await onTableChange();
+  $("#ex-table").addEventListener("change", () => { onTableChange().then(runExplore); });
+  $("#ex-scope").addEventListener("change", runExplore);
   $("#ex-run").addEventListener("click", runExplore);
   $("#ex-csv").addEventListener("click", () => lastExplore && downloadBlob("vlop-explore.csv", toCSV(lastExplore), "text/csv"));
   $("#ex-json-dl").addEventListener("click", () => lastExplore && downloadBlob("vlop-explore.json", JSON.stringify(lastExplore, null, 2), "application/json"));
@@ -753,8 +813,6 @@ let lastCompare = null;
 
 // One-click cross-table analyses. `filters` (per leg) become that leg's `query`.
 const CMP_PRESETS = [
-  { label: "每次申诉的处置数", a: { table: "t5_own_initiative_illegal", measure: "measures" },
-    b: { table: "t7_appeals_recidivism", measure: "value" }, derived: "a_div_b" },
   { label: "每千名用户的通知数", a: { table: "t4_notices", measure: "notices" },
     b: { table: "t10_amar", measure: "value" }, derived: "a_per_1k_b" },
   { label: "可信举报者通知占比（%）", a: { table: "t4_notices", measure: "tf_notices" },
@@ -968,10 +1026,10 @@ function downloadBlob(name, text, type) {
   a.download = name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
 }
 
-function refineInBuilder(aq) {
+async function refineInBuilder(aq) {
   const t = exOptions && exOptions.tables.find(x => x.table === aq.table);
   if (!t) return;
-  $("#ex-table").value = aq.table; onTableChange();
+  $("#ex-table").value = aq.table; await onTableChange();
   const dim = (aq.group_by || [])[0];
   if (dim && t.dimensions.includes(dim)) $("#ex-dim").value = dim;
   const agg = (aq.aggregates || [])[0];
