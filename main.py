@@ -2272,6 +2272,10 @@ def _compute_gr_overview() -> dict[str, Any]:
             "country_count": country_count,
             "period_count": len(periods),
             "periods": periods,
+            # Provenance: the snapshot build date (shared with the DSA dataset) and
+            # the covered reporting window, so the dashboard can cite both.
+            "generated": _dataset_meta().get("generated"),
+            "coverage": (periods[0] + " – " + periods[-1]) if periods else None,
             "countries": countries,
             "requestors": requestors,
             "products": products,
@@ -3109,8 +3113,22 @@ def _render_result(
     headers = (
         {"Content-Disposition": f'attachment; filename="{job_id}.json"'} if as_attachment else None
     )
+    # Stamp the result with dataset provenance so an exported JSON is self-describing
+    # and citable (snapshot period + generation date + build) without a separate lookup.
+    meta = _dataset_meta()
     return JSONResponse(
-        {"columns": cols, "rows": rows, "row_count": len(rows)}, headers=headers
+        {
+            "columns": cols,
+            "rows": rows,
+            "row_count": len(rows),
+            "dataset": {
+                "period": meta.get("period"),
+                "generated": meta.get("generated"),
+                "app_version": APP_VERSION,
+                "source": "https://github.com/krMaynard/transparency-report-api",
+            },
+        },
+        headers=headers,
     )
 
 
