@@ -718,9 +718,12 @@ const TABS = [
     filters: [CAT_TOTAL],
     secondary: { group: "category_label", measure: "notices", label: "콘텐츠 범주별", filters: [CAT_LEAF] } },
   { tab: "자체 조치", title: "자체 모더레이션 조치",
-    sub: "통지 없이 취한 선제적 조치 — 불법 콘텐츠(DSA 표5).",
-    table: "t5_own_initiative_illegal", measure: "measures", valueLabel: "조치 수", color: "green",
-    filters: [CAT_TOTAL] },
+    sub: "통지 없이 취한 선제적 조치(법적 근거별) — 불법 콘텐츠(DSA 표5) 및 서비스 약관 위반(DSA 표6).",
+    composite: { measure: "measures", legs: [
+      { alias: "illegal", table: "t5_own_initiative_illegal", col: "iv", label: "불법 콘텐츠(표5)" },
+      { alias: "tos", table: "t6_own_initiative_tos", col: "tv", label: "서비스 약관 위반(표6)" },
+    ] },
+    valueLabel: "조치 수", color: "green", filters: [CAT_TOTAL] },
   { tab: "정부 명령", title: "회원국의 조치 명령",
     sub: "콘텐츠 조치를 요구하는 EU 회원국 명령(DSA 표3, 제9조).",
     table: "t3_member_state_orders", measure: "orders_to_act", valueLabel: "명령", color: "green",
@@ -763,6 +766,22 @@ function buildTabQuery(tab) {
   if (tab.qual) {
     return { table: tab.qual.table, fields: tab.qual.fields, max_count: 6,
              ...(and.length ? { query: { and } } : {}) };
+  }
+  if (tab.composite) {
+    // Two disjoint tables (t5 illegal-content / t6 ToS) summed per platform via a
+    // composite, so the tab shows both legal bases as a stacked bar instead of
+    // silently representing only one. Each leg carries the same filters.
+    const legs = {};
+    tab.composite.legs.forEach(l => {
+      legs[l.alias] = { table: l.table,
+        aggregates: [{ function: "SUM", field_name: tab.composite.measure, alias: l.col }],
+        ...(and.length ? { query: { and } } : {}) };
+    });
+    return {
+      legs, join_on: ["service_name"],
+      derived: [{ alias: "value", expr: tab.composite.legs.map(l => `${l.alias}.${l.col}`).join(" + ") }],
+      sort: [{ field_name: "value", order: "desc" }], max_count: 10,
+    };
   }
   return {
     table: tab.table, group_by: ["service_name"],
@@ -821,8 +840,49 @@ async function renderTab(tab) {
   }
   if (currentTab !== tab) return;  // a newer tab/scope click superseded this fetch
   if (tab.qual) { renderQual(d); return; }
+  if (tab.composite) {
+    const idx = {};
+    (d.columns || []).forEach((c, i) => { idx[c] = i; });
+    const labels = d.rows.map(r => r[0]);
+    const series = tab.composite.legs.map((l, k) => ({
+      label: l.label,
+      data: d.rows.map(r => r[idx[l.col]] || 0),
+      color: STACK_COLORS[k % STACK_COLORS.length],
+    }));
+    drawStackedChart(labels, series, "플랫폼", tab.valueLabel);
+    return;
+  }
   drawTabChart(d.rows.map(r => r[0]), d.rows.map(r => r[1]), "플랫폼", tab.valueLabel, tab.color);
   if (tab.secondary) renderSecondary(tab);
+}
+
+const STACK_COLORS = ["#3fb950", "#58a6ff"];  // illegal content / ToS
+
+// A stacked horizontal bar for a multi-series (composite) tab, with a per-series
+// + total fallback table for when Chart.js is unavailable or for screen readers.
+function drawStackedChart(labels, series, nameLabel, valueLabel) {
+  const canvas = $("#tab-chart"), fb = $("#tab-fallback");
+  const head = `<tr><th>${esc(nameLabel)}</th>` +
+    series.map(s => `<th class="num">${esc(s.label)}</th>`).join("") +
+    `<th class="num">Total</th></tr>`;
+  const body = labels.map((l, i) => {
+    const cells = series.map(s => `<td class="num">${fmt(s.data[i])}</td>`).join("");
+    const total = series.reduce((t, s) => t + (s.data[i] || 0), 0);
+    return `<tr><td>${esc(l)}</td>${cells}<td class="num">${fmt(total)}</td></tr>`;
+  }).join("");
+  fb.innerHTML = `<table class="restable">${head}${body}</table>`;
+  if (tabChart) { tabChart.destroy(); tabChart = null; }
+  if (!chartReady() || !labels.length) {
+    canvas.style.display = "none"; fb.classList.remove("sr-only"); return;
+  }
+  canvas.style.display = ""; fb.classList.add("sr-only");
+  tabChart = new Chart(canvas, {
+    type: "bar",
+    data: { labels, datasets: series.map(s => ({ label: s.label, data: s.data, backgroundColor: s.color, borderRadius: 4 })) },
+    options: { indexAxis: "y", plugins: { legend: { display: true, labels: { color: "#e6edf3" } } },
+      scales: { x: { stacked: true, ticks: { color: "#9aa7b4" }, grid: { color: "#30363d" } },
+                y: { stacked: true, ticks: { color: "#e6edf3" }, grid: { display: false } } } },
+  });
 }
 
 function renderQual(d) {
