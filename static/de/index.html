@@ -1161,7 +1161,17 @@ function buildCompareQuery() {
     const agg = measures
       ? { function: "SUM", field_name: $(`#cmp-measure-${which}`).value, alias }
       : { function: "COUNT", field_name: "*", alias };
-    return { table, aggregates: [agg] };
+    const body = { table, aggregates: [agg] };
+    // Pin the published total row along is_total dimensions, so each leg's SUM is
+    // the headline figure — never the aggregate double-counted with its own
+    // breakdown. Without this, "Notices per 1,000 users" summed all t4 category
+    // taxonomies over all t10 scopes (a triple-count ÷ a garbage denominator).
+    const dims = exOptions.tables.find(x => x.table === table).dimensions;
+    const and = [];
+    if (dims.includes("category_is_total")) and.push({ operation: "EQ", field_name: "category_is_total", field_values: ["1"] });
+    if (dims.includes("scope_is_total")) and.push({ operation: "EQ", field_name: "scope_is_total", field_values: ["1"] });
+    if (and.length) body.query = { and };
+    return body;
   };
   return {
     legs: { a: leg("a", "av"), b: leg("b", "bv") },

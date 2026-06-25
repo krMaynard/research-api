@@ -468,7 +468,7 @@ display: flex; align-items: center; justify-content: space-between;
         </div>
         <div class="chart-loading" id="ts-loading">Cargando…</div>
         <canvas id="chart-ts" height="160" aria-hidden="true" class="hidden"></canvas>
-        <div id="chart-ts-table" class="hidden sr-only"></div>
+        <div id="chart-ts-table" class="sr-only"></div>
       </div>
 
       <div class="chart-card wide">
@@ -476,30 +476,35 @@ display: flex; align-items: center; justify-content: space-between;
         <p class="chart-sub">Proporción de elementos señalados que Google realmente retiró (legal + políticas + ya retirados).</p>
         <div class="chart-loading" id="rate-loading">Cargando…</div>
         <canvas id="chart-rate" height="120" aria-hidden="true" class="hidden"></canvas>
+        <div id="chart-rate-table" class="sr-only"></div>
       </div>
 
       <div class="chart-card">
         <h3>10 países principales por elementos señalados</h3>
         <div class="chart-loading" id="cty-loading">Cargando…</div>
         <canvas id="chart-countries" height="200" aria-hidden="true" class="hidden"></canvas>
+        <div id="chart-countries-table" class="sr-only"></div>
       </div>
 
       <div class="chart-card">
         <h3>Principales motivos citados</h3>
         <div class="chart-loading" id="rsn-loading">Cargando…</div>
         <canvas id="chart-reasons" height="200" aria-hidden="true" class="hidden"></canvas>
+        <div id="chart-reasons-table" class="sr-only"></div>
       </div>
 
       <div class="chart-card">
         <h3>Principales productos de Google señalados</h3>
         <div class="chart-loading" id="prd-loading">Cargando…</div>
         <canvas id="chart-products" height="200" aria-hidden="true" class="hidden"></canvas>
+        <div id="chart-products-table" class="sr-only"></div>
       </div>
 
       <div class="chart-card">
         <h3>Cómo respondió Google</h3>
         <div class="chart-loading" id="cmp-loading">Cargando…</div>
         <canvas id="chart-compliance" height="200" aria-hidden="true" class="hidden"></canvas>
+        <div id="chart-compliance-table" class="sr-only"></div>
       </div>
 
     </div>
@@ -627,7 +632,7 @@ display: flex; align-items: center; justify-content: space-between;
     if (sort)      body.sort = sort;
     if (max_count) body.max_count = max_count;
     var cond = buildConditions();
-    if (cond) body.conditions = cond;
+    if (cond) body.query = cond;   // API field is `query` (a BooleanQuery), not `conditions`
     return body;
   }
 
@@ -637,6 +642,21 @@ display: flex; align-items: center; justify-content: space-between;
   function showChart(canvasId, loadingId) {
     document.getElementById(loadingId).classList.add('hidden');
     document.getElementById(canvasId).classList.remove('hidden');
+  }
+
+  // Accessible data-table mirror of a chart, written into a visually-hidden
+  // (.sr-only) container so screen-reader users get the numbers even though the
+  // canvas is aria-hidden (and even if Chart.js fails to load).
+  function srTable(tableId, caption, headers, rows) {
+    var el = document.getElementById(tableId);
+    if (!el) return;
+    el.innerHTML = '<table><caption>' + esc(caption) + '</caption><thead><tr>'
+      + headers.map(function (h) { return '<th>' + esc(h) + '</th>'; }).join('')
+      + '</tr></thead><tbody>'
+      + rows.map(function (r) {
+          return '<tr>' + r.map(function (c) { return '<td>' + esc(c) + '</td>'; }).join('') + '</tr>';
+        }).join('')
+      + '</tbody></table>';
   }
 
   function barChart(id, loadId, labels, values, label) {
@@ -719,6 +739,8 @@ display: flex; align-items: center; justify-content: space-between;
       var labels = rows.map(function(r){ return r[0]; });
       var values = rows.map(function(r){ return r[1]; });
       lineChart('chart-ts', 'ts-loading', labels, [{ label: 'Elementos señalados', data: values }]);
+      srTable('chart-ts-table', 'Items targeted for removal, by period',
+        ['Period', 'Elementos señalados'], rows.map(function(r){ return [r[0], fmt(r[1])]; }));
     } else {
       // rows = [period, breakdown_val, items] — pivot into per-breakdown datasets
       var periodSet = [], seriesMap = {};
@@ -737,6 +759,11 @@ display: flex; align-items: center; justify-content: space-between;
         return { label: entry.key, data: periodSet.map(function(p){ return seriesMap[entry.key][p] || 0; }) };
       });
       lineChart('chart-ts', 'ts-loading', periodSet, datasets);
+      srTable('chart-ts-table', 'Items targeted for removal, by period',
+        ['Period'].concat(totals.map(function(e){ return e.key; })),
+        periodSet.map(function(p){
+          return [p].concat(totals.map(function(e){ return fmt(seriesMap[e.key][p] || 0); }));
+        }));
     }
   }
 
@@ -748,24 +775,32 @@ display: flex; align-items: center; justify-content: space-between;
       return items > 0 ? removed / items : null;
     });
     pctLineChart('chart-rate', 'rate-loading', labels, rates);
+    srTable('chart-rate-table', 'Removal rate over time', ['Period', 'Removal rate'],
+      rows.map(function(r, i){ return [r[0], rates[i] == null ? '—' : (rates[i] * 100).toFixed(1) + '%']; }));
   }
 
   function renderTopCountries(rows) {
     var labels = rows.map(function(r){ return r[0]; }).reverse();
     var values = rows.map(function(r){ return r[1]; }).reverse();
     barChart('chart-countries', 'cty-loading', labels, values, 'Elementos señalados');
+    srTable('chart-countries-table', 'Top 10 countries by items targeted',
+      ['Country', 'Elementos señalados'], rows.map(function(r){ return [r[0], fmt(r[1])]; }));
   }
 
   function renderTopReasons(rows) {
     var labels = rows.map(function(r){ return r[0]; });
     var values = rows.map(function(r){ return r[1]; });
     doughnutChart('chart-reasons', 'rsn-loading', labels, values);
+    srTable('chart-reasons-table', 'Top reasons cited',
+      ['Reason', 'Elementos señalados'], rows.map(function(r){ return [r[0], fmt(r[1])]; }));
   }
 
   function renderTopProducts(rows) {
     var labels = rows.map(function(r){ return r[0]; }).reverse();
     var values = rows.map(function(r){ return r[1]; }).reverse();
     barChart('chart-products', 'prd-loading', labels, values, 'Elementos señalados');
+    srTable('chart-products-table', 'Top Google products targeted',
+      ['Google product', 'Elementos señalados'], rows.map(function(r){ return [r[0], fmt(r[1])]; }));
   }
 
   function renderCompliance(rows) {
@@ -773,6 +808,8 @@ display: flex; align-items: center; justify-content: space-between;
       destroyChart('chart-compliance');
       var loadingEl = document.getElementById('cmp-loading');
       if (loadingEl) loadingEl.classList.add('hidden');
+      var tEl = document.getElementById('chart-compliance-table');
+      if (tEl) tEl.innerHTML = '';
       return;
     }
     var r = rows[0];
@@ -780,6 +817,8 @@ display: flex; align-items: center; justify-content: space-between;
     var labels = ['Retirado (legal)', 'Retirado (políticas)', 'Ya retirado', 'No encontrado', 'Información insuficiente', 'Sin acción'];
     var values = [r[0]||0, r[1]||0, r[2]||0, r[3]||0, r[4]||0, r[5]||0];
     doughnutChart('chart-compliance', 'cmp-loading', labels, values);
+    srTable('chart-compliance-table', 'How Google responded',
+      ['Outcome', 'Items'], labels.map(function(l, i){ return [l, fmt(values[i])]; }));
   }
 
   function renderTable(rows) {
@@ -836,13 +875,32 @@ display: flex; align-items: center; justify-content: space-between;
       var el = document.getElementById(id); if (el) el.classList.add('hidden');
     });
 
-    var grp = breakdown ? ['period', breakdown] : ['period'];
     var tsAggs = [{ function: 'SUM', field_name: 'items_requested', alias: 'items' }];
-    var tsSort = [{ field_name: 'period', order: 'asc' }];
 
     try {
+      // Time-series query. When broken down, first find the top-8 breakdown
+      // values (by total over the *current filters*), then fetch only
+      // period × those-8 rows. This keeps the grid well under the explore row
+      // cap (8×13 ≪ 500) so no periods are silently dropped — the old single
+      // query asked for period×country (1000+ rows) capped at 200 and lost most
+      // of the timeline. Chronological ordering is fixed client-side below.
+      var tsQuery;
+      if (breakdown) {
+        var topRes = await explore(q('gr_removals', [breakdown], tsAggs, [{ field_name: 'items', order: 'desc' }], 8));
+        var topVals = topRes.rows.map(function (r) { return r[0]; });
+        var tsBody = q('gr_removals', ['period', breakdown], tsAggs, null, 500);
+        if (topVals.length) {
+          var inCond = { operation: 'IN', field_name: breakdown, field_values: topVals };
+          tsBody.query = tsBody.query
+            ? { and: tsBody.query.and.concat([inCond]) }
+            : { and: [inCond] };
+        }
+        tsQuery = explore(tsBody);
+      } else {
+        tsQuery = explore(q('gr_removals', ['period'], tsAggs, null, 50));
+      }
       var results = await Promise.all([
-        explore(q('gr_removals', grp, tsAggs, tsSort, 200)),
+        tsQuery,
         explore(q('gr_removals', ['period'], [
           { function: 'SUM', field_name: 'items_requested', alias: 'items' },
           { function: 'SUM', field_name: 'removed_legal',   alias: 'legal' },
