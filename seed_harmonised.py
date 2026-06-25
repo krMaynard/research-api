@@ -71,6 +71,10 @@ SLUG_META = {
     "vrbo": ("Vrbo", "online-platform"),
     "webde": ("Web.de", "online-platform"),
     "yahoo": ("Yahoo Search", "online-platform"),
+    "bumble": ("Bumble", "online-platform"),
+    "grindr": ("Grindr", "online-platform"),
+    "vestiaire": ("Vestiaire Collective", "online-platform"),
+    "whatnot": ("Whatnot", "online-platform"),
 }
 
 SECTIONS = [
