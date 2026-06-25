@@ -1892,6 +1892,33 @@ class TestDimensionNormalization:
         assert conn.execute("SELECT COUNT(*) FROM t10_amar").fetchone()[0] == 3
         assert conn.execute("SELECT COUNT(*) FROM scopes WHERE name = '9 & 10'").fetchone()[0] == 1
 
+    def test_canonical_key_unifies_languages(self, tmp_path):
+        import sqlite3
+        import seed
+        # Inject a crosswalk so the test stays hermetic (no dependence on the
+        # vendored file), then restore the lazy loader.
+        seed._CROSSWALK = {"scope": {"Décisions confirmées": "Decisions upheld"}}
+        try:
+            db = str(tmp_path / "cw.db")
+            seed.build_db({
+                "meta": {"period": "2025-07-01/2025-12-31", "tier": "vlop"},
+                "services": ["S"], "service_platforms": ["P"],
+                "categories": ["TOTAL"], "category_labels": {"TOTAL": "All the entries"},
+                "sections": ["Internal complaints mechanism"], "indicators": ["i"],
+                "scopes": ["Decisions upheld", "Décisions confirmées"], "surfaces": ["All"],
+                "t7": [[0, 0, 0, 0, 5, 0], [0, 0, 0, 1, 7, 0]],
+            }, db)
+            conn = sqlite3.connect(db)
+            keys = dict(conn.execute("SELECT name, key FROM scopes"))
+            # The French label keeps its display text but shares the English key.
+            assert keys["Décisions confirmées"] == "Decisions upheld"
+            assert keys["Decisions upheld"] == "Decisions upheld"
+            # An unmapped/English label keys to itself.
+            assert conn.execute("SELECT key FROM sections").fetchone()[0] == \
+                "Internal complaints mechanism"
+        finally:
+            seed._CROSSWALK = None
+
     def test_total_grain_avoids_double_count(self, tmp_path):
         conn = self._build(tmp_path)
         # Summing the total row alone (is_total=1) gives 100, not 200 (total+leaf).

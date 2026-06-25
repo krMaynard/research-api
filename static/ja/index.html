@@ -705,7 +705,9 @@ const VLOP_TIER   = { operation: "EQ", field_name: "report_tier", field_values: 
 const SCOPE_TOTAL = { operation: "EQ", field_name: "scope_is_total", field_values: ["1"] };
 const CAT_TOTAL   = { operation: "EQ", field_name: "category_is_total", field_values: ["1"] };
 const CAT_LEAF    = { operation: "EQ", field_name: "category_is_total", field_values: ["0"] };
-const APPEALS_IND = { operation: "EQ", field_name: "indicator",
+// Filter on indicator_key (the language-neutral canonical label) so the tab spans
+// reports filed in other EU languages, not just the English string.
+const APPEALS_IND = { operation: "EQ", field_name: "indicator_key",
   field_values: ["Number of complaints submitted to the internal-complaints mechanism"] };
 const WARN_SVG = '<svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="#d29922" stroke-width="1.4" stroke-linecap="round"><path d="M8 1.7l6.5 12H1.5L8 1.7z"/><path d="M8 6.3v3.4M8 11.8v.05"/></svg>';
 
@@ -716,9 +718,12 @@ const TABS = [
     filters: [CAT_TOTAL],
     secondary: { group: "category_label", measure: "notices", label: "コンテンツのカテゴリ別", filters: [CAT_LEAF] } },
   { tab: "自主的対応", title: "自主的なモデレーション対応",
-    sub: "通知なしに講じた自主的措置 — 違法コンテンツ（DSA 表5）。",
-    table: "t5_own_initiative_illegal", measure: "measures", valueLabel: "対応件数", color: "green",
-    filters: [CAT_TOTAL] },
+    sub: "通知なしに講じた自主的措置（法的根拠別）— 違法コンテンツ（DSA 表5）と利用規約違反（DSA 表6）。",
+    composite: { measure: "measures", legs: [
+      { alias: "illegal", table: "t5_own_initiative_illegal", col: "iv", label: "違法コンテンツ（表5）" },
+      { alias: "tos", table: "t6_own_initiative_tos", col: "tv", label: "利用規約違反（表6）" },
+    ] },
+    valueLabel: "対応件数", color: "green", filters: [CAT_TOTAL] },
   { tab: "政府命令", title: "加盟国による対応命令",
     sub: "コンテンツへの対応を求めるEU加盟国の命令（DSA 表3、第9条）。",
     table: "t3_member_state_orders", measure: "orders_to_act", valueLabel: "命令", color: "green",
@@ -761,6 +766,22 @@ function buildTabQuery(tab) {
   if (tab.qual) {
     return { table: tab.qual.table, fields: tab.qual.fields, max_count: 6,
              ...(and.length ? { query: { and } } : {}) };
+  }
+  if (tab.composite) {
+    // Two disjoint tables (t5 illegal-content / t6 ToS) summed per platform via a
+    // composite, so the tab shows both legal bases as a stacked bar instead of
+    // silently representing only one. Each leg carries the same filters.
+    const legs = {};
+    tab.composite.legs.forEach(l => {
+      legs[l.alias] = { table: l.table,
+        aggregates: [{ function: "SUM", field_name: tab.composite.measure, alias: l.col }],
+        ...(and.length ? { query: { and } } : {}) };
+    });
+    return {
+      legs, join_on: ["service_name"],
+      derived: [{ alias: "value", expr: tab.composite.legs.map(l => `${l.alias}.${l.col}`).join(" + ") }],
+      sort: [{ field_name: "value", order: "desc" }], max_count: 10,
+    };
   }
   return {
     table: tab.table, group_by: ["service_name"],
@@ -819,8 +840,49 @@ async function renderTab(tab) {
   }
   if (currentTab !== tab) return;  // a newer tab/scope click superseded this fetch
   if (tab.qual) { renderQual(d); return; }
+  if (tab.composite) {
+    const idx = {};
+    (d.columns || []).forEach((c, i) => { idx[c] = i; });
+    const labels = d.rows.map(r => r[0]);
+    const series = tab.composite.legs.map((l, k) => ({
+      label: l.label,
+      data: d.rows.map(r => r[idx[l.col]] || 0),
+      color: STACK_COLORS[k % STACK_COLORS.length],
+    }));
+    drawStackedChart(labels, series, "プラットフォーム", tab.valueLabel);
+    return;
+  }
   drawTabChart(d.rows.map(r => r[0]), d.rows.map(r => r[1]), "プラットフォーム", tab.valueLabel, tab.color);
   if (tab.secondary) renderSecondary(tab);
+}
+
+const STACK_COLORS = ["#3fb950", "#58a6ff"];  // illegal content / ToS
+
+// A stacked horizontal bar for a multi-series (composite) tab, with a per-series
+// + total fallback table for when Chart.js is unavailable or for screen readers.
+function drawStackedChart(labels, series, nameLabel, valueLabel) {
+  const canvas = $("#tab-chart"), fb = $("#tab-fallback");
+  const head = `<tr><th>${esc(nameLabel)}</th>` +
+    series.map(s => `<th class="num">${esc(s.label)}</th>`).join("") +
+    `<th class="num">Total</th></tr>`;
+  const body = labels.map((l, i) => {
+    const cells = series.map(s => `<td class="num">${fmt(s.data[i])}</td>`).join("");
+    const total = series.reduce((t, s) => t + (s.data[i] || 0), 0);
+    return `<tr><td>${esc(l)}</td>${cells}<td class="num">${fmt(total)}</td></tr>`;
+  }).join("");
+  fb.innerHTML = `<table class="restable">${head}${body}</table>`;
+  if (tabChart) { tabChart.destroy(); tabChart = null; }
+  if (!chartReady() || !labels.length) {
+    canvas.style.display = "none"; fb.classList.remove("sr-only"); return;
+  }
+  canvas.style.display = ""; fb.classList.add("sr-only");
+  tabChart = new Chart(canvas, {
+    type: "bar",
+    data: { labels, datasets: series.map(s => ({ label: s.label, data: s.data, backgroundColor: s.color, borderRadius: 4 })) },
+    options: { indexAxis: "y", plugins: { legend: { display: true, labels: { color: "#e6edf3" } } },
+      scales: { x: { stacked: true, ticks: { color: "#9aa7b4" }, grid: { color: "#30363d" } },
+                y: { stacked: true, ticks: { color: "#e6edf3" }, grid: { display: false } } } },
+  });
 }
 
 function renderQual(d) {

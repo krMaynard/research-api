@@ -63,9 +63,9 @@ CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT);
 -- Shared dimension tables. id = position in the source lookup array.
 CREATE TABLE services   (id INTEGER PRIMARY KEY, name TEXT NOT NULL, platform TEXT NOT NULL);
 CREATE TABLE categories (id INTEGER PRIMARY KEY, code TEXT NOT NULL, label TEXT NOT NULL, is_total INTEGER NOT NULL DEFAULT 0);
-CREATE TABLE sections   (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
-CREATE TABLE indicators (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
-CREATE TABLE scopes     (id INTEGER PRIMARY KEY, name TEXT NOT NULL, is_total INTEGER NOT NULL DEFAULT 0);
+CREATE TABLE sections   (id INTEGER PRIMARY KEY, name TEXT NOT NULL, key TEXT NOT NULL DEFAULT '');
+CREATE TABLE indicators (id INTEGER PRIMARY KEY, name TEXT NOT NULL, key TEXT NOT NULL DEFAULT '');
+CREATE TABLE scopes     (id INTEGER PRIMARY KEY, name TEXT NOT NULL, is_total INTEGER NOT NULL DEFAULT 0, key TEXT NOT NULL DEFAULT '');
 CREATE TABLE surfaces   (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
 
 -- Report dimension: one row per submitted transparency report (one dataset = one report).
@@ -261,6 +261,27 @@ _CATEGORY_FACTS = ("t3_member_state_orders", "t4_notices",
                    "t5_own_initiative_illegal", "t6_own_initiative_tos")
 
 
+_CROSSWALK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                               "data", "template-crosswalk.json")
+# {dimension: {original-language label: canonical English label}} — see
+# scripts/build_template_crosswalk.py. Maps DSA harmonised-template rows filed in
+# other EU languages onto their canonical English term so the same logical
+# section/indicator/scope can be grouped across languages (the `key` column),
+# while the original-language label is preserved for display (the `name` column).
+_CROSSWALK: dict[str, dict[str, str]] | None = None
+
+
+def _crosswalk() -> dict[str, dict[str, str]]:
+    global _CROSSWALK
+    if _CROSSWALK is None:
+        try:
+            with open(_CROSSWALK_PATH, encoding="utf-8") as f:
+                _CROSSWALK = json.load(f)
+        except (OSError, ValueError):
+            _CROSSWALK = {}
+    return _CROSSWALK
+
+
 def _is_total_label(label: str) -> bool:
     return (label or "").strip().casefold() in _TOTAL_LABELS
 
@@ -292,6 +313,19 @@ def normalize_dimensions(conn: sqlite3.Connection) -> dict[str, int]:
             conn.executemany(f"UPDATE {dim} SET is_total = 1 WHERE id = ?",
                              [(i,) for i in ids])
             flagged += len(ids)
+
+    # Stamp the language-neutral canonical `key` on each template dimension row:
+    # the crosswalk's English term where the label was filed in another language,
+    # else the label itself (already English / unmapped). Lets queries group or
+    # filter across languages while `name` keeps the original-language text.
+    cw = _crosswalk()
+    for dim, table in (("section", "sections"), ("indicator", "indicators"),
+                       ("scope", "scopes")):
+        m = cw.get(dim, {})
+        conn.executemany(
+            f"UPDATE {table} SET key = ? WHERE id = ?",
+            [(m.get(name, name), rid)
+             for rid, name in conn.execute(f"SELECT id, name FROM {table}")])
 
     deleted = 0
     junk_scopes = [rid for rid, n in conn.execute("SELECT id, name FROM scopes")

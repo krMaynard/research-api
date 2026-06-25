@@ -928,8 +928,13 @@ _CAT_DIMS = {"category_code": "c.code", "category_label": "c.label",
              "category_is_total": "c.is_total"}
 # Scope dims, incl. the is_total flag (1 for AMAR's EU TOTAL, the "Total number"
 # headline scope, etc.) so a query can pick a single grain instead of summing
-# the aggregate row together with its breakdown.
-_SCOPE_DIMS = {"scope": "sc.name", "scope_is_total": "sc.is_total"}
+# the aggregate row together with its breakdown. `*_key` is the language-neutral
+# canonical English label (see seed.normalize_dimensions) — group/filter on it to
+# span reports filed in different EU languages; the plain dim keeps the original-
+# language text for display.
+_SCOPE_DIMS = {"scope": "sc.name", "scope_is_total": "sc.is_total", "scope_key": "sc.key"}
+_SEC_DIMS = {"section": "se.name", "section_key": "se.key"}
+_IND_DIMS = {"indicator": "i.name", "indicator_key": "i.key"}
 
 _J_RPT = "JOIN reports r ON r.id = f.report_id"
 _RPT_DIMS = {
@@ -977,19 +982,19 @@ TABLES: dict[str, TableSpec] = {
     "t7_appeals_recidivism": TableSpec(
         "Appeals & recidivism (internal complaints, out-of-court disputes, repeat-offender suspensions), by section × indicator × scope × surface.",
         f"FROM t7_appeals_recidivism f {_J_RPT} {_J_SVC} {_J_SEC} {_J_IND} {_J_SCOPE} {_J_SURF}",
-        {**_RPT_DIMS, **_SVC, "section": "se.name", "indicator": "i.name", **_SCOPE_DIMS, "surface": "su.name"},
+        {**_RPT_DIMS, **_SVC, **_SEC_DIMS, **_IND_DIMS, **_SCOPE_DIMS, "surface": "su.name"},
         {"value": "f.value"},
     ),
     "t8_automated_means": TableSpec(
         "Use of automated means for content moderation, by section × indicator × scope × surface.",
         f"FROM t8_automated_means f {_J_RPT} {_J_SVC} {_J_SEC} {_J_IND} {_J_SCOPE} {_J_SURF}",
-        {**_RPT_DIMS, **_SVC, "section": "se.name", "indicator": "i.name", **_SCOPE_DIMS, "surface": "su.name"},
+        {**_RPT_DIMS, **_SVC, **_SEC_DIMS, **_IND_DIMS, **_SCOPE_DIMS, "surface": "su.name"},
         {"value": "f.value"},
     ),
     "t9_human_resources": TableSpec(
         "Human resources dedicated to content moderation, by section × indicator × scope.",
         f"FROM t9_human_resources f {_J_RPT} {_J_SVC} {_J_SEC} {_J_IND} {_J_SCOPE}",
-        {**_RPT_DIMS, **_SVC, "section": "se.name", "indicator": "i.name", **_SCOPE_DIMS},
+        {**_RPT_DIMS, **_SVC, **_SEC_DIMS, **_IND_DIMS, **_SCOPE_DIMS},
         {"value": "f.value"},
     ),
     "t10_amar": TableSpec(
@@ -1001,7 +1006,7 @@ TABLES: dict[str, TableSpec] = {
     "t11_qualitative": TableSpec(
         "Qualitative description (free text), by indicator. No numeric measures — request `qualitative_text` in `fields`.",
         f"FROM t11_qualitative f {_J_RPT} {_J_SVC} {_J_IND}",
-        {**_RPT_DIMS, **_SVC, "indicator": "i.name", "qualitative_text": "f.value_text"},
+        {**_RPT_DIMS, **_SVC, **_IND_DIMS, "qualitative_text": "f.value_text"},
         {},
     ),
     "gr_removals": TableSpec(

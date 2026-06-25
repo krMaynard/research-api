@@ -34,6 +34,8 @@ Built to demonstrate two things:
 | `data/vlop-dsa.json` | Vendored dataset snapshot — what the Docker image is seeded from (refresh via `scripts/refresh-dataset.sh`) |
 | `data/harmonised-reports.json` | Vendored snapshot of the 27 extracted non-VLOP harmonised-template reports (sibling `dsa-transparency-data/harmonised-reports/extracted/`) — seeded into `t3`–`t11` by `seed_harmonised.py` |
 | `data/report-locations.csv` | Vendored snapshot of the non-VLOP DSA report-locations catalogue (sibling `dsa-transparency-data/dsa_reports.csv`) — seeded into the read-only `report_locations` table by `seed.py` |
+| `data/template-crosswalk.json` | Vendored `{original-language label → canonical English}` map for the template's `sections`/`indicators`/`scopes`, applied by `seed.normalize_dimensions` to stamp each dim row's language-neutral `key`. Regenerate with `scripts/build_template_crosswalk.py` |
+| `scripts/build_template_crosswalk.py` | Learns `data/template-crosswalk.json` by aligning same-structure non-VLOP report sheets to an English reference (drops ambiguous labels) — reads the sibling repo's extracted CSVs |
 | `demo.py` | Narrated walkthrough script (run after starting the server) |
 | `static/index.html` | Public VLOP dashboard (served at `/reports`) — Chart.js overview + interactive query builder + "Compare tables" composite panel + NL "Ask" box (`GET /api/overview`, `POST /api/explore`, `POST /api/ask`) |
 | `static/catalog.html` | Public report-locations catalogue page (served at `/catalog`) — the "Where platforms publish their reports" filterable table over `GET /api/report-locations` |
@@ -180,6 +182,21 @@ numeric strays) leaked by some non-VLOP extracts. `compile_query` exposes
 and the Explore "Rows" selector pick a single grain (totals only / breakdown
 only) instead of summing a total together with its own parts.
 
+**Cross-language canonical keys.** Non-VLOP reports are filed in any official EU
+language, so the same template row arrives as different text (`Décisions
+confirmées` / `Bestätigte Entscheidungen` / `Decisions upheld`). The seeder keeps
+the original-language label for display (`name`) but stamps a language-neutral
+**`key`** (canonical English) on each `sections`/`indicators`/`scopes` row from
+the vendored `data/template-crosswalk.json` (built by
+`scripts/build_template_crosswalk.py`, which learns the mapping by aligning
+same-structure reports to an English reference and **drops anything ambiguous**).
+`compile_query` exposes `section_key`/`indicator_key`/`scope_key` so a query can
+group or filter across languages (e.g. the Appeals tab filters on `indicator_key`)
+while the plain dimension still shows the filed text. (Greek extracts have a
+column-shift in the source data, so most EL indicator/scope labels stay
+un-normalized for now — correct-but-unmapped, never mis-mapped; category labels
+aren't crosswalked yet.)
+
 **Multi-tier reports.** The `reports` table (one row per submitted report, with a
 `tier`) lets the same `t3`–`t11` schema hold more than the VLOP set. After the
 VLOP load, `seed_harmonised.build_harmonised_facts()` appends the **non-VLOP
@@ -206,7 +223,9 @@ FROM/joins and the registry of:
 
 - **Dimensions** (text, `EQ`/`IN`): always `service_name`, `platform`; plus
   per-table `category_code`/`category_label`, `section`, `indicator`, `scope`,
-  `surface`, or `qualitative_text` (t11).
+  `surface`, or `qualitative_text` (t11); plus the derived `scope_is_total`/
+  `category_is_total` grain flags and the language-neutral `section_key`/
+  `indicator_key`/`scope_key` canonical labels.
 - **Measures** (numeric, `EQ`/`IN`/`GT`/`GTE`/`LT`/`LTE`): per-table count
   columns (e.g. t4 `notices`/`tf_notices`/…, t7–t10 `value`). t11 has none.
 - **Aggregates**: `SUM`/`COUNT`/`AVG`/`MIN`/`MAX` over a measure, with an alias.
