@@ -836,7 +836,7 @@ function renderQual(d) {
 }
 
 async function renderSecondary(tab) {
-  const and = tabFilters(tab.secondary.filters);
+  const and = tabFilters(tab.secondary.filters || null);
   const q = { table: tab.table, group_by: [tab.secondary.group],
     aggregates: [{ function: "SUM", field_name: tab.secondary.measure, alias: "value" }],
     sort: [{ field_name: "value", order: "desc" }], max_count: 8,
@@ -948,7 +948,9 @@ function buildQuery() {
   const field_name = (agg === "COUNT" || $("#ex-measure").disabled) ? "*" : $("#ex-measure").value;
   const table = $("#ex-table").value;
   const t = exOptions.tables.find(x => x.table === table);
+  // /api/explore/options sends dimensions as an array, but tolerate an object too.
   const dims = (t && t.dimensions) || [];
+  const hasDim = (d) => Array.isArray(dims) ? dims.includes(d) : (d in dims);
   const q = {
     table,
     group_by: [$("#ex-dim").value],
@@ -964,9 +966,9 @@ function buildQuery() {
   const scopePinned = !$("#ex-scope-wrap").classList.contains("hidden") && $("#ex-scope").value;
   if (grain !== "all") {
     const v = grain === "total" ? "1" : "0";
-    if (dims.includes("category_is_total")) and.push({ operation: "EQ", field_name: "category_is_total", field_values: [v] });
+    if (hasDim("category_is_total")) and.push({ operation: "EQ", field_name: "category_is_total", field_values: [v] });
     // Scope grain only when the user hasn't pinned a specific scope below.
-    if (dims.includes("scope_is_total") && !scopePinned) and.push({ operation: "EQ", field_name: "scope_is_total", field_values: [v] });
+    if (hasDim("scope_is_total") && !scopePinned) and.push({ operation: "EQ", field_name: "scope_is_total", field_values: [v] });
   }
   // Pin a specific scope (the breakdown-table picker) — takes precedence over the
   // scope grain so an explicit choice like "Decisions upheld" still works.

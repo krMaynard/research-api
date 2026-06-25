@@ -242,8 +242,11 @@ _FACT_TABLES = {
 # Labels (stripped, casefolded) that denote an aggregate/total row.
 _TOTAL_LABELS = {
     "total", "totals", "total number", "all the entries", "all entries",
+    # "total" in the official EU languages (reports are filed in any of them).
     "gesamt", "gesamtzahl", "nombre total", "número total", "numero total",
     "totale", "totaal", "ogółem", "totalt", "yhteensä", "celkem", "σύνολο",
+    "összesen", "общо", "celkovo", "spolu", "iš viso", "kopā", "kokku",
+    "skupaj", "ukupno", "iomlán", "i alt", "nifer cyfan", "iomlán líon",
 }
 # Labels that are mis-parsed header/placeholder cells, not real dimension values.
 _JUNK_LABELS = {
@@ -264,10 +267,16 @@ def _is_total_label(label: str) -> bool:
 
 def _is_junk_label(label: str) -> bool:
     s = (label or "").strip()
-    if s.casefold() in _JUNK_LABELS:
+    if not s or s.casefold() in _JUNK_LABELS:
         return True
-    # Stray spreadsheet cells: nothing but digits/punctuation (e.g. "168", "[...]").
-    return bool(s) and not any(ch.isalpha() for ch in s)
+    if any(ch.isalpha() for ch in s):
+        return False
+    # No letters: a mis-parsed cell. Drop pure-punctuation placeholders ("[...]",
+    # "...", "-") and bare single numbers ("0", "168"), but KEEP meaningful numeric
+    # labels that carry a separator — e.g. "9 & 10" (Art. 9 & 10), "1.1", "2024/25".
+    if not any(ch.isalnum() for ch in s):
+        return True
+    return s.isdigit()
 
 
 def normalize_dimensions(conn: sqlite3.Connection) -> dict[str, int]:
@@ -294,11 +303,15 @@ def normalize_dimensions(conn: sqlite3.Connection) -> dict[str, int]:
         for t in _SCOPE_FACTS:
             deleted += conn.execute(
                 f"DELETE FROM {t} WHERE scope_id IN ({ph})", junk_scopes).rowcount
+        # Drop the now-unreferenced junk dimension rows too, so they can't leak
+        # into a distinct-scope listing.
+        conn.execute(f"DELETE FROM scopes WHERE id IN ({ph})", junk_scopes)
     if junk_cats:
         ph = ",".join("?" * len(junk_cats))
         for t in _CATEGORY_FACTS:
             deleted += conn.execute(
                 f"DELETE FROM {t} WHERE category_id IN ({ph})", junk_cats).rowcount
+        conn.execute(f"DELETE FROM categories WHERE id IN ({ph})", junk_cats)
     conn.commit()
     return {"totals_flagged": flagged, "junk_facts_deleted": deleted}
 
