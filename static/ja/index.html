@@ -514,10 +514,10 @@
 
   <section class="card" id="tabs-card" aria-label="Browse DSA report tables">
     <div class="tabs-head">
-      <p class="tabs-eyebrow">Browse by DSA report table</p>
+      <p class="tabs-eyebrow">DSA レポート表で閲覧</p>
       <div class="scope-seg" id="scope-seg" role="group" aria-label="Data scope">
-        <button type="button" class="on" data-scope="vlop">VLOPs only</button>
-        <button type="button" data-scope="all">Include non-VLOP filers</button>
+        <button type="button" class="on" data-scope="vlop">VLOP のみ</button>
+        <button type="button" data-scope="all">非VLOP提出者を含む</button>
       </div>
     </div>
     <div class="tabstrip" id="tabstrip" role="tablist"></div>
@@ -527,18 +527,17 @@
       <p class="note hidden" id="tab-note"></p>
       <div class="error" id="tab-error" role="alert"></div>
       <canvas id="tab-chart" height="150" aria-hidden="true"></canvas>
-      <div id="tab-fallback" aria-live="polite"><p class="loading">Loading…</p></div>
+      <div id="tab-fallback" aria-live="polite"><p class="loading">読み込み中…</p></div>
       <div id="tab-secondary"></div>
-      <details class="qjson"><summary>Query JSON (run it via the API)</summary><pre id="tab-json"></pre></details>
+      <details class="qjson"><summary>クエリ JSON（API で実行）</summary><pre id="tab-json"></pre></details>
     </div>
   </section>
 
   <div class="error" id="error" role="alert"></div>
 
   <details class="advanced" id="advanced">
-    <summary>Advanced query tools</summary>
-    <p class="sub adv-intro">Free-form builders over the same validated <code>POST /api/explore</code> path —
-      for custom cross-table analysis beyond the curated tabs above.</p>
+    <summary>高度なクエリツール</summary>
+    <p class="sub adv-intro">上記のキュレーションされたタブを超えた独自のクロステーブル分析のための、同じ検証済み <code>POST /api/explore</code> パス上の自由形式ビルダー。</p>
 
   <section class="card" id="explore-card">
     <h2>データを探索</h2>
@@ -701,35 +700,35 @@ const APPEALS_IND = { operation: "EQ", field_name: "indicator",
 const WARN_SVG = '<svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="#d29922" stroke-width="1.4" stroke-linecap="round"><path d="M8 1.7l6.5 12H1.5L8 1.7z"/><path d="M8 6.3v3.4M8 11.8v.05"/></svg>';
 
 const TABS = [
-  { tab: "Notices", title: "Article 16 notices by platform",
-    sub: "Total notices of allegedly illegal content received (DSA Table 4).",
-    table: "t4_notices", measure: "notices", valueLabel: "Notices", color: "blue",
-    secondary: { group: "category_label", measure: "notices", label: "By content category" } },
-  { tab: "Own-initiative", title: "Own-initiative moderation actions",
-    sub: "Proactive measures taken without a notice — illegal content (DSA Table 5).",
-    table: "t5_own_initiative_illegal", measure: "measures", valueLabel: "Actions", color: "green" },
-  { tab: "Gov orders", title: "Member-state orders to act",
-    sub: "Orders from EU member states to act against content (DSA Table 3, Art. 9).",
-    table: "t3_member_state_orders", measure: "orders_to_act", valueLabel: "Orders", color: "green" },
-  { tab: "Appeals", title: "Internal-complaint submissions",
-    sub: "Complaints to the platform’s internal complaint-handling mechanism (DSA Table 7).",
-    note: "One indicator at the “Total number” scope — not summed across outcomes (upheld / reversed), so the figure isn’t double-counted.",
-    table: "t7_appeals_recidivism", measure: "value", valueLabel: "Complaints", color: "blue",
+  { tab: "通知", title: "プラットフォーム別の第16条通知",
+    sub: "受領した違法の疑いのあるコンテンツの通知総数（DSA 表4）。",
+    table: "t4_notices", measure: "notices", valueLabel: "通知", color: "blue",
+    secondary: { group: "category_label", measure: "notices", label: "コンテンツのカテゴリ別" } },
+  { tab: "自主的対応", title: "自主的なモデレーション対応",
+    sub: "通知なしに講じた自主的措置 — 違法コンテンツ（DSA 表5）。",
+    table: "t5_own_initiative_illegal", measure: "measures", valueLabel: "対応件数", color: "green" },
+  { tab: "政府命令", title: "加盟国による対応命令",
+    sub: "コンテンツへの対応を求めるEU加盟国の命令（DSA 表3、第9条）。",
+    table: "t3_member_state_orders", measure: "orders_to_act", valueLabel: "命令", color: "green" },
+  { tab: "異議申立て", title: "内部苦情の申立件数",
+    sub: "プラットフォームの内部苦情処理メカニズムへの苦情（DSA 表7）。",
+    note: "「総数」スコープの単一指標 — 結果（支持／取消）を合計しないため、数値が二重計上されません。",
+    table: "t7_appeals_recidivism", measure: "value", valueLabel: "苦情件数", color: "blue",
     filters: [SCOPE_TOTAL, APPEALS_IND] },
-  { tab: "Automated", title: "Actions taken by automated means",
-    sub: "Moderation actions taken by automated means, “Total number” scope (DSA Table 8).",
-    note: "Shown for one scope at a time; accuracy / precision / recall are separate indicators, never summed in.",
-    table: "t8_automated_means", measure: "value", valueLabel: "Actions", color: "amber",
+  { tab: "自動化手段", title: "自動化手段による対応",
+    sub: "自動化手段によるモデレーション対応、「総数」スコープ（DSA 表8）。",
+    note: "一度に1つのスコープのみ表示。正確度／適合率／再現率は別個の指標であり、合計には含めません。",
+    table: "t8_automated_means", measure: "value", valueLabel: "対応件数", color: "amber",
     filters: [SCOPE_TOTAL] },
-  { tab: "Human resources", title: "Content moderators",
-    sub: "Internal and external content moderators employed, “Total number” scope (DSA Table 9).",
-    table: "t9_human_resources", measure: "value", valueLabel: "Moderators", color: "amber",
+  { tab: "人的リソース", title: "コンテンツモデレーター",
+    sub: "雇用されている社内外のコンテンツモデレーター、「総数」スコープ（DSA 表9）。",
+    table: "t9_human_resources", measure: "value", valueLabel: "モデレーター", color: "amber",
     filters: [SCOPE_TOTAL] },
-  { tab: "User reach", title: "Average monthly active recipients (AMAR)",
-    sub: "EU-wide average monthly active recipients per service (DSA Table 10).",
-    table: "t10_amar", measure: "value", agg: "MAX", valueLabel: "AMAR (EU)", color: "blue" },
-  { tab: "Qualitative", title: "Qualitative descriptions",
-    sub: "Free-text governance, automation and human-resource descriptions (DSA Table 11).",
+  { tab: "ユーザーリーチ", title: "平均月間アクティブ利用者数（AMAR）",
+    sub: "サービスごとのEU全体の平均月間アクティブ利用者数（DSA 表10）。",
+    table: "t10_amar", measure: "value", agg: "MAX", valueLabel: "AMAR（EU）", color: "blue" },
+  { tab: "定性情報", title: "定性的な説明",
+    sub: "ガバナンス・自動化・人的リソースに関する自由記述（DSA 表11）。",
     qual: { table: "t11_qualitative", fields: ["service_name", "indicator", "qualitative_text"] } },
 ];
 
@@ -791,7 +790,7 @@ async function renderTab(tab) {
   $("#tab-error").textContent = "";
   $("#tab-secondary").innerHTML = "";
   $("#tab-fallback").classList.remove("sr-only");
-  $("#tab-fallback").innerHTML = "<p class='loading'>Loading…</p>";
+  $("#tab-fallback").innerHTML = "<p class='loading'>読み込み中…</p>";
   const q = buildTabQuery(tab);
   $("#tab-json").textContent = JSON.stringify(q, null, 2);
   let d;
@@ -801,12 +800,12 @@ async function renderTab(tab) {
     if (tabChart) { tabChart.destroy(); tabChart = null; }
     $("#tab-chart").style.display = "none";
     $("#tab-fallback").innerHTML = "";
-    $("#tab-error").textContent = "Could not load this table: " + err.message;
+    $("#tab-error").textContent = "このテーブルを読み込めませんでした：" + err.message;
     return;
   }
   if (currentTab !== tab) return;  // a newer tab/scope click superseded this fetch
   if (tab.qual) { renderQual(d); return; }
-  drawTabChart(d.rows.map(r => r[0]), d.rows.map(r => r[1]), "Platform", tab.valueLabel, tab.color);
+  drawTabChart(d.rows.map(r => r[0]), d.rows.map(r => r[1]), "プラットフォーム", tab.valueLabel, tab.color);
   if (tab.secondary) renderSecondary(tab);
 }
 
@@ -819,7 +818,7 @@ function renderQual(d) {
   fb.innerHTML = rows.length
     ? rows.map(r => `<div class="ql-card"><div class="who">${esc(r[0])} · ${esc(r[1])}</div>` +
         `<div class="txt">${esc(String(r[2] || "").slice(0, 280))}…</div></div>`).join("")
-    : "<p class='sub'>No qualitative entries for this scope.</p>";
+    : "<p class='sub'>このスコープに定性データはありません。</p>";
 }
 
 async function renderSecondary(tab) {
@@ -832,7 +831,7 @@ async function renderSecondary(tab) {
     const d = await explore(q);
     if (currentTab !== tab) return;
     $("#tab-secondary").innerHTML = `<p class="secondary-h">${esc(tab.secondary.label)}</p>` +
-      miniTable(d.rows.map(r => r[0]), d.rows.map(r => r[1]), "Category", tab.valueLabel);
+      miniTable(d.rows.map(r => r[0]), d.rows.map(r => r[1]), "カテゴリ", tab.valueLabel);
   } catch (_) { /* secondary is best-effort */ }
 }
 

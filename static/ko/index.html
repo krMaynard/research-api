@@ -514,10 +514,10 @@
 
   <section class="card" id="tabs-card" aria-label="Browse DSA report tables">
     <div class="tabs-head">
-      <p class="tabs-eyebrow">Browse by DSA report table</p>
+      <p class="tabs-eyebrow">DSA 보고서 표별 보기</p>
       <div class="scope-seg" id="scope-seg" role="group" aria-label="Data scope">
-        <button type="button" class="on" data-scope="vlop">VLOPs only</button>
-        <button type="button" data-scope="all">Include non-VLOP filers</button>
+        <button type="button" class="on" data-scope="vlop">VLOP만</button>
+        <button type="button" data-scope="all">비VLOP 제출자 포함</button>
       </div>
     </div>
     <div class="tabstrip" id="tabstrip" role="tablist"></div>
@@ -527,18 +527,17 @@
       <p class="note hidden" id="tab-note"></p>
       <div class="error" id="tab-error" role="alert"></div>
       <canvas id="tab-chart" height="150" aria-hidden="true"></canvas>
-      <div id="tab-fallback" aria-live="polite"><p class="loading">Loading…</p></div>
+      <div id="tab-fallback" aria-live="polite"><p class="loading">불러오는 중…</p></div>
       <div id="tab-secondary"></div>
-      <details class="qjson"><summary>Query JSON (run it via the API)</summary><pre id="tab-json"></pre></details>
+      <details class="qjson"><summary>쿼리 JSON(API로 실행)</summary><pre id="tab-json"></pre></details>
     </div>
   </section>
 
   <div class="error" id="error" role="alert"></div>
 
   <details class="advanced" id="advanced">
-    <summary>Advanced query tools</summary>
-    <p class="sub adv-intro">Free-form builders over the same validated <code>POST /api/explore</code> path —
-      for custom cross-table analysis beyond the curated tabs above.</p>
+    <summary>고급 쿼리 도구</summary>
+    <p class="sub adv-intro">위의 선별된 탭을 넘어서는 맞춤형 교차 표 분석을 위한, 동일하게 검증된 <code>POST /api/explore</code> 경로 기반의 자유형 빌더.</p>
 
   <section class="card" id="explore-card">
     <h2>데이터 탐색</h2>
@@ -701,35 +700,35 @@ const APPEALS_IND = { operation: "EQ", field_name: "indicator",
 const WARN_SVG = '<svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="#d29922" stroke-width="1.4" stroke-linecap="round"><path d="M8 1.7l6.5 12H1.5L8 1.7z"/><path d="M8 6.3v3.4M8 11.8v.05"/></svg>';
 
 const TABS = [
-  { tab: "Notices", title: "Article 16 notices by platform",
-    sub: "Total notices of allegedly illegal content received (DSA Table 4).",
-    table: "t4_notices", measure: "notices", valueLabel: "Notices", color: "blue",
-    secondary: { group: "category_label", measure: "notices", label: "By content category" } },
-  { tab: "Own-initiative", title: "Own-initiative moderation actions",
-    sub: "Proactive measures taken without a notice — illegal content (DSA Table 5).",
-    table: "t5_own_initiative_illegal", measure: "measures", valueLabel: "Actions", color: "green" },
-  { tab: "Gov orders", title: "Member-state orders to act",
-    sub: "Orders from EU member states to act against content (DSA Table 3, Art. 9).",
-    table: "t3_member_state_orders", measure: "orders_to_act", valueLabel: "Orders", color: "green" },
-  { tab: "Appeals", title: "Internal-complaint submissions",
-    sub: "Complaints to the platform’s internal complaint-handling mechanism (DSA Table 7).",
-    note: "One indicator at the “Total number” scope — not summed across outcomes (upheld / reversed), so the figure isn’t double-counted.",
-    table: "t7_appeals_recidivism", measure: "value", valueLabel: "Complaints", color: "blue",
+  { tab: "통지", title: "플랫폼별 제16조 통지",
+    sub: "접수된 불법 의심 콘텐츠 통지 총수(DSA 표4).",
+    table: "t4_notices", measure: "notices", valueLabel: "통지", color: "blue",
+    secondary: { group: "category_label", measure: "notices", label: "콘텐츠 범주별" } },
+  { tab: "자체 조치", title: "자체 모더레이션 조치",
+    sub: "통지 없이 취한 선제적 조치 — 불법 콘텐츠(DSA 표5).",
+    table: "t5_own_initiative_illegal", measure: "measures", valueLabel: "조치 수", color: "green" },
+  { tab: "정부 명령", title: "회원국의 조치 명령",
+    sub: "콘텐츠 조치를 요구하는 EU 회원국 명령(DSA 표3, 제9조).",
+    table: "t3_member_state_orders", measure: "orders_to_act", valueLabel: "명령", color: "green" },
+  { tab: "이의신청", title: "제출된 내부 불만",
+    sub: "플랫폼의 내부 불만 처리 메커니즘에 제기된 불만(DSA 표7).",
+    note: "“전체 수” 범위의 단일 지표 — 결과(인용／취소)를 합산하지 않으므로 수치가 중복 집계되지 않습니다.",
+    table: "t7_appeals_recidivism", measure: "value", valueLabel: "불만 수", color: "blue",
     filters: [SCOPE_TOTAL, APPEALS_IND] },
-  { tab: "Automated", title: "Actions taken by automated means",
-    sub: "Moderation actions taken by automated means, “Total number” scope (DSA Table 8).",
-    note: "Shown for one scope at a time; accuracy / precision / recall are separate indicators, never summed in.",
-    table: "t8_automated_means", measure: "value", valueLabel: "Actions", color: "amber",
+  { tab: "자동화", title: "자동화 수단으로 취한 조치",
+    sub: "자동화 수단으로 취한 모더레이션 조치, “전체 수” 범위(DSA 표8).",
+    note: "한 번에 하나의 범위만 표시됩니다. 정확도／정밀도／재현율은 별도 지표이며 합산되지 않습니다.",
+    table: "t8_automated_means", measure: "value", valueLabel: "조치 수", color: "amber",
     filters: [SCOPE_TOTAL] },
-  { tab: "Human resources", title: "Content moderators",
-    sub: "Internal and external content moderators employed, “Total number” scope (DSA Table 9).",
-    table: "t9_human_resources", measure: "value", valueLabel: "Moderators", color: "amber",
+  { tab: "인적 자원", title: "콘텐츠 검토 인력",
+    sub: "고용된 내부 및 외부 콘텐츠 검토 인력, “전체 수” 범위(DSA 표9).",
+    table: "t9_human_resources", measure: "value", valueLabel: "검토 인력", color: "amber",
     filters: [SCOPE_TOTAL] },
-  { tab: "User reach", title: "Average monthly active recipients (AMAR)",
-    sub: "EU-wide average monthly active recipients per service (DSA Table 10).",
-    table: "t10_amar", measure: "value", agg: "MAX", valueLabel: "AMAR (EU)", color: "blue" },
-  { tab: "Qualitative", title: "Qualitative descriptions",
-    sub: "Free-text governance, automation and human-resource descriptions (DSA Table 11).",
+  { tab: "사용자 도달", title: "평균 월간 활성 수신자(AMAR)",
+    sub: "서비스별 EU 전체 평균 월간 활성 수신자(DSA 표10).",
+    table: "t10_amar", measure: "value", agg: "MAX", valueLabel: "AMAR(EU)", color: "blue" },
+  { tab: "정성 정보", title: "정성적 설명",
+    sub: "거버넌스, 자동화, 인적 자원에 대한 자유 서술(DSA 표11).",
     qual: { table: "t11_qualitative", fields: ["service_name", "indicator", "qualitative_text"] } },
 ];
 
@@ -791,7 +790,7 @@ async function renderTab(tab) {
   $("#tab-error").textContent = "";
   $("#tab-secondary").innerHTML = "";
   $("#tab-fallback").classList.remove("sr-only");
-  $("#tab-fallback").innerHTML = "<p class='loading'>Loading…</p>";
+  $("#tab-fallback").innerHTML = "<p class='loading'>불러오는 중…</p>";
   const q = buildTabQuery(tab);
   $("#tab-json").textContent = JSON.stringify(q, null, 2);
   let d;
@@ -801,12 +800,12 @@ async function renderTab(tab) {
     if (tabChart) { tabChart.destroy(); tabChart = null; }
     $("#tab-chart").style.display = "none";
     $("#tab-fallback").innerHTML = "";
-    $("#tab-error").textContent = "Could not load this table: " + err.message;
+    $("#tab-error").textContent = "이 표를 불러올 수 없습니다: " + err.message;
     return;
   }
   if (currentTab !== tab) return;  // a newer tab/scope click superseded this fetch
   if (tab.qual) { renderQual(d); return; }
-  drawTabChart(d.rows.map(r => r[0]), d.rows.map(r => r[1]), "Platform", tab.valueLabel, tab.color);
+  drawTabChart(d.rows.map(r => r[0]), d.rows.map(r => r[1]), "플랫폼", tab.valueLabel, tab.color);
   if (tab.secondary) renderSecondary(tab);
 }
 
@@ -819,7 +818,7 @@ function renderQual(d) {
   fb.innerHTML = rows.length
     ? rows.map(r => `<div class="ql-card"><div class="who">${esc(r[0])} · ${esc(r[1])}</div>` +
         `<div class="txt">${esc(String(r[2] || "").slice(0, 280))}…</div></div>`).join("")
-    : "<p class='sub'>No qualitative entries for this scope.</p>";
+    : "<p class='sub'>이 범위에 대한 정성 항목이 없습니다.</p>";
 }
 
 async function renderSecondary(tab) {
@@ -832,7 +831,7 @@ async function renderSecondary(tab) {
     const d = await explore(q);
     if (currentTab !== tab) return;
     $("#tab-secondary").innerHTML = `<p class="secondary-h">${esc(tab.secondary.label)}</p>` +
-      miniTable(d.rows.map(r => r[0]), d.rows.map(r => r[1]), "Category", tab.valueLabel);
+      miniTable(d.rows.map(r => r[0]), d.rows.map(r => r[1]), "범주", tab.valueLabel);
   } catch (_) { /* secondary is best-effort */ }
 }
 
