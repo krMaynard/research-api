@@ -34,7 +34,7 @@ Dailymotion,Dailymotion SA,"Social, messaging, community & video",verified,yes,X
 Decathlon Marketplace,Decathlon SE,E-commerce marketplaces & retail,verified,no,Hub + PDF; 2024 & 2025,Hub,https://www.decathlon.fr/lp/i/rapport-annuel-de-transparence,
 Deliveroo,Deliveroo plc,Food delivery & gig / freelance,verified,no,PDF; Apr 2025,PDF,https://dpd-12774-s3.s3.eu-west-2.amazonaws.com/assets/7517/4559/3138/Deliveroo_DSA_Transparency_Report_April2025.pdf,https://github.com/krMaynard/dsa-transparency-data/tree/main/pdf-reports/deliveroo
 "Delivery Hero (foodora, …)",Delivery Hero SE,Food delivery & gig / freelance,likely,no,HTML; content-moderation report + AMAR,DSA statement,https://www.deliveryhero.com/digital-services-act/,
-Depop,Depop Ltd,E-commerce marketplaces & retail,likely,no,HTML; 2025,DSA page,https://depophelp.zendesk.com/hc/en-gb/articles/13057572688273-EU-Digital-Services-Act,
+Depop,Depop Ltd,E-commerce marketplaces & retail,verified,yes,XLSX (harmonised template); 2025,DSA page,https://depophelp.zendesk.com/hc/en-gb/articles/13057572688273-EU-Digital-Services-Act,https://github.com/krMaynard/dsa-transparency-data/tree/main/harmonised-reports/extracted/depop
 Discogs,"Discogs (Zink Media, Inc.)",E-commerce marketplaces & retail,likely,no,HTML; 17 Feb 2024 – 16 Feb 2025,Statement,https://support.discogs.com/hc/en-us/articles/12730436158349-EU-Digital-Services-Act-Statement,
 Discord,Discord Netherlands B.V.,"Social, messaging, community & video",verified,yes,ZIP (machine-readable template); 2024 & 2025,Hub,https://discord.com/safety-transparency,
 DocMorris,DocMorris N.V.,E-commerce marketplaces & retail,uncertain,unknown,HTML DSA page; contents unverified,DSA page,https://www.docmorris.de/digital-services-act,
@@ -133,7 +133,7 @@ Microsoft Teams / Skype,Microsoft,"Social, messaging, community & video",verifie
 Microsoft Whiteboard,Microsoft,"Creator, publishing, education & community",verified,no,PDF; Feb – Dec 2024,PDF,https://go.microsoft.com/fwlink/?linkid=2305705,
 Miniclip,Miniclip SA (Tencent),App stores & gaming,verified,unknown,Landing + ZIP; CY2025,Report,https://www.miniclip.com/dsa-transparency-report,
 Mozilla / Firefox,Mozilla Corporation,"Browsers, email & portals",verified,unknown,DSA report; CY2024,Transparency,https://www.mozilla.org/en-US/about/policy/transparency/2024/,
-Nexon,Nexon,App stores & gaming,likely,no,HTML hub,DSA page,https://playersupport.nexon.com/hc/en-us/articles/46401329736084-Digital-Services-Act,
+Nexon,Nexon,App stores & gaming,verified,yes,XLSX (harmonised template); 2025,DSA page,https://playersupport.nexon.com/hc/en-us/articles/46401329736084-Digital-Services-Act,https://github.com/krMaynard/dsa-transparency-data/tree/main/harmonised-reports/extracted/nexon
 Nextdoor,"Nextdoor Holdings, Inc.","Social, messaging, community & video",likely,no,HTML; periodic,Report,https://help.nextdoor.com/s/article/DSA-Transparency-Report,
 "Niantic (Pokémon GO, …)",Niantic Inc.,App stores & gaming,verified,yes,Landing + Excel/PDF; CY2025,Report,https://nianticlabs.com/dsa-transparency,https://github.com/krMaynard/dsa-transparency-data/tree/main/harmonised-reports/extracted/niantic
 Nintendo eShop,"Nintendo Co., Ltd.",App stores & gaming,verified,no,PDF; Feb 2025,DSA page,https://www.nintendo.com/en-gb/Legal-information/Digital-Services-Act-2522334.html,

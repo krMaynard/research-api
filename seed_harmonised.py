@@ -75,6 +75,8 @@ SLUG_META = {
     "grindr": ("Grindr", "online-platform"),
     "vestiaire": ("Vestiaire Collective", "online-platform"),
     "whatnot": ("Whatnot", "online-platform"),
+    "depop": ("Depop", "online-platform"),
+    "nexon": ("Nexon", "online-platform"),
 }
 
 SECTIONS = [
