@@ -304,6 +304,64 @@ class TestQueryLifecycle:
         assert body["columns"] == ["n"]
         assert body["rows"][0][0] == 3  # 3 rows seeded in conftest.py
 
+    def test_warnings_ride_along_to_result(self):
+        # A double-count-prone query (no category_is_total grain) must carry its
+        # warning all the way to /result and the polled job — not only the 202 —
+        # so the exported artifact keeps its guardrail.
+        job = _submit_and_wait({
+            "table": "t4_notices", "group_by": ["service_name"],
+            "aggregates": [{"function": "SUM", "field_name": "notices", "alias": "n"}],
+        })
+        assert any("double-count" in w for w in job.get("warnings", []))
+        r = client.get(f"/api/jobs/{job['job_id']}/result", headers=MOMO)
+        assert any("double-count" in w for w in r.json().get("warnings", []))
+
+    def test_offset_pagination(self):
+        base = {"table": "t4_notices", "group_by": ["service_name"],
+                "aggregates": [{"function": "SUM", "field_name": "notices", "alias": "n"}],
+                "query": {"and": [{"operation": "EQ", "field_name": "category_is_total", "field_values": ["1"]}]},
+                "max_count": 1}
+        p0 = client.post("/api/explore", json={**base, "offset": 0}).json()["rows"]
+        p1 = client.post("/api/explore", json={**base, "offset": 1}).json()["rows"]
+        assert p0 and p1 and p0[0][0] != p1[0][0]  # distinct rows under a stable order
+
+    def test_paginated_pulls_are_deterministic(self):
+        # Under pagination the tie-break kicks in (req.offset), giving a total order so
+        # page boundaries are stable and repeated pulls are byte-identical — the property
+        # snapshot diffing and offset paging actually depend on.
+        q = {"table": "t4_notices", "group_by": ["service_name", "category_label"],
+             "aggregates": [{"function": "SUM", "field_name": "notices", "alias": "n"}],
+             "max_count": 5, "offset": 0}
+        a = client.post("/api/explore", json=q).json()["rows"]
+        b = client.post("/api/explore", json=q).json()["rows"]
+        assert a == b
+        # And page 2 never repeats a page-1 row (stable boundary).
+        page2 = client.post("/api/explore", json={**q, "offset": 5}).json()["rows"]
+        assert not ({tuple(r) for r in a} & {tuple(r) for r in page2})
+
+    def test_report_id_is_traceable_dimension(self):
+        # Each fact row exposes its source report_id, so (dataset version, report_id)
+        # pins an exact source for citation. It's groupable and filterable.
+        r = client.post("/api/explore", json={
+            "table": "t4_notices", "group_by": ["report_id"],
+            "aggregates": [{"function": "SUM", "field_name": "notices", "alias": "n"}],
+            "sort": [{"field_name": "report_id", "order": "asc"}]}).json()
+        assert r["rows"], r
+        first_id = str(r["rows"][0][0])
+        scoped = client.post("/api/explore", json={
+            "table": "t4_notices", "group_by": ["report_id", "service_name"],
+            "query": {"and": [{"operation": "EQ", "field_name": "report_id",
+                               "field_values": [first_id]}]}}).json()
+        assert scoped["rows"] and all(str(row[0]) == first_id for row in scoped["rows"])
+
+    def test_gr_period_ord_sorts_chronologically(self):
+        r = client.post("/api/explore", json={
+            "table": "gr_removals", "group_by": ["period_ord", "period"],
+            "aggregates": [{"function": "COUNT", "field_name": "*", "alias": "c"}],
+            "sort": [{"field_name": "period_ord", "order": "asc"}]}).json()
+        ords = [row[0] for row in r["rows"]]
+        assert ords == sorted(ords)
+
     def test_happy_path_csv(self):
         job = _submit_and_wait(
             {
@@ -693,10 +751,16 @@ class TestQueryRateLimit:
         main._key_store = main.MemoryKeyStore()  # isolated, so it doesn't affect other tests
         main.QUERY_RATE_MAX = 2
         try:
-            statuses = [client.post("/api/query", json=COUNT_ALL, headers=MOMO).status_code for _ in range(4)]
-            assert statuses == [202, 202, 429, 429]
+            first = client.post("/api/query", json=COUNT_ALL, headers=MOMO)
+            assert first.status_code == 202
+            # Success responses advertise the budget so a caller can self-pace.
+            assert first.headers["X-RateLimit-Limit"] == "2"
+            assert first.headers["X-RateLimit-Remaining"] == "1"
+            statuses = [client.post("/api/query", json=COUNT_ALL, headers=MOMO).status_code for _ in range(3)]
+            assert statuses == [202, 429, 429]
             r = client.post("/api/query", json=COUNT_ALL, headers=MOMO)
             assert r.status_code == 429 and r.headers["Retry-After"] == str(main.QUERY_RATE_WINDOW)
+            assert r.headers["X-RateLimit-Remaining"] == "0"
         finally:
             main._key_store, main.QUERY_RATE_MAX = original_store, original_max
 
@@ -1138,6 +1202,24 @@ class TestDashboard:
         assert {"platform", "notices"} <= set(d["top_platforms"][0])
         assert isinstance(d["by_category"], list)
         assert "period" in d and "generated" in d
+
+    def test_overview_carries_dataset_version_and_etag(self):
+        # The snapshot exposes an immutable version token (citable) and an ETag
+        # that lets a client revalidate with a conditional GET → 304.
+        r = client.get("/api/overview")
+        assert r.json().get("version")
+        etag = r.headers.get("ETag")
+        assert etag and r.headers.get("Cache-Control")
+        not_modified = client.get("/api/overview", headers={"If-None-Match": etag})
+        assert not_modified.status_code == 304
+
+    def test_removals_overview_carries_version_and_etag(self):
+        r = client.get("/api/overview/removals")
+        assert r.status_code == 200 and r.json().get("version")
+        etag = r.headers.get("ETag")
+        assert etag
+        assert client.get("/api/overview/removals",
+                          headers={"If-None-Match": etag}).status_code == 304
 
     def test_overview_notices_not_double_counted(self):
         # Regression: t4 carries a reported grand-total row (code 'TOTAL') plus two

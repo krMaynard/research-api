@@ -21,7 +21,7 @@
 <style>
   :root {
     --bg: #f2f2f2; --panel: #fff; --panel2: #f5f5f5; --border: #e8e8e8;
-    --fg: #333; --muted: #666; --accent: #2a9d8f; --accent-dark: #1e7268; --accent2: #1e7268;
+    --fg: #333; --muted: #666; --accent: #1e7268; --accent-dark: #155a52; --accent2: #1e7268;
     --on-accent: #fff; --shadow: rgba(0,0,0,.07);
     --mono: ui-monospace, SFMono-Regular, "DejaVu Sans Mono", Menlo, monospace;
     --topbar-h: 52px; --header-h: var(--topbar-h); --sidebar-w: 220px;
@@ -1004,7 +1004,7 @@ display: flex; align-items: center; justify-content: space-between;
         document.getElementById('prov-snap').textContent =
           d.generated + (d.coverage ? ' (' + d.coverage + ')' : '');
         document.getElementById('prov-cite').textContent =
-          '“Google government content-removal requests, via the Transparency Report API (' + d.generated + ' snapshot).”';
+          '“Google government content-removal requests, via the Transparency Report API (' + d.generated + ' snapshot' + (d.version ? ', dataset version ' + d.version : '') + ').”';
         document.getElementById('provenance').hidden = false;
       }
 

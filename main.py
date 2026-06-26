@@ -381,6 +381,7 @@ class Job:
     error: str | None = None
     row_count: int | None = None
     callback_url: str | None = None  # optional webhook notified on terminal state
+    warnings: list[str] = field(default_factory=list)  # non-fatal query caveats
     # columns/rows live in the result store, not on the job object.
     columns: list[str] | None = field(default=None, repr=False)
     rows: list[list[Any]] | None = field(default=None, repr=False)
@@ -397,6 +398,7 @@ class Job:
             "error": self.error,
             "row_count": rc,
             "compiled_sql": self.sql,
+            "warnings": self.warnings,
             "status_url": f"{API_PREFIX}/jobs/{self.id}",
             "result_url": f"{API_PREFIX}/jobs/{self.id}/result" if self.status == "done" else None,
             # Signed, expiring links that download the result without an API key.
@@ -507,6 +509,7 @@ class RedisJobStore:
             "error": job.error or "",
             "row_count": "" if job.row_count is None else str(job.row_count),
             "callback_url": job.callback_url or "",
+            "warnings": json.dumps(job.warnings),
         }
 
     def _from_hash(self, h: dict[str, str]) -> Job:
@@ -523,6 +526,7 @@ class RedisJobStore:
             error=h.get("error") or None,
             row_count=int(h["row_count"]) if h.get("row_count") else None,
             callback_url=h.get("callback_url") or None,
+            warnings=json.loads(h.get("warnings") or "[]"),
         )
 
     def put(self, job: Job) -> None:
@@ -938,6 +942,7 @@ _IND_DIMS = {"indicator": "i.name", "indicator_key": "i.key"}
 
 _J_RPT = "JOIN reports r ON r.id = f.report_id"
 _RPT_DIMS = {
+    "report_id":           "r.id",   # source-report identifier (traceability)
     "report_period":       "r.period",
     "report_period_start": "r.period_start",
     "report_period_end":   "r.period_end",
@@ -1014,6 +1019,7 @@ TABLES: dict[str, TableSpec] = {
         f"FROM gr_removals f {_J_GR_PER} {_J_GR_CTY} {_J_GR_REQ} {_J_GR_PRD} {_J_GR_RSN}",
         {
             "period":       "per.name",
+            "period_ord":   "per.id",   # chronological ordinal — sort by this, not the text label
             "country_code": "cty.code",
             "country_name": "cty.name",
             "requestor":    "req.name",
@@ -1152,6 +1158,7 @@ class QueryRequest(BaseModel):
         description="Result ordering.",
     )
     max_count: int = Field(default=100, ge=1, description="Row limit (capped at ROW_LIMIT).")
+    offset: int = Field(default=0, ge=0, description="Rows to skip — for paging past the cap with a stable sort.")
     callback_url: str | None = Field(
         default=None,
         max_length=2048,
@@ -1641,12 +1648,23 @@ def compile_query(req: QueryRequest) -> tuple[str, list[Any], list[str]]:
             col_expr[f] = expr
 
     order_parts = []
+    sorted_cols: set[str] = set()
     for s in req.sort:
         if s.field_name not in col_expr:
             raise QueryCompileError(
                 f"Cannot sort by '{s.field_name}'; it is not a selected output column."
             )
         order_parts.append(f"{col_expr[s.field_name]} {'DESC' if s.order == 'desc' else 'ASC'}")
+        sorted_cols.add(s.field_name)
+    # Deterministic tie-break: append remaining output columns so the order is total.
+    # Only when the caller sorts or paginates — those are the cases where tie order is
+    # observable (a sorted view, or stable page boundaries across offset pulls). A bare
+    # capped query skips this to avoid forcing a full sort on large tables (the static
+    # read-only DB returns a stable order for an identical query anyway).
+    if req.sort or req.offset:
+        for c in columns:
+            if c not in sorted_cols:
+                order_parts.append(f"{col_expr[c]} ASC")
 
     limit = min(req.max_count, ROW_LIMIT)
 
@@ -1658,6 +1676,8 @@ def compile_query(req: QueryRequest) -> tuple[str, list[Any], list[str]]:
     if order_parts:
         sql += " ORDER BY " + ", ".join(order_parts)
     sql += f" LIMIT {limit}"
+    if req.offset:
+        sql += f" OFFSET {int(req.offset)}"
 
     return sql, params, columns
 
@@ -2217,6 +2237,7 @@ def _compute_overview() -> dict[str, Any]:
         return {
             "period": meta.get("period"),
             "generated": meta.get("generated"),
+            "version": _dataset_version(),
             "services": services,
             "platforms": platforms,
             "total_notices": total_notices,
@@ -2228,17 +2249,31 @@ def _compute_overview() -> dict[str, Any]:
         conn.close()
 
 
+def _dataset_etag(request: Request, response: Response) -> Response | None:
+    """Stamp the dataset-version ETag (+ a short cache window) on a public,
+    snapshot-static response. Returns a bare 304 when the client already holds
+    this version (conditional GET), else None and the caller serves the body."""
+    etag = f'W/"{_dataset_version()}"'
+    response.headers["ETag"] = etag
+    response.headers["Cache-Control"] = "public, max-age=300"
+    inm = request.headers.get("if-none-match")
+    if inm and etag in {t.strip() for t in inm.split(",")}:
+        return Response(status_code=304, headers={"ETag": etag, "Cache-Control": "public, max-age=300"})
+    return None
+
+
 @api_router.get("/overview")
-def overview() -> dict[str, Any]:
+def overview(request: Request, response: Response) -> Any:
     """Public headline aggregates for the dashboard — no auth. Memoised: the
     read-only DB is static, so we compute the fixed queries once (no user input
-    reaches SQL) and serve from memory thereafter."""
+    reaches SQL) and serve from memory thereafter. Carries the dataset-version
+    ETag so clients can cache and cite an immutable snapshot."""
     global _overview_cache
     if _overview_cache is None:
         with _overview_cache_lock:
             if _overview_cache is None:
                 _overview_cache = _compute_overview()
-    return _overview_cache
+    return _dataset_etag(request, response) or _overview_cache
 
 
 _gr_overview_cache: dict[str, Any] | None = None
@@ -2275,6 +2310,7 @@ def _compute_gr_overview() -> dict[str, Any]:
             # Provenance: the snapshot build date (shared with the DSA dataset) and
             # the covered reporting window, so the dashboard can cite both.
             "generated": _dataset_meta().get("generated"),
+            "version": _dataset_version(),
             "coverage": (periods[0] + " – " + periods[-1]) if periods else None,
             "countries": countries,
             "requestors": requestors,
@@ -2286,16 +2322,16 @@ def _compute_gr_overview() -> dict[str, Any]:
 
 
 @api_router.get("/overview/removals")
-def overview_removals() -> dict[str, Any]:
+def overview_removals(request: Request, response: Response) -> Any:
     """Public headline stats and filter options for the Government Removals dataset — no auth.
     Returns totals, the ordered period list (chronological), and dimension value lists for
-    populating filter dropdowns. Memoised like /overview."""
+    populating filter dropdowns. Memoised like /overview; carries the dataset-version ETag."""
     global _gr_overview_cache
     if _gr_overview_cache is None:
         with _gr_overview_cache_lock:
             if _gr_overview_cache is None:
                 _gr_overview_cache = _compute_gr_overview()
-    return _gr_overview_cache
+    return _dataset_etag(request, response) or _gr_overview_cache
 
 
 # --- Report-locations catalogue (non-VLOP DSA transparency reports) -----------
@@ -3037,6 +3073,16 @@ def _dataset_meta() -> dict[str, str]:
     return _meta_cache
 
 
+def _dataset_version() -> str:
+    """A short, stable digest of the dataset snapshot — an immutable token a
+    researcher can cite ("dataset version 7f3c…") and a client can use as an
+    ETag. Derived from the snapshot's reporting period + build timestamp, so it
+    changes only when the underlying data does (not on a code-only redeploy)."""
+    meta = _dataset_meta()
+    basis = f"{meta.get('period', '')}|{meta.get('generated', '')}"
+    return hashlib.sha256(basis.encode("utf-8")).hexdigest()[:12]
+
+
 # Short, plain-language help for each queryable field — what it means, its unit,
 # and any aggregation gotcha. Surfaced by /api/schema and the schema browser so
 # bare field names aren't a guessing game. English by design (field names are too).
@@ -3045,6 +3091,7 @@ FIELD_HELP: dict[str, str] = {
     "service_name": "The platform/service that filed the report (e.g. YouTube, TikTok).",
     "platform": "Parent company of the service (e.g. Alphabet for YouTube).",
     "period": "Reporting period covered by the report.",
+    "report_id": "Identifier of the source report row this fact came from. Stable within a dataset version, so (dataset version, report_id) pins an exact source for traceable citation. Group or filter by it (EQ/IN on the stringified id) to scope to one filing.",
     "report_period": "Reporting period covered by the report.",
     "report_period_start": "Start date of the reporting period (YYYY-MM-DD).",
     "report_period_end": "End date of the reporting period (YYYY-MM-DD).",
@@ -3064,6 +3111,7 @@ FIELD_HELP: dict[str, str] = {
     "scope_key": "Language-neutral canonical label for `scope`.",
     "qualitative_text": "Free-text description (Table 11). Request it via `fields`; this table has no numeric measures.",
     # ── Google removals dims ──
+    "period_ord": "Chronological ordinal of the reporting period (1 = earliest). Sort or group by this for a correct timeline — the text `period` sorts alphabetically. It is a dimension, so filtering uses `EQ`/`IN` on the ordinal value (e.g. one specific period); for a range, sort by it and page, or `IN`-list the ordinals you want.",
     "country_code": "Requesting country's ISO code (Google government removals).",
     "country_name": "Requesting country (Google government removals).",
     "requestor": "Type of government body making the removal request.",
@@ -3203,13 +3251,23 @@ def submit_query(
     response: Response,
     principal: dict = Depends(require_api_key),
 ) -> dict[str, Any]:
-    # Throttle the expensive job-spawning path per API key.
-    if _key_store.incr(f"query:{principal['key']}", QUERY_RATE_WINDOW) > QUERY_RATE_MAX:
+    # Throttle the expensive job-spawning path per API key. Advertise the limit
+    # on every response (success and 429) so a scripted caller can self-pace
+    # instead of discovering the ceiling by hitting it.
+    used = _key_store.incr(f"query:{principal['key']}", QUERY_RATE_WINDOW)
+    remaining = max(0, QUERY_RATE_MAX - used)
+    rate_headers = {
+        "X-RateLimit-Limit": str(QUERY_RATE_MAX),
+        "X-RateLimit-Remaining": str(remaining),
+        "X-RateLimit-Reset": str(QUERY_RATE_WINDOW),
+    }
+    if used > QUERY_RATE_MAX:
         raise HTTPException(
             status_code=429,
             detail=f"Query rate limit exceeded ({QUERY_RATE_MAX}/{QUERY_RATE_WINDOW}s). Slow down.",
-            headers={"Retry-After": str(QUERY_RATE_WINDOW)},
+            headers={**rate_headers, "Retry-After": str(QUERY_RATE_WINDOW)},
         )
+    response.headers.update(rate_headers)
 
     try:
         sql, params, _columns = compile_query(body)
@@ -3222,6 +3280,9 @@ def submit_query(
         except CallbackUrlError as exc:
             raise HTTPException(status_code=400, detail=str(exc))
 
+    # Non-fatal correctness advisories (double-count grain, median aggregation,
+    # cross-tier). Stored on the job so they ride along to /result and the CSV —
+    # not just the 202 — so the exported artifact keeps its guardrail.
     job = Job(
         id=uuid.uuid4().hex,
         sql=sql,
@@ -3229,19 +3290,14 @@ def submit_query(
         owner_key=principal["key"],
         submitted_by=principal["name"],
         callback_url=body.callback_url,
+        warnings=_query_warnings(body),
     )
     _store.put(job)
     JOB_QUEUE_DEPTH.inc()  # queued; decremented when _execute_job picks it up
     _executor.submit(_execute_job, job.id)
     logger.info("job_submitted", extra={"data": {"job_id": job.id, "user": principal["name"]}})
     response.headers["Location"] = f"{API_PREFIX}/jobs/{job.id}"
-    # Non-fatal correctness advisories (double-count grain, median aggregation) so a
-    # scripted caller sees them on submit rather than getting a silently-wrong number.
-    submitted = job.to_public()
-    warnings = _query_warnings(body)
-    if warnings:
-        submitted["warnings"] = warnings
-    return submitted
+    return job.to_public()
 
 
 @api_router.get("/jobs")
@@ -3279,6 +3335,7 @@ def _provenance() -> dict[str, str | None]:
     return {
         "period": meta.get("period"),
         "generated": meta.get("generated"),
+        "version": _dataset_version(),
         "app_version": APP_VERSION,
         "source": "https://github.com/krMaynard/transparency-report-api",
     }
@@ -3288,7 +3345,7 @@ def _provenance_headers() -> dict[str, str]:
     """Same provenance as response headers — so a CSV export (whose body can't
     carry a metadata block without breaking the header row) is still citable."""
     prov = _provenance()
-    h = {"X-App-Version": APP_VERSION}
+    h = {"X-App-Version": APP_VERSION, "X-Dataset-Version": str(prov["version"])}
     if prov["period"]:
         h["X-Dataset-Period"] = prov["period"]
     if prov["generated"]:
@@ -3305,6 +3362,8 @@ def _render_result(
         raise HTTPException(status_code=404, detail="Result not found (may have expired).")
     cols, rows = result
     prov_headers = _provenance_headers()
+    job = _store.get(job_id)
+    warnings = job.warnings if job else []
 
     if fmt == "csv":
         buf = io.StringIO()
@@ -3328,7 +3387,13 @@ def _render_result(
     # Stamp the result with dataset provenance so an exported JSON is self-describing
     # and citable (snapshot period + generation date + build) without a separate lookup.
     return JSONResponse(
-        {"columns": cols, "rows": rows, "row_count": len(rows), "dataset": _provenance()},
+        {
+            "columns": cols,
+            "rows": rows,
+            "row_count": len(rows),
+            "warnings": warnings,  # ride along to the result, not just the 202
+            "dataset": _provenance(),
+        },
         headers=headers,
     )
 

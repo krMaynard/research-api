@@ -21,7 +21,7 @@
 <style>
   :root {
     --bg: #f2f2f2; --panel: #fff; --panel2: #f5f5f5; --border: #e8e8e8;
-    --fg: #333; --muted: #666; --accent: #2a9d8f; --accent-dark: #1e7268; --accent2: #1e7268;
+    --fg: #333; --muted: #666; --accent: #1e7268; --accent-dark: #155a52; --accent2: #1e7268;
     --on-accent: #fff; --shadow: rgba(0,0,0,.07);
     --mono: ui-monospace, SFMono-Regular, "DejaVu Sans Mono", Menlo, monospace;
     --topbar-h: 52px;
@@ -538,10 +538,10 @@
     </dl>
   </details>
 
-  <section class="card" id="tabs-card" aria-label="Browse DSA report tables">
+  <section class="card" id="tabs-card" aria-label="DSA-Berichtstabellen durchsuchen">
     <div class="tabs-head">
       <p class="tabs-eyebrow">Nach DSA-Berichtstabelle durchsuchen</p>
-      <div class="scope-seg" id="scope-seg" role="group" aria-label="Data scope">
+      <div class="scope-seg" id="scope-seg" role="group" aria-label="Datenumfang">
         <button type="button" class="on" data-scope="vlop">Nur VLOPs</button>
         <button type="button" data-scope="all">Nicht-VLOP-Melder einbeziehen</button>
       </div>
@@ -717,7 +717,7 @@ async function load() {
   if (d.period) $("#period").textContent = `Berichtszeitraum ${fmtPeriod(d.period)} · ${d.services} benannte VLOPs & VLOSEs, plus ${d.nonvlop_filers} Nicht-VLOP-Plattformen, die die harmonisierte EU-Vorlage einreichen.`;
   if (d.generated) {
     $("#prov-snap").textContent = d.generated + (d.period ? ` (${fmtPeriod(d.period)})` : "");
-    $("#prov-cite").textContent = `“EU DSA VLOP transparency reports, via the Transparency Report API (${d.generated} snapshot).”`;
+    $("#prov-cite").textContent = `“EU DSA VLOP transparency reports, via the Transparency Report API (${d.generated} snapshot${d.version ? `, dataset version ${d.version}` : ""}).”`;
     $("#provenance").hidden = false;
   }
   $("#stats").innerHTML =
@@ -1118,7 +1118,7 @@ async function runExplore() {
   const body = d.rows.map(r =>
     `<tr>${r.map((v, i) => i === 0 ? `<td>${esc(v)}</td>` : `<td class="num">${fmt(v)}</td>`).join("")}</tr>`
   ).join("");
-  $("#ex-out").innerHTML = (d.rows.length ? `<table class="restable">${head}${body}</table>` : "") + truncNote(d);
+  $("#ex-out").innerHTML = (d.rows.length ? `<table class="restable">${head}${body}</table>` : "") + warnNote(d) + truncNote(d);
   lastExplore = d;
   $("#ex-actions").classList.toggle("hidden", !d.rows.length);
 }
@@ -1278,7 +1278,7 @@ async function runCompare() {
   const body = d.rows.map(r =>
     `<tr>${r.map((v) => typeof v === "string" ? `<td>${esc(v)}</td>` : `<td class="num">${fmtCell(v)}</td>`).join("")}</tr>`
   ).join("");
-  $("#cmp-out").innerHTML = (d.rows.length ? `<table class="restable">${head}${body}</table>` : "") + truncNote(d);
+  $("#cmp-out").innerHTML = (d.rows.length ? `<table class="restable">${head}${body}</table>` : "") + warnNote(d) + truncNote(d);
   lastCompare = d;
   $("#cmp-actions").classList.toggle("hidden", !d.rows.length);
 }
@@ -1354,6 +1354,15 @@ function truncNote(d) {
   return d.truncated ? `<p class="sub">Zeigt die ersten ${fmt(d.row_count)} Zeilen (begrenzt).</p>` : "";
 }
 
+// Surface the API's non-fatal `warnings` (double-count / median / cross-tier) so a
+// UI user sees the same guardrail a scripted caller gets. role=status → announced.
+function warnNote(d) {
+  if (!d || !d.warnings || !d.warnings.length) return "";
+  return '<div class="scope-warn" role="status" style="margin-top:10px">'
+    + d.warnings.map((w) => '<p style="margin:4px 0">' + WARN_SVG + ' <span>' + esc(w) + '</span></p>').join("")
+    + '</div>';
+}
+
 function toCSV(d) {
   const cell = (v) => {
     let s = v == null ? "" : String(v);
@@ -1424,7 +1433,7 @@ async function runAsk() {
     $("#ask-json").textContent = JSON.stringify(d.query, null, 2);
     $("#ask-explain").innerHTML = explainQuery(d.query, d.cached);
     renderRows(d, "#ask-chart", "#ask-out", d.columns[1] || "value");
-    $("#ask-out").insertAdjacentHTML("beforeend", truncNote(d));
+    $("#ask-out").insertAdjacentHTML("beforeend", warnNote(d) + truncNote(d));
     if (d.rows.length) $("#ask-actions").classList.remove("hidden");
   } catch (err) {
     $("#ask-error").textContent = "" + err.message;
