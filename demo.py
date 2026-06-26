@@ -136,7 +136,7 @@ def main() -> None:
     # 1. Root — no auth
     _step("Root endpoint (no auth required)")
     _note("Public meta-endpoint lists all routes and explains the design.")
-    get("/")
+    get("/api")
 
     # 2. Reject unauthenticated request
     _step("Unauthenticated request → 401")
