@@ -89,6 +89,10 @@ SLUG_META = {
     "miniclip-paint-brawl": ("Paint Brawl (Miniclip)", "online-platform"),
     "miniclip-speed-stars": ("Speed Stars (Miniclip)", "online-platform"),
     "miniclip-ultimate-golf": ("Ultimate Golf (Miniclip)", "online-platform"),
+    # Format-variant reports mapped into the canonical sections by extract.py's
+    # SHEET_MAP (LINE's unnumbered sheets; Discord's renumbered ones).
+    "line": ("LINE", "online-platform"),
+    "discord": ("Discord", "online-platform"),
 }
 
 SECTIONS = [
