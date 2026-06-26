@@ -6,7 +6,7 @@ A FastAPI service that accepts **structured query parameters** (not SQL) via
 HTTP, runs the resulting query asynchronously on background worker threads, and
 returns results as JSON or CSV. Backed by a read-only SQLite database seeded from
 transparency-reporting datasets: the aggregated **EU Digital Services Act (DSA)
-VLOP transparency reports** (content-moderation statistics for 33 designated Very
+VLOP transparency reports** (content-moderation statistics for 25 designated Very
 Large Online Platforms / Search Engines, H2 2025, tables 3–11 of the DSA
 Implementing Regulation template) and **Google Government content-removal
 requests**.

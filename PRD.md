@@ -187,7 +187,7 @@ queued → running → done
 
 ### 5.1 SQLite Schema (Star Schema)
 
-The database is seeded from the aggregated [EU DSA VLOP transparency reports](https://transparency.dsa.ec.europa.eu/) (`vlop-dsa.json`) — content-moderation statistics for 33 designated VLOP/VLOSE services for H2 2025, following tables 3–11 of the DSA Implementing Regulation template.
+The database is seeded from the aggregated [EU DSA VLOP transparency reports](https://transparency.dsa.ec.europa.eu/) (`vlop-dsa.json`) — content-moderation statistics for 25 designated VLOP/VLOSE services for H2 2025, following tables 3–11 of the DSA Implementing Regulation template.
 
 **Shared dimension tables** (`id INTEGER PRIMARY KEY` = the row's position in the source lookup array):
 
