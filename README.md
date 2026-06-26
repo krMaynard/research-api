@@ -10,14 +10,14 @@ public transparency-reporting datasets:
 - **EU Digital Services Act (DSA) transparency reports** — content-moderation
   statistics for the 25 designated Very Large Online Platforms / Search Engines
   (H2 2025, tables 3–11 of the DSA Implementing Regulation template; vendored at
-  `data/vlop-dsa.json`), **plus 26 non-VLOP platforms** that file the same EU
+  `data/vlop-dsa.json`), **plus 43 non-VLOP platforms** that file the same EU
   harmonised template (Ceneo, Cloudflare, Dailymotion, Carrefour, DuckDuckGo,
-  Expedia, Roblox, Vinted, …; vendored at `data/harmonised-reports.json`, loaded
-  by `seed_harmonised.py`). All share the `t3`–`t11` star schema, so the query API
-  spans both — while the VLOP dashboard's headline `/api/overview` stays scoped to
-  VLOP-tier reports. Sourced from the companion
+  Expedia, Nintendo eShop, Square Enix, Miniclip, Roblox, Vinted, …; vendored at
+  `data/harmonised-reports.json`, loaded by `seed_harmonised.py`). All share the
+  `t3`–`t11` star schema, so the query API spans both — while the VLOP dashboard's
+  headline `/api/overview` stays scoped to VLOP-tier reports. Sourced from the companion
   [dsa-transparency-data](https://github.com/krMaynard/dsa-transparency-data)
-  catalogue (214 non-VLOP platforms, 54 of which file the harmonised template).
+  catalogue (232 non-VLOP platforms, 66 of which file the harmonised template).
 - **Google Government content-removal requests** — 160 countries, 13 reporting
   periods (2019–2025), 42 products, 22 stated reasons.
 
@@ -35,11 +35,11 @@ result, secure download, validation, and isolation:
 
 | Submit a structured query | Poll until done |
 |---|---|
-| ![Submit](docs/gifs/step-05-submit-a-structured-query-post-query-ret.gif) | ![Poll](docs/gifs/step-06-poll-get-jobs-job-id-until-status-done.gif) |
+| ![Submit](docs/gifs/step-05-submit-a-structured-query-post-api-query.gif) | ![Poll](docs/gifs/step-06-poll-get-api-jobs-job-id-until-status-do.gif) |
 | **Fetch the result (JSON)** | **Secure download — signed URL, no API key** |
 | ![Result](docs/gifs/step-07-fetch-the-result-as-json.gif) | ![Download](docs/gifs/step-08-secure-download-signed-url-no-api-key.gif) |
 | **Discover queryable fields** | **Invalid query → 400 (no arbitrary SQL)** |
-| ![Fields](docs/gifs/step-04-discover-a-table-s-fields-get-fields-tab.gif) | ![Invalid](docs/gifs/step-10-invalid-query-400-no-sql-no-unknown-fiel.gif) |
+| ![Fields](docs/gifs/step-04-discover-a-table-s-fields-get-api-fields.gif) | ![Invalid](docs/gifs/step-10-invalid-query-400-no-sql-no-unknown-fiel.gif) |
 
 A GIF for every step lives in [`docs/gifs/`](docs/gifs/). They're generated
 headlessly from `demo.py` — see [Regenerating the showcase GIFs](#regenerating-the-showcase-gifs).
@@ -537,7 +537,7 @@ Star schema — shared dimension tables plus one fact table per Annex I report
 part. The `reports` table carries a `tier` per submitted report, so the same
 `t3`–`t11` tables hold both the 25 VLOP services (tier `vlop`) and the non-VLOP
 harmonised reports (tier `online-platform`/`hosting`/`intermediary`) appended by
-`seed_harmonised.py` — 51 services across 27 reports today, growing as more
+`seed_harmonised.py` — 68 services across 45 reports today, growing as more
 non-VLOP platforms are ingested.
 DSA dimensions: `services(id, name, platform)` (platform = parent company),
 `categories(id, code, label)`, `sections`, `indicators`, `scopes`, `surfaces`.
