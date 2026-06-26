@@ -615,6 +615,7 @@ display: flex; align-items: center; justify-content: space-between;
   var allPeriods = [], fromIdx = 0, toIdx = 0;
   var charts = {};
   var debounceTimer = null;
+  var datasetGenerated = '';   // snapshot date, for a citable export filename
 
   // ── API calls ─────────────────────────────────────────────────────────────
   async function explore(body) {
@@ -998,6 +999,7 @@ display: flex; align-items: center; justify-content: space-between;
       document.getElementById('stats').removeAttribute('aria-busy');
 
       // Provenance + citation line (dataset snapshot date + covered window).
+      datasetGenerated = d.generated || '';
       if (d.generated) {
         document.getElementById('prov-snap').textContent =
           d.generated + (d.coverage ? ' (' + d.coverage + ')' : '');
@@ -1070,7 +1072,9 @@ display: flex; align-items: center; justify-content: space-between;
           var blob = await res.blob();
           var url = URL.createObjectURL(blob);
           var a = document.createElement('a');
-          a.href = url; a.download = 'google-removals-records.csv';
+          // Descriptive name + snapshot date, so the export is self-identifying and citable.
+          a.href = url;
+          a.download = 'google-removals-records' + (datasetGenerated ? '-' + datasetGenerated : '') + '.csv';
           document.body.appendChild(a); a.click(); a.remove();
           URL.revokeObjectURL(url);
         } catch (e) {

@@ -2664,7 +2664,8 @@ NON_ADDITIVE_MEASURES = {"median_time", "tf_median_time"}
 
 
 def _filter_fields(q: "BooleanQuery") -> set[str]:
-    return {c.field_name for c in (*q.and_, *q.or_, *q.not_)}
+    # The clause lists default to [] (never None) per the model, but guard anyway.
+    return {c.field_name for c in (*(q.and_ or ()), *(q.or_ or ()), *(q.not_ or ()))}
 
 
 def _leg_warnings(
