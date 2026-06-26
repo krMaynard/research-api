@@ -382,12 +382,7 @@ display: flex; align-items: center;
  <main id="main" tabindex="-1">
   <section class="card">
     <h2>What it is</h2>
-    <p class="sub">The repository ships <code>mcp_server.py</code>, a native
-      <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener noreferrer">Model Context Protocol</a>
-      stdio server. It is a thin front end over this public API — it talks to a running
-      server over HTTP, so an AI assistant can explore the DSA transparency data through
-      structured tool calls instead of raw HTTP. No SQL is ever exposed; every query goes
-      through the same validated query layer as the rest of the API.</p>
+    <p class="sub">The repository ships <code>mcp_server.py</code>, a native <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener noreferrer">Model Context Protocol</a> stdio server. It is a thin front end over this public API — it talks to a running server over HTTP, so an AI assistant can explore the DSA transparency data through structured tool calls instead of raw HTTP. No SQL is ever exposed; every query goes through the same validated query layer as the rest of the API.</p>
 
     <h2>Tools</h2>
     <ul class="toollist">
@@ -396,29 +391,27 @@ display: flex; align-items: center;
       <li><code>dataset_overview</code><div class="desc">Headline aggregates for the whole dataset.</div></li>
       <li><code>run_query</code><div class="desc">Run a structured (single-table or composite) query and get JSON rows back.</div></li>
       <li><code>ask</code><div class="desc">Ask a natural-language question; an LLM translates it into a validated structured query.</div></li>
+      <li><code>register</code><div class="desc">Mint a demo API key from a name and email — unlocks the authenticated tools below.</div></li>
+      <li><code>submit_query</code><div class="desc">Submit a full async query job (no row cap, CSV export, composite legs) and get a job id.</div></li>
+      <li><code>poll_job</code><div class="desc">Poll a submitted job until it finishes and return its result.</div></li>
     </ul>
+    <p class="hint"><code>submit_query</code>, <code>poll_job</code>, and <code>ask</code> need an API key; <code>register</code> mints a demo one.</p>
 
     <h2>Connect it</h2>
-    <p class="sub">Add the server to your MCP host (for example Claude Desktop's
-      <code>claude_desktop_config.json</code>). See
-      <a href="https://github.com/krMaynard/transparency-report-api/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">docs/MCP.md</a>
-      for the full setup, and <code>mcp-config.example.json</code> in the repository for a ready-made example.</p>
+    <p class="sub">Add the server to your MCP host (for example Claude Desktop's <code>claude_desktop_config.json</code>). See <a href="https://github.com/krMaynard/transparency-report-api/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">docs/MCP.md</a> for the full setup, and <code>mcp-config.example.json</code> in the repository for a ready-made example.</p>
     <pre>{
   "mcpServers": {
-    "transparency": {
-      "command": "python",
-      "args": ["mcp_server.py"],
+    "transparency-report-api": {
+      "command": "/absolute/path/to/transparency-report-api/.venv-mcp/bin/python",
+      "args": ["/absolute/path/to/transparency-report-api/mcp_server.py"],
       "env": {
         "TRANSPARENCY_API_URL": "https://your-deployment.example",
-        "TRANSPARENCY_API_KEY": "your-api-key"
+        "TRANSPARENCY_API_KEY": "momo"
       }
     }
   }
 }</pre>
-    <p class="hint">Configured via <code>TRANSPARENCY_API_URL</code>, <code>TRANSPARENCY_API_KEY</code>,
-      and <code>TRANSPARENCY_API_TIMEOUT</code>. Its dependencies (<code>mcp</code> + <code>httpx</code>)
-      live in <code>requirements-mcp.txt</code>, separate from the app image. Need a key?
-      <a href="/api-key">Get an API key →</a></p>
+    <p class="hint">Configured via <code>TRANSPARENCY_API_URL</code>, <code>TRANSPARENCY_API_KEY</code>, and <code>TRANSPARENCY_API_TIMEOUT</code>. Its dependencies (<code>mcp</code> + <code>httpx</code>) live in <code>requirements-mcp.txt</code>, separate from the app image. Need a key? <a href="/api-key">Get an API key →</a></p>
   </section>
  </main>
 

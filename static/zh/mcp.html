@@ -382,12 +382,7 @@ display: flex; align-items: center;
  <main id="main" tabindex="-1">
   <section class="card">
     <h2>简介</h2>
-    <p class="sub">The repository ships <code>mcp_server.py</code>, a native
-      <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener noreferrer">Model Context Protocol</a>
-      stdio server. It is a thin front end over this public API — it talks to a running
-      server over HTTP, so an AI assistant can explore the DSA transparency data through
-      structured tool calls instead of raw HTTP. No SQL is ever exposed; every query goes
-      through the same validated query layer as the rest of the API.</p>
+    <p class="sub">代码库提供了 <code>mcp_server.py</code>，一个原生的 <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener noreferrer">Model Context Protocol</a> stdio 服务器。它是这个公开 API 之上的轻量前端——通过 HTTP 与运行中的服务器通信，使 AI 助手能够通过结构化的工具调用而非原始 HTTP 来探索 DSA 透明度数据。绝不暴露 SQL；每个查询都经过与 API 其余部分相同的经过验证的查询层。</p>
 
     <h2>工具</h2>
     <ul class="toollist">
@@ -396,33 +391,31 @@ display: flex; align-items: center;
       <li><code>dataset_overview</code><div class="desc">整个数据集的关键汇总数据。</div></li>
       <li><code>run_query</code><div class="desc">运行结构化查询（单表或复合）并返回 JSON 行。</div></li>
       <li><code>ask</code><div class="desc">用自然语言提问；LLM 会将其转换为经过验证的结构化查询。</div></li>
+      <li><code>register</code><div class="desc">根据姓名和邮箱生成演示 API 密钥——解锁下方需要鉴权的工具。</div></li>
+      <li><code>submit_query</code><div class="desc">提交完整的异步查询作业（无行数上限、CSV 导出、复合查询）并返回作业 id。</div></li>
+      <li><code>poll_job</code><div class="desc">轮询已提交的作业直至完成并返回其结果。</div></li>
     </ul>
+    <p class="hint"><code>submit_query</code>、<code>poll_job</code> 和 <code>ask</code> 需要 API 密钥；<code>register</code> 会生成一个演示密钥。</p>
 
     <h2>连接方式</h2>
-    <p class="sub">Add the server to your MCP host (for example Claude Desktop's
-      <code>claude_desktop_config.json</code>). See
-      <a href="https://github.com/krMaynard/transparency-report-api/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">docs/MCP.md</a>
-      for the full setup, and <code>mcp-config.example.json</code> in the repository for a ready-made example.</p>
+    <p class="sub">将该服务器添加到你的 MCP 主机（例如 Claude Desktop 的 <code>claude_desktop_config.json</code>）。完整设置见 <a href="https://github.com/krMaynard/transparency-report-api/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">docs/MCP.md</a>，现成示例见仓库中的 <code>mcp-config.example.json</code>。</p>
     <pre>{
   "mcpServers": {
-    "transparency": {
-      "command": "python",
-      "args": ["mcp_server.py"],
+    "transparency-report-api": {
+      "command": "/absolute/path/to/transparency-report-api/.venv-mcp/bin/python",
+      "args": ["/absolute/path/to/transparency-report-api/mcp_server.py"],
       "env": {
         "TRANSPARENCY_API_URL": "https://your-deployment.example",
-        "TRANSPARENCY_API_KEY": "your-api-key"
+        "TRANSPARENCY_API_KEY": "momo"
       }
     }
   }
 }</pre>
-    <p class="hint">Configured via <code>TRANSPARENCY_API_URL</code>, <code>TRANSPARENCY_API_KEY</code>,
-      and <code>TRANSPARENCY_API_TIMEOUT</code>. Its dependencies (<code>mcp</code> + <code>httpx</code>)
-      live in <code>requirements-mcp.txt</code>, separate from the app image. Need a key?
-      <a href="/zh/api-key">Get an API key →</a></p>
+    <p class="hint">通过 <code>TRANSPARENCY_API_URL</code>、<code>TRANSPARENCY_API_KEY</code> 和 <code>TRANSPARENCY_API_TIMEOUT</code> 配置。其依赖（<code>mcp</code> + <code>httpx</code>）位于 <code>requirements-mcp.txt</code>，与应用镜像分开。需要密钥？<a href="/zh/api-key">获取 API 密钥 →</a></p>
   </section>
  </main>
 
-  <footer>Powered by the Transparency Report API · <a href="/docs">Swagger UI</a> · <a href="/zh/privacy">隐私</a></footer>
+  <footer>由 Transparency Report API 提供支持 · <a href="/docs">Swagger UI</a> · <a href="/zh/privacy">隐私</a></footer>
 </div><!-- /.wrap -->
 </div><!-- /.main-area -->
 </div><!-- /.app-body -->

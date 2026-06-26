@@ -25,6 +25,9 @@ is the Python sibling of the generated Go MCP server in
 | `dataset_overview` | `GET /api/overview` | — | Headline aggregates: period, service/platform counts, total notices, top platforms and categories. |
 | `run_query` | `POST /api/explore` | — | Run a structured (no-SQL) query synchronously and return `{columns, rows, row_count, truncated}`. Supports single-table and composite (cross-table) shapes; row-capped. |
 | `ask` | `POST /api/ask` | key | Natural-language question → LLM-generated *structured* query → results. Needs `TRANSPARENCY_API_KEY` and a server with `ANTHROPIC_API_KEY` set. |
+| `register` | `POST /api/portal/register` | — | Mint a demo API key from a name + email (gated by `ALLOW_DEMO_KEYS`) — the way to obtain a key for the authenticated tools. |
+| `submit_query` | `POST /api/query` | key | Submit a full async query job (no row cap, CSV export, up to 4 composite legs) → `job_id`. Needs `TRANSPARENCY_API_KEY`. |
+| `poll_job` | `GET /api/jobs/{id}` + `/result` | key | Poll a submitted job until it finishes and return its result. Needs `TRANSPARENCY_API_KEY`. |
 
 `run_query` takes the same structured query object as `POST /api/query` /
 `POST /api/explore`. Example single-table query:
@@ -50,7 +53,7 @@ The server is configured entirely via environment variables:
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `TRANSPARENCY_API_URL` | `http://127.0.0.1:8000` | Base URL of a running API. |
-| `TRANSPARENCY_API_KEY` | _(unset)_ | Optional `X-API-Key`. When set, keyed tools (`describe_table` full registry, `ask`) use the authenticated endpoints. |
+| `TRANSPARENCY_API_KEY` | _(unset)_ | Optional `X-API-Key`. When set, keyed tools (`describe_table` full registry, `ask`, `submit_query`, `poll_job`) use the authenticated endpoints. |
 | `TRANSPARENCY_API_TIMEOUT` | `30` | Per-request timeout in seconds. |
 
 ## Run it

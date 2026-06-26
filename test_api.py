@@ -1323,6 +1323,27 @@ class TestDashboard:
         r = client.get("/mcp")
         assert r.status_code == 200 and "text/html" in r.headers["content-type"]
         assert "mcp_server.py" in r.text and "Model Context Protocol" in r.text
+        # The page must document every tool the server actually registers. Parse
+        # mcp_server.py as text (don't import it — its httpx dep isn't in the app
+        # env) so this can't drift from build_server()'s registration list.
+        import re
+        import pathlib
+        src = pathlib.Path(__file__).with_name("mcp_server.py").read_text()
+        reg = re.search(r"for fn in \(([^)]*)\):", src, re.S)
+        assert reg, "could not find the tool-registration tuple in mcp_server.py"
+        tools = re.findall(r"[A-Za-z_]\w+", reg.group(1))
+        assert len(tools) >= 8
+        for tool in tools:
+            assert f"<code>{tool}</code>" in r.text, f"{tool} missing from /mcp"
+        # Host-config snippet matches the example file (server name + valid demo key).
+        assert '"transparency-report-api"' in r.text and '"momo"' in r.text
+
+    def test_mcp_localized_prose_not_in_english(self):
+        for loc, needle in [("es", "El repositorio incluye"), ("zh", "代码库提供了")]:
+            r = client.get(f"/{loc}/mcp")
+            assert r.status_code == 200
+            assert "The repository ships" not in r.text
+            assert needle in r.text
 
     def test_new_pages_in_sidebar_nav(self):
         # Both new pages are linked from every page's sidebar nav.

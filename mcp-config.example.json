@@ -9,7 +9,7 @@
       "args": ["/absolute/path/to/transparency-report-api/mcp_server.py"],
       "env": {
         "TRANSPARENCY_API_URL": "http://127.0.0.1:8000",
-        "TRANSPARENCY_API_KEY": "alice"
+        "TRANSPARENCY_API_KEY": "momo"
       }
     }
   }

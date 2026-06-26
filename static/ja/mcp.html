@@ -382,12 +382,7 @@ display: flex; align-items: center;
  <main id="main" tabindex="-1">
   <section class="card">
     <h2>概要</h2>
-    <p class="sub">The repository ships <code>mcp_server.py</code>, a native
-      <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener noreferrer">Model Context Protocol</a>
-      stdio server. It is a thin front end over this public API — it talks to a running
-      server over HTTP, so an AI assistant can explore the DSA transparency data through
-      structured tool calls instead of raw HTTP. No SQL is ever exposed; every query goes
-      through the same validated query layer as the rest of the API.</p>
+    <p class="sub">リポジトリには <code>mcp_server.py</code>（<a href="https://modelcontextprotocol.io" target="_blank" rel="noopener noreferrer">Model Context Protocol</a> のネイティブ stdio サーバー）が含まれています。これはこの公開 API の薄いフロントエンドで、稼働中のサーバーと HTTP で通信するため、AI アシスタントは生の HTTP ではなく構造化されたツール呼び出しで DSA 透明性データを探索できます。SQL が公開されることはなく、すべてのクエリは API のほかの部分と同じ検証済みクエリ層を通ります。</p>
 
     <h2>ツール</h2>
     <ul class="toollist">
@@ -396,33 +391,31 @@ display: flex; align-items: center;
       <li><code>dataset_overview</code><div class="desc">データセット全体の主要な集計値。</div></li>
       <li><code>run_query</code><div class="desc">構造化クエリ（単一テーブルまたは複合）を実行し、JSON 行を返します。</div></li>
       <li><code>ask</code><div class="desc">自然言語で質問すると、LLM が検証済みの構造化クエリに変換します。</div></li>
+      <li><code>register</code><div class="desc">名前とメールからデモ API キーを発行します — 下の認証付きツールが使えるようになります。</div></li>
+      <li><code>submit_query</code><div class="desc">完全な非同期クエリジョブ（行数制限なし、CSV エクスポート、複合クエリ）を送信し、ジョブ ID を返します。</div></li>
+      <li><code>poll_job</code><div class="desc">送信したジョブを完了まで監視し、その結果を返します。</div></li>
     </ul>
+    <p class="hint"><code>submit_query</code>、<code>poll_job</code>、<code>ask</code> には API キーが必要です。<code>register</code> はデモキーを発行します。</p>
 
     <h2>接続方法</h2>
-    <p class="sub">Add the server to your MCP host (for example Claude Desktop's
-      <code>claude_desktop_config.json</code>). See
-      <a href="https://github.com/krMaynard/transparency-report-api/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">docs/MCP.md</a>
-      for the full setup, and <code>mcp-config.example.json</code> in the repository for a ready-made example.</p>
+    <p class="sub">サーバーを MCP ホスト（例：Claude Desktop の <code>claude_desktop_config.json</code>）に追加します。完全なセットアップは <a href="https://github.com/krMaynard/transparency-report-api/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">docs/MCP.md</a> を、すぐに使える例はリポジトリの <code>mcp-config.example.json</code> を参照してください。</p>
     <pre>{
   "mcpServers": {
-    "transparency": {
-      "command": "python",
-      "args": ["mcp_server.py"],
+    "transparency-report-api": {
+      "command": "/absolute/path/to/transparency-report-api/.venv-mcp/bin/python",
+      "args": ["/absolute/path/to/transparency-report-api/mcp_server.py"],
       "env": {
         "TRANSPARENCY_API_URL": "https://your-deployment.example",
-        "TRANSPARENCY_API_KEY": "your-api-key"
+        "TRANSPARENCY_API_KEY": "momo"
       }
     }
   }
 }</pre>
-    <p class="hint">Configured via <code>TRANSPARENCY_API_URL</code>, <code>TRANSPARENCY_API_KEY</code>,
-      and <code>TRANSPARENCY_API_TIMEOUT</code>. Its dependencies (<code>mcp</code> + <code>httpx</code>)
-      live in <code>requirements-mcp.txt</code>, separate from the app image. Need a key?
-      <a href="/ja/api-key">Get an API key →</a></p>
+    <p class="hint"><code>TRANSPARENCY_API_URL</code>、<code>TRANSPARENCY_API_KEY</code>、<code>TRANSPARENCY_API_TIMEOUT</code> で設定します。依存関係（<code>mcp</code> + <code>httpx</code>）はアプリイメージとは別に <code>requirements-mcp.txt</code> にあります。キーが必要ですか？ <a href="/ja/api-key">API キーを取得 →</a></p>
   </section>
  </main>
 
-  <footer>Powered by the Transparency Report API · <a href="/docs">Swagger UI</a> · <a href="/ja/privacy">プライバシー</a></footer>
+  <footer>Powered by Transparency Report API · <a href="/docs">Swagger UI</a> · <a href="/ja/privacy">プライバシー</a></footer>
 </div><!-- /.wrap -->
 </div><!-- /.main-area -->
 </div><!-- /.app-body -->

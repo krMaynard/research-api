@@ -382,12 +382,7 @@ display: flex; align-items: center;
  <main id="main" tabindex="-1">
   <section class="card">
     <h2>개요</h2>
-    <p class="sub">The repository ships <code>mcp_server.py</code>, a native
-      <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener noreferrer">Model Context Protocol</a>
-      stdio server. It is a thin front end over this public API — it talks to a running
-      server over HTTP, so an AI assistant can explore the DSA transparency data through
-      structured tool calls instead of raw HTTP. No SQL is ever exposed; every query goes
-      through the same validated query layer as the rest of the API.</p>
+    <p class="sub">저장소에는 <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener noreferrer">Model Context Protocol</a> 네이티브 stdio 서버인 <code>mcp_server.py</code>가 포함되어 있습니다. 이 공개 API 위의 얇은 프런트엔드로, 실행 중인 서버와 HTTP로 통신하므로 AI 어시스턴트가 원시 HTTP 대신 구조화된 도구 호출로 DSA 투명성 데이터를 탐색할 수 있습니다. SQL은 절대 노출되지 않으며, 모든 쿼리는 API의 나머지 부분과 동일한 검증된 쿼리 계층을 거칩니다.</p>
 
     <h2>도구</h2>
     <ul class="toollist">
@@ -396,29 +391,27 @@ display: flex; align-items: center;
       <li><code>dataset_overview</code><div class="desc">전체 데이터셋의 주요 집계값.</div></li>
       <li><code>run_query</code><div class="desc">구조화된(단일 테이블 또는 복합) 쿼리를 실행하고 JSON 행을 반환합니다.</div></li>
       <li><code>ask</code><div class="desc">자연어로 질문하면 LLM이 검증된 구조화 쿼리로 변환합니다.</div></li>
+      <li><code>register</code><div class="desc">이름과 이메일로 데모 API 키를 발급합니다 — 아래의 인증 도구를 사용할 수 있게 됩니다.</div></li>
+      <li><code>submit_query</code><div class="desc">전체 비동기 쿼리 작업(행 수 제한 없음, CSV 내보내기, 복합 쿼리)을 제출하고 작업 id를 반환합니다.</div></li>
+      <li><code>poll_job</code><div class="desc">제출한 작업이 완료될 때까지 폴링하고 그 결과를 반환합니다.</div></li>
     </ul>
+    <p class="hint"><code>submit_query</code>, <code>poll_job</code>, <code>ask</code>에는 API 키가 필요합니다. <code>register</code>는 데모 키를 발급합니다.</p>
 
     <h2>연결하기</h2>
-    <p class="sub">Add the server to your MCP host (for example Claude Desktop's
-      <code>claude_desktop_config.json</code>). See
-      <a href="https://github.com/krMaynard/transparency-report-api/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">docs/MCP.md</a>
-      for the full setup, and <code>mcp-config.example.json</code> in the repository for a ready-made example.</p>
+    <p class="sub">서버를 MCP 호스트(예: Claude Desktop의 <code>claude_desktop_config.json</code>)에 추가하세요. 전체 설정은 <a href="https://github.com/krMaynard/transparency-report-api/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">docs/MCP.md</a>를, 바로 사용할 수 있는 예시는 저장소의 <code>mcp-config.example.json</code>을 참조하세요.</p>
     <pre>{
   "mcpServers": {
-    "transparency": {
-      "command": "python",
-      "args": ["mcp_server.py"],
+    "transparency-report-api": {
+      "command": "/absolute/path/to/transparency-report-api/.venv-mcp/bin/python",
+      "args": ["/absolute/path/to/transparency-report-api/mcp_server.py"],
       "env": {
         "TRANSPARENCY_API_URL": "https://your-deployment.example",
-        "TRANSPARENCY_API_KEY": "your-api-key"
+        "TRANSPARENCY_API_KEY": "momo"
       }
     }
   }
 }</pre>
-    <p class="hint">Configured via <code>TRANSPARENCY_API_URL</code>, <code>TRANSPARENCY_API_KEY</code>,
-      and <code>TRANSPARENCY_API_TIMEOUT</code>. Its dependencies (<code>mcp</code> + <code>httpx</code>)
-      live in <code>requirements-mcp.txt</code>, separate from the app image. Need a key?
-      <a href="/ko/api-key">Get an API key →</a></p>
+    <p class="hint"><code>TRANSPARENCY_API_URL</code>, <code>TRANSPARENCY_API_KEY</code>, <code>TRANSPARENCY_API_TIMEOUT</code>로 구성합니다. 의존성(<code>mcp</code> + <code>httpx</code>)은 앱 이미지와 분리되어 <code>requirements-mcp.txt</code>에 있습니다. 키가 필요하신가요? <a href="/ko/api-key">API 키 받기 →</a></p>
   </section>
  </main>
 

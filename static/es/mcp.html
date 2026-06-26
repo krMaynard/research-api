@@ -382,12 +382,7 @@ display: flex; align-items: center;
  <main id="main" tabindex="-1">
   <section class="card">
     <h2>Qué es</h2>
-    <p class="sub">The repository ships <code>mcp_server.py</code>, a native
-      <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener noreferrer">Model Context Protocol</a>
-      stdio server. It is a thin front end over this public API — it talks to a running
-      server over HTTP, so an AI assistant can explore the DSA transparency data through
-      structured tool calls instead of raw HTTP. No SQL is ever exposed; every query goes
-      through the same validated query layer as the rest of the API.</p>
+    <p class="sub">El repositorio incluye <code>mcp_server.py</code>, un servidor stdio nativo del <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener noreferrer">Model Context Protocol</a>. Es una capa ligera sobre esta API pública: se comunica con un servidor en ejecución por HTTP, de modo que un asistente de IA puede explorar los datos de transparencia del DSA mediante llamadas a herramientas estructuradas en lugar de HTTP en crudo. Nunca se expone SQL; cada consulta pasa por la misma capa de consultas validada que el resto de la API.</p>
 
     <h2>Herramientas</h2>
     <ul class="toollist">
@@ -396,33 +391,31 @@ display: flex; align-items: center;
       <li><code>dataset_overview</code><div class="desc">Agregados principales de todo el conjunto de datos.</div></li>
       <li><code>run_query</code><div class="desc">Ejecuta una consulta estructurada (de una tabla o compuesta) y devuelve filas JSON.</div></li>
       <li><code>ask</code><div class="desc">Haz una pregunta en lenguaje natural; un LLM la traduce en una consulta estructurada validada.</div></li>
+      <li><code>register</code><div class="desc">Genera una clave de API de demostración a partir de un nombre y un correo: desbloquea las herramientas autenticadas de abajo.</div></li>
+      <li><code>submit_query</code><div class="desc">Envía un trabajo de consulta asíncrono completo (sin límite de filas, exportación CSV, consultas compuestas) y obtén un id de trabajo.</div></li>
+      <li><code>poll_job</code><div class="desc">Sondea un trabajo enviado hasta que termina y devuelve su resultado.</div></li>
     </ul>
+    <p class="hint"><code>submit_query</code>, <code>poll_job</code> y <code>ask</code> necesitan una clave de API; <code>register</code> genera una de demostración.</p>
 
     <h2>Cómo conectarlo</h2>
-    <p class="sub">Add the server to your MCP host (for example Claude Desktop's
-      <code>claude_desktop_config.json</code>). See
-      <a href="https://github.com/krMaynard/transparency-report-api/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">docs/MCP.md</a>
-      for the full setup, and <code>mcp-config.example.json</code> in the repository for a ready-made example.</p>
+    <p class="sub">Añade el servidor a tu host MCP (por ejemplo, el <code>claude_desktop_config.json</code> de Claude Desktop). Consulta <a href="https://github.com/krMaynard/transparency-report-api/blob/main/docs/MCP.md" target="_blank" rel="noopener noreferrer">docs/MCP.md</a> para la configuración completa y <code>mcp-config.example.json</code> en el repositorio para un ejemplo listo para usar.</p>
     <pre>{
   "mcpServers": {
-    "transparency": {
-      "command": "python",
-      "args": ["mcp_server.py"],
+    "transparency-report-api": {
+      "command": "/absolute/path/to/transparency-report-api/.venv-mcp/bin/python",
+      "args": ["/absolute/path/to/transparency-report-api/mcp_server.py"],
       "env": {
         "TRANSPARENCY_API_URL": "https://your-deployment.example",
-        "TRANSPARENCY_API_KEY": "your-api-key"
+        "TRANSPARENCY_API_KEY": "momo"
       }
     }
   }
 }</pre>
-    <p class="hint">Configured via <code>TRANSPARENCY_API_URL</code>, <code>TRANSPARENCY_API_KEY</code>,
-      and <code>TRANSPARENCY_API_TIMEOUT</code>. Its dependencies (<code>mcp</code> + <code>httpx</code>)
-      live in <code>requirements-mcp.txt</code>, separate from the app image. Need a key?
-      <a href="/es/api-key">Get an API key →</a></p>
+    <p class="hint">Se configura mediante <code>TRANSPARENCY_API_URL</code>, <code>TRANSPARENCY_API_KEY</code> y <code>TRANSPARENCY_API_TIMEOUT</code>. Sus dependencias (<code>mcp</code> + <code>httpx</code>) están en <code>requirements-mcp.txt</code>, separadas de la imagen de la app. ¿Necesitas una clave? <a href="/es/api-key">Obtener una clave de API →</a></p>
   </section>
  </main>
 
-  <footer>Powered by the Transparency Report API · <a href="/docs">Swagger UI</a> · <a href="/es/privacy">Privacidad</a></footer>
+  <footer>Con tecnología de Transparency Report API · <a href="/docs">Swagger UI</a> · <a href="/es/privacy">Privacidad</a></footer>
 </div><!-- /.wrap -->
 </div><!-- /.main-area -->
 </div><!-- /.app-body -->
