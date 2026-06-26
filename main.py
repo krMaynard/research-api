@@ -2385,10 +2385,18 @@ def _compute_report_locations() -> dict[str, Any]:
     def _facet(key: str) -> list[str]:
         return sorted({r[key] for r in rows if r.get(key)}, key=str.lower)
 
+    # A content fingerprint of the catalogue itself (a separate CSV snapshot from
+    # the star-schema DB, so it gets its own version rather than the DB's), so an
+    # exported slice is citable/pinnable like every other export on the site.
+    version = hashlib.sha256(
+        json.dumps(rows, sort_keys=True, ensure_ascii=False).encode("utf-8")
+    ).hexdigest()[:12]
+
     return {
         "rows": rows,
         "total": len(rows),
         "platform_count": len({r["platform"] for r in rows}),
+        "version": version,
         "facets": {
             "category": _facet("category"),
             "confidence": _facet("confidence"),
@@ -2437,6 +2445,15 @@ def report_locations(
         )
     ]
 
+    # Provenance so a catalogue slice is citable/pinnable, like the other exports
+    # (the methodology page promises this on "every export"). The catalogue is its
+    # own CSV snapshot, so it carries its own version + the shared build date.
+    version = data["version"]
+    generated = _dataset_meta().get("generated")
+    prov_headers = {"X-Catalogue-Version": version}
+    if generated:
+        prov_headers["X-Dataset-Generated"] = generated
+
     if format == "csv":
         buf = io.StringIO()
         writer = csv.writer(buf)
@@ -2447,16 +2464,21 @@ def report_locations(
         return PlainTextResponse(
             buf.getvalue(),
             media_type="text/csv",
-            headers={"Content-Disposition": 'attachment; filename="report-locations.csv"'},
+            headers={
+                **prov_headers,
+                "Content-Disposition": f'attachment; filename="report-locations-{version}.csv"',
+            },
         )
 
     return JSONResponse({
         "count": len(out),
         "total": data["total"],
         "platform_count": data["platform_count"],
+        "version": version,
+        "generated": generated,
         "facets": data["facets"],
         "rows": out,
-    })
+    }, headers=prov_headers)
 
 
 @api_router.get("/explore/options")

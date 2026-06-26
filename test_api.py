@@ -1352,6 +1352,18 @@ class TestReportLocations:
         assert discord["archived"].startswith("https://github.com/")
         assert reddit["archived"] is None
 
+    def test_catalogue_carries_provenance(self):
+        # The catalogue is its own CSV snapshot, so it exposes a content version +
+        # build date (JSON body + X-Catalogue-Version header) and a stamped CSV
+        # filename — so an exported slice is citable like every other export.
+        r = client.get("/api/report-locations")
+        d = r.json()
+        assert d.get("version") and "generated" in d
+        assert r.headers.get("X-Catalogue-Version") == d["version"]
+        cv = client.get("/api/report-locations", params={"format": "csv"})
+        assert cv.headers.get("X-Catalogue-Version") == d["version"]
+        assert f'report-locations-{d["version"]}.csv' in cv.headers.get("content-disposition", "")
+
     def test_filter_by_confidence(self):
         r = client.get("/api/report-locations", params={"confidence": "verified"})
         d = r.json()

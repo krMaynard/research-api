@@ -210,7 +210,7 @@ display: flex; align-items: center;
   }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
   .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 14px; }
-  .controls label { display: flex; flex-direction: column; font-size: 12px; color: var(--muted); gap: 4px; }
+  .controls label { display: flex; flex-direction: column; font-size: 12px; color: var(--fg); gap: 4px; }
   select, input[type=search] { background: var(--panel2); color: var(--fg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 14px; min-width: 130px; }
   .controls button { background: var(--accent); color: var(--on-accent); border: 0; border-radius: 8px; padding: 9px 18px; font-size: 14px; font-weight: 650; cursor: pointer; }
   .controls button:hover { background: var(--accent-dark); }
@@ -220,6 +220,18 @@ display: flex; align-items: center;
   .restable th, .restable td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--border); }
   .restable th { color: var(--muted); font-weight: 600; }
   .restable a { color: var(--accent); text-decoration: none; }
+  .restable .na { color: var(--muted); }
+  /* Screen-reader-only helper (for "opens in new tab" cues + the mobile header row). */
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+  /* Column key */
+  .legend { margin: 0 0 16px; font-size: 13px; }
+  .legend > summary { cursor: pointer; color: var(--accent-dark); font-weight: 600; }
+  [data-theme="dark"] .legend > summary { color: var(--accent); }
+  .legend p { color: var(--muted); margin: 8px 0 0; }
+  .legend code, .legend em { font-style: normal; }
+  /* Provenance / cite-as line (mirrors the dashboards). */
+  .provenance { font-size: 12px; margin-top: 10px; color: var(--muted); }
+  .provenance .prov-label { font-weight: 600; }
   /* On phones the 7-column table can't fit, so collapse each row into a stacked
      "card": hide the header row and label each cell with its column name (pulled
      from the header via data-label, so it stays localized). */
@@ -231,8 +243,10 @@ display: flex; align-items: center;
     .controls select, .controls input[type=search] { width: 100%; min-width: 0; }
     .controls button { width: 100%; }
     .restable { font-size: 14px; margin-top: 4px; }
-    /* The card labels (data-label) replace the header row, so drop it entirely. */
-    .restable thead { display: none; }
+    /* The card labels (data-label) replace the header row visually, but keep the
+       header in the accessibility tree (sr-only) so screen-reader column context
+       isn't lost on mobile. */
+    .restable thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
     .restable, .restable tbody, .restable tr, .restable td { display: block; width: 100%; }
     .restable tr {
       border: 1px solid var(--border); border-radius: 10px;
@@ -409,14 +423,18 @@ display: flex; align-items: center;
   <header>
     <span class="badge">Catalogue</span>
     <h1>プラットフォームが報告書を公開している場所</h1>
-    <p>指定 VLOP 以外を含め、オンラインプラットフォームが DSA 第15条・第24条の透明性報告書を公開している場所。</p>
+    <p>オンラインプラットフォーム（VLOPかどうかを問わず）がDSA第15/24条の透明性報告書を公開している場所。</p>
   </header>
 
  <main id="main" tabindex="-1">
   <section class="card" id="locations-card">
-    <p class="sub">オンラインプラットフォームが DSA 第15条・第24条の透明性報告書を公開している場所を
-      まとめたキュレーション済みカタログです（指定 VLOP 以外を含む）。公開の読み取り専用
-      <code>GET /api/report-locations</code> が提供します。</p>
+    <p class="sub">オンラインプラットフォームがDSA第15/24条の透明性報告書を公開している場所をまとめたカタログ。指定VLOP以外の多数のプラットフォームを中心に扱いつつ、一部のVLOPの公開場所も掲載しています。公開・読み取り専用の<code>GET /api/report-locations</code>が提供します。</p>
+    <details class="legend">
+      <summary>各列の意味</summary>
+      <p><strong>確度</strong> — このURLが本当にそのプラットフォームのDSA報告書であるという編纂者の評価であり、報告書の内容についての判断ではありません： <em>verified</em> ＝リンクを確認済み、<em>likely</em> ＝有力な手がかりはあるが未確認、<em>uncertain</em> ＝推測。</p>
+      <p><strong>テンプレート</strong> — プラットフォームがEUの統一報告テンプレート（実施規則）を用いて提出したかどうか： <em>yes</em> / <em>no</em> / <em>partial</em> / <em>unknown</em>。</p>
+      <p><strong>形式／対象期間</strong> — ファイル形式と報告書が対象とする報告期間。 <strong>アーカイブ</strong> — ライブリンクが移動した場合に備え、本プロジェクトのオープンデータリポジトリにミラーした元ファイルのスナップショット。</p>
+    </details>
     <div class="controls">
       <label>カテゴリ <select id="rl-category"><option value="">すべて</option></select></label>
       <label>信頼度 <select id="rl-confidence"><option value="">すべて</option></select></label>
@@ -426,7 +444,8 @@ display: flex; align-items: center;
     </div>
     <div class="error" id="rl-error" role="alert"></div>
     <div id="rl-summary" class="sub" aria-live="polite"></div>
-    <div id="rl-out" aria-live="polite" aria-busy="true"></div>
+    <div id="rl-out" aria-busy="true"></div>
+    <p class="provenance" id="rl-prov" hidden><span class="prov-label">スナップショット：</span> <span id="rl-snap"></span> · <span class="prov-label">引用方法：</span> <span id="rl-cite"></span></p>
   </section>
  </main>
 
@@ -482,25 +501,35 @@ async function runLocations() {
   $("#rl-out").setAttribute("aria-busy", "false");
   $("#rl-summary").textContent =
     `${fmt(d.platform_count)} 個のプラットフォームの報告書 URL ${fmt(d.total)} 件のうち ${fmt(d.count)} 件を表示しています。`;
-  const head = "<tr><th>プラットフォーム</th><th>会社</th><th>カテゴリ</th>" +
-    "<th>信頼度</th><th>テンプレート</th><th>報告書</th><th>アーカイブ</th></tr>";
+  // Provenance / cite-as line for the catalogue snapshot (version + build date).
+  if (d.version) {
+    $("#rl-snap").textContent = (d.generated ? d.generated + " · " : "") + "version " + d.version;
+    $("#rl-cite").textContent =
+      `“DSA transparency-report locations, via the Transparency Report API (catalogue version ${d.version}).”`;
+    $("#rl-prov").hidden = false;
+  }
+  const head = '<tr><th scope="col">プラットフォーム</th><th scope="col">企業</th><th scope="col">カテゴリ</th>' +
+    '<th scope="col">確度</th><th scope="col">テンプレート</th><th scope="col">形式／対象期間</th>' +
+    '<th scope="col">報告書</th><th scope="col">アーカイブ</th></tr>';
   // Column labels, taken from the (already-localized) header cells, so the
   // mobile card view can label each cell via data-label without a second
   // translatable copy of the column names.
-  const labels = [...head.matchAll(/<th>(.*?)<\/th>/g)].map(m => m[1]);
+  const labels = [...head.matchAll(/<th[^>]*>(.*?)<\/th>/g)].map(m => m[1]);
   const body = d.rows.map(r => {
     const href = safeHref(r.url);
+    const linkText = r.url_label || "報告書";
     const link = href
-      ? `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer">${esc(r.url_label || "Report")}</a>`
+      ? `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(linkText + " — " + r.platform + "（新しいタブで開く）")}">${esc(linkText)}</a>`
       : esc(r.url_label || "");
     // `archived` is one or more (semicolon-separated) GitHub URLs to the file(s)
     // mirrored in this project's data repo — sanitise + link each separately.
     const archLink = (r.archived || "").split(";").map(part => {
       const href = safeHref(part.trim());
-      return href ? `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer">GitHub</a>` : "";
+      return href ? `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer" aria-label="${esc("アーカイブ報告書 — " + r.platform + "（新しいタブで開く）")}">GitHub</a>` : "";
     }).filter(Boolean).join(", ");
+    const archCell = archLink || '<span class="na">アーカイブなし</span>';
     const cells = [esc(r.platform), esc(r.company || ""), esc(r.category),
-      esc(r.confidence), esc(r.harmonised_template || ""), link, archLink];
+      esc(r.confidence), esc(r.harmonised_template || ""), esc(r.format_period || ""), link, archCell];
     return "<tr>" + cells.map((c, i) =>
       `<td data-label="${esc(labels[i] || "")}">${c}</td>`).join("") + "</tr>";
   }).join("");
