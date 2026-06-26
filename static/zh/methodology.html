@@ -388,7 +388,7 @@ display: flex; align-items: center;
     <h2>这是什么</h2>
     <p class="sub">这是一个对公开透明度报告数据的<strong>独立、非官方</strong>聚合，不隶属于任何平台、公司或政府。它将两类报告整合到一个可查询的模式中：</p>
     <ul class="toollist">
-      <li><strong>欧盟 DSA 透明度报告</strong><div class="desc">供应商根据欧盟《数字服务法》（DSA）发布的定期内容审核统计数据——即依据第15/24/42条定期发布的透明度报告，而非单独的、实时收录各项 “Statements of Reasons” 的 DSA Transparency Database。提交方使用一套共享的分级欧盟模板：每家供应商只填写其层级所要求的报告部分（本数据集在内部将这些部分编号为 t3–t11）。它涵盖被指定的超大型在线平台和搜索引擎（VLOP / VLOSE），这些平台报告更频繁、更详尽，同时也涵盖数十家规模较小的平台。请参阅 <a href="/zh/reports">DSA 报告</a>仪表板，查看实时计数及覆盖周期。</div></li>
+      <li><strong>欧盟 DSA 透明度报告</strong><div class="desc">提供者依据欧盟《数字服务法》（DSA）发布的定期内容审核统计数据——即 DSA 第15条、第24条和第42条所要求的周期性透明度报告（分别针对中介服务、在线平台和超大型平台的报告义务），而非另行设立的、收录单条理由说明（Statements of Reasons）的实时 DSA 透明度数据库。报送方使用一份共享的分级欧盟模板：每家提供者只需填写其层级所要求的报告部分（本数据集在内部将这些部分编为 t3–t11 索引）。它涵盖超大型在线平台和搜索引擎（VLOPs / VLOSEs）——即因其在欧盟的影响范围而被欧盟委员会正式<em>指定</em>的平台——这些平台报送更为频繁、更为详尽，同时还涵盖数十家规模较小的平台。实时统计数和涵盖期间请见 <a href="/zh/reports">DSA 报告</a> 仪表板。</div></li>
       <li><strong>Google 政府删除请求</strong><div class="desc">Google 报告的各国政府要求删除内容的请求数量，按国家、产品、原因和报告周期划分——这是 Google 自身长期运行的自愿性透明度报告，而非 DSA 报告。可在<a href="/zh/removals">政府删除请求</a>仪表板中探索。</div></li>
     </ul>
     <p class="hint">每个平台在何处发布其原始报告，已编入<a href="/zh/catalog">报告位置</a>页面，并附有源文件存档副本的链接。</p>
@@ -398,23 +398,26 @@ display: flex; align-items: center;
 
     <h2>一份报告如何变得可查询</h2>
     <p class="sub">每份来源报告的表格会被提取并载入一个数据库，API 以<strong>只读</strong>方式打开该数据库（纵深防御），并且只通过一个能读取但永远无法写入的接口来访问——其结构为星型模式：每个 DSA 报告表对应一张数据表（内部索引为 t3–t11），周围环绕着共享的查找表（services、categories、sections、indicators、scopes、surfaces、reporting periods）。重复的标签只存储一次并以编号引用，因此同一个类别或平台名称只存在于单一位置。可在 <a href="/zh/schema">模式</a>页面浏览由此生成的表格以及每一个可查询的字段。</p>
+    <p class="hint">这九张报告表的含义为：<code>t3</code> 成员国命令 · <code>t4</code> 通知（含可信举报者）· <code>t5</code> / <code>t6</code> 自主行动（非法内容 / 服务条款）· <code>t7</code> 申诉与累犯 · <code>t8</code> 自动化手段的使用 · <code>t9</code> 人力资源 · <code>t10</code> 平均月活跃接收者 · <code>t11</code> 定性描述。</p>
 
     <h2>避免重复计数</h2>
     <p class="sub">DSA 模板会把一个汇总<strong>总计</strong>行紧挨着它所汇总的分项行放置（例如，在按类别计数旁边放一个总计的“All the entries”类别，或在维持/撤销结果旁边放一个“Total number”范围）。对这样的列进行简单的 <code>SUM</code> 会把各分项<em>和</em>它们自身的总计一起计数，从而虚增数字。加载器为每个汇总行打上 <code>is_total</code> 标记，并将其作为可筛选的维度公开，因此查询可以有意选定单一粒度——只取总计，或只取分项——绝不会把总计与其组成部分相加。仪表板的标题数字使用报告的总计；其分项图表使用组成行。若某项数字仍带有注意事项，API 会返回一条 <code>warnings</code> 说明，并由仪表板在结果旁一并呈现。</p>
 
     <h2>跨语言阅读</h2>
-    <p class="sub">非 VLOP 平台以任一欧盟官方语言提交统一模板，因此同一个模板行会以不同文本出现（<code>Decisions upheld</code> / <code>Décisions confirmées</code> / <code>Bestätigte Entscheidungen</code>）。每一行都保留其原始语言标签用于显示，但同时也被标注一个语言中立的标准标签——即<strong>规范键</strong>——通过一份翻译映射表（一份 “crosswalk”）进行匹配，该映射表将结构相同的报告对齐到英文参考，并<em>舍弃任何含糊不清的内容</em>。查询可以按规范键进行分组或筛选，从而跨语言进行对等比较，同时仍会显示原始文本。</p>
+    <p class="sub">非 VLOP 平台可以用任何一种欧盟官方语言报送这份统一模板，因此同一个模板行可能以不同的文字出现（<code>Decisions upheld</code> / <code>Décisions confirmées</code> / <code>Bestätigte Entscheidungen</code>）。每一行都保留其原始语言的标签用于显示，同时还被标注上一个与语言无关的标准标签——即<strong>规范键</strong>——它通过一份翻译映射（一份“对照表”）来匹配，该映射将结构相同的报告对齐到一份英文参照，并<em>舍弃任何含义不明确的项</em>。查询可以按规范键进行分组或筛选，从而跨语言进行同类对比，同时仍然显示原始文字——不过目前各语言的覆盖程度尚不一致（见已知局限）。</p>
 
     <h2>如何查询</h2>
     <p class="sub">本服务没有 SQL 接口。一次查询是一个<strong>结构化请求</strong>——它指定一张表、一个由字段／操作／值条件组成的布尔过滤器，以及可选的分组、聚合、排序和限制。服务器会根据该表固定的注册表校验每个字段和操作，并将其编译为单次预先校验的数据库查找（一个参数化的 <code>SELECT</code>），其中你的输入始终被视为数据，绝不会作为命令执行。查询同样受到限制——结果数量上限、请求大小与复杂度限制，以及按密钥计的速率限制——因此单次请求无法耗尽服务资源。跨表的“复合”查询会通过同一道校验边界，在共享维度上连接两张或更多的表。在启用时，自然语言“Ask”输入框是唯一离开服务器的路径：它会把你输入的问题（连同数据集的模式）发送给第三方 LLM（Anthropic 的 Claude）以<em>起草</em>一个结构化查询，随后该查询会像其他任何查询一样先经过校验再运行——API 的其他任何部分都不会把数据发送到服务器之外。可在 <a href="/zh/reports">DSA 报告</a>仪表板上试用，或阅读 <a href="/docs">API 参考</a>以及我们的<a href="/zh/privacy">隐私</a>说明。</p>
 
     <h2>可复现性与引用</h2>
-    <p class="sub">该数据库是一个静态的只读<strong>快照</strong>。每个快照都带有一个不可变的<strong>数据集版本</strong>——它是其内容的指纹，因此只要数据发生变化它就会改变——以 <code>ETag</code> 和 <code>X-Dataset-Version</code> 标头的形式发送，并且每一行事实数据都会公开其来源报告的 <code>report_id</code>。一项数据由三者共同锁定——<em>数据集版本</em>、确切的<em>查询</em>，以及它所依据的 <code>report_id</code>——因此请将这三者一并引用，相关行便可被重新获取（仅凭版本和 report_id 只能确定一份来源报告，而非某个特定数字）。每当你排序或分页时，结果都会以完全确定的顺序返回，因此保存下来的一次提取是逐字节可复现的。快照的构建日期和覆盖周期会显示在每个仪表板的 “Cite as” 行中，以及每次导出的标头里。</p>
+    <p class="sub">该数据库是一份静态、只读的<strong>快照</strong>。每份快照都带有一个不可变更的<strong>数据集版本</strong>——它是其内容的指纹，因此只要数据发生变化它就会随之改变——以 <code>ETag</code> 和 <code>X-Dataset-Version</code> 头的形式发送，而且每一条事实行都会公开其来源报送的 <code>report_id</code>。一个数字由三者共同锁定——<em>数据集版本</em>、确切的<em>查询</em>，以及它所取自的 <em>report_id</em>(s)——所以请将这三者一并引用，相关行便可重新取回（仅凭版本和 report_id 只能标识某份来源报送，而非某个具体数字）。无论你进行排序还是分页，结果都会以完全确定的顺序返回，因此保存下来的某次提取在字节层面是可复现的。快照的构建日期和涵盖期间显示在每个仪表板的“Cite as”一行中，也显示在每次导出的头部信息里；而某一行的 <code>report_id</code> 可通过 <a href="/zh/catalog">报告位置</a> 目录解析到其已发布的报送。</p>
+    <p class="hint"><strong>署名：</strong>请将该数字归于报送它的平台；本站只应作为访问工具加以标注。</p>
+    <p class="hint">示例：<code>YouTube, EU DSA transparency report (H2 2025), accessed via the Transparency Report API — dataset version 7f3c1a2b9d04, report_id 42, retrieved 2026-06-26.</code> 实时快照确切的数据集版本和涵盖期间显示在 <a href="/zh/reports">DSA 报告</a> 和 <a href="/zh/removals">政府删除请求</a> 仪表板的“Cite as”一行中。</p>
 
     <h2>已知局限</h2>
     <ul class="toollist">
       <li><strong>快照，而非实时</strong><div class="desc">数字反映构建快照时可获得的报告；后续的更正或新报送的报告只会出现在随后的快照中（并附带新的数据集版本）。</div></li>
-      <li><strong>源质量参差不齐</strong><div class="desc">各平台报送的严谨程度和格式各不相同。被错误解析的无效行（表头单元格、空白、某些提取泄漏的杂散值）在加载时会被剔除，而不是凭猜测处理。</div></li>
+      <li><strong>源质量参差不齐</strong><div class="desc">各平台报送的严谨程度和格式各不相同。解析有误的垃圾行（表头单元格、空白、某些提取过程泄漏出的杂散值）会在加载时被舍弃，而非加以臆测——那些跨语言对照表无法明确映射的模板行也是如此。被舍弃行的确切数量以及对照表的覆盖程度尚未公布，因此整体完整性尚无法量化。</div></li>
       <li><strong>部分标签未规范化</strong><div class="desc">希腊语提取在源数据中存在列位移，因此大多数希腊语指标/范围标签被保留为正确但未映射的状态，以免冒错误映射的风险；类别标签尚未跨语言对照。</div></li>
       <li><strong>演示服务</strong><div class="desc">这是一个作品集/演示项目。它忠实于其来源，但并非官方记录——对于任何重要事项，请始终对照平台自己发布的报告（可从<a href="/zh/catalog">报告位置</a>链接进入）加以确认。</div></li>
     </ul>
