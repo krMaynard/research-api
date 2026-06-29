@@ -171,7 +171,7 @@ CREATE INDEX idx_t9_report   ON t9_human_resources(report_id);
 CREATE INDEX idx_t10_report  ON t10_amar(report_id);
 CREATE INDEX idx_t11_report  ON t11_qualitative(report_id);
 
--- Google Government Removal Requests (2019–2025)
+-- Google Government Removal Requests (2011–2025)
 CREATE TABLE gr_periods    (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
 CREATE TABLE gr_countries  (id INTEGER PRIMARY KEY, code TEXT NOT NULL, name TEXT NOT NULL);
 CREATE TABLE gr_requestors (id INTEGER PRIMARY KEY, name TEXT NOT NULL);

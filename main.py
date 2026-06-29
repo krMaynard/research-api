@@ -1015,7 +1015,7 @@ TABLES: dict[str, TableSpec] = {
         {},
     ),
     "gr_removals": TableSpec(
-        "Google Government Removal Requests — requests from governments worldwide to remove content from Google products (2019–2025), by period × country × requestor type × product × reason.",
+        "Google Government Removal Requests — requests from governments worldwide to remove content from Google products (2011–2025), by period × country × requestor type × product × reason.",
         f"FROM gr_removals f {_J_GR_PER} {_J_GR_CTY} {_J_GR_REQ} {_J_GR_PRD} {_J_GR_RSN}",
         {
             "period":       "per.name",

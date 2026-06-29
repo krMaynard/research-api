@@ -2089,6 +2089,20 @@ class TestGRTable:
         assert d["total_requests"] >= 0
         assert d["total_items"] >= 0
 
+    def test_vendored_gr_dataset_spans_2011_to_2025(self):
+        # The shipped Google-removals snapshot (what the Docker image seeds from)
+        # must cover the full 2011–2025 range, not just the old 2019+ slice.
+        import json
+        import pathlib
+        data = json.loads(pathlib.Path(__file__).with_name("data")
+                          .joinpath("google-government-removals.json").read_text())
+        periods = data["periods"]
+        assert len(periods) == 30
+        assert periods[0] == "January - June 2011"
+        assert periods[-1] == "July - December 2025"
+        # Row width matches the schema the seeder expects (5 dims + 8 measures).
+        assert all(len(row) == 13 for row in data["rows"][:50])
+
     def test_removals_page_served(self):
         r = client.get("/removals")
         assert r.status_code == 200 and "text/html" in r.headers["content-type"]
