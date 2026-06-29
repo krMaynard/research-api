@@ -66,7 +66,7 @@ CREATE TABLE categories (id INTEGER PRIMARY KEY, code TEXT NOT NULL, label TEXT 
 CREATE TABLE sections   (id INTEGER PRIMARY KEY, name TEXT NOT NULL, key TEXT NOT NULL DEFAULT '');
 CREATE TABLE indicators (id INTEGER PRIMARY KEY, name TEXT NOT NULL, key TEXT NOT NULL DEFAULT '');
 CREATE TABLE scopes     (id INTEGER PRIMARY KEY, name TEXT NOT NULL, is_total INTEGER NOT NULL DEFAULT 0, key TEXT NOT NULL DEFAULT '');
-CREATE TABLE surfaces   (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
+CREATE TABLE surfaces   (id INTEGER PRIMARY KEY, name TEXT NOT NULL, is_total INTEGER NOT NULL DEFAULT 0);
 
 -- Report dimension: one row per submitted transparency report (one dataset = one report).
 -- Supports multi-period ingestion when non-VLOP annual reports are added.
@@ -314,6 +314,18 @@ def normalize_dimensions(conn: sqlite3.Connection) -> dict[str, int]:
             conn.executemany(f"UPDATE {dim} SET is_total = 1 WHERE id = ?",
                              [(i,) for i in ids])
             flagged += len(ids)
+
+    # Surfaces: the "All" surface is the cross-surface aggregate (it sums Core +
+    # Ads + the per-target breakdowns), so flag it as the total grain the same way
+    # — letting queries pick "All" only or the per-surface breakdown, never both.
+    # "All" isn't in _TOTAL_LABELS (plain "all" is too generic elsewhere), so match
+    # it explicitly on the surface dimension alone.
+    surf_ids = [rid for rid, n in conn.execute("SELECT id, name FROM surfaces")
+                if (n or "").strip().casefold() == "all"]
+    if surf_ids:
+        conn.executemany("UPDATE surfaces SET is_total = 1 WHERE id = ?",
+                         [(i,) for i in surf_ids])
+        flagged += len(surf_ids)
 
     # Stamp the language-neutral canonical `key` on each template dimension row:
     # the crosswalk's English term where the label was filed in another language,

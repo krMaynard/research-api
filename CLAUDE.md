@@ -208,14 +208,16 @@ id), so seeding is positional. The DB is opened `mode=ro` as defence in depth.
 `build_db` and `build_harmonised_facts`, idempotent): the DSA template embeds an
 aggregate **total** row next to its breakdown rows (AMAR's EU `TOTAL` beside the
 per-member-state rows; the `All the entries` category beside per-category rows;
-the `Total number` scope beside upheld/reversed outcomes), so a naive `SUM`
+the `Total number` scope beside upheld/reversed outcomes; the `All` cross-surface
+row beside the per-surface rows like `Core`/`Ads` in t6/t7/t8), so a naive `SUM`
 double-counts. The pass sets **`is_total`** on the `scopes`/`categories` rows
-whose label is an aggregate (TOTAL/GESAMT/"All the entries"/…) and **deletes fact
-rows** that reference mis-parsed junk labels (`[...]`, header cells, blanks,
-numeric strays) leaked by some non-VLOP extracts. `compile_query` exposes
-`scope_is_total`/`category_is_total` as filterable dimensions so the curated tabs
-and the Explore "Rows" selector pick a single grain (totals only / breakdown
-only) instead of summing a total together with its own parts.
+whose label is an aggregate (TOTAL/GESAMT/"All the entries"/…) and on the
+`surfaces` row named `All`, and **deletes fact rows** that reference mis-parsed
+junk labels (`[...]`, header cells, blanks, numeric strays) leaked by some
+non-VLOP extracts. `compile_query` exposes
+`scope_is_total`/`category_is_total`/`surface_is_total` as filterable dimensions
+so the curated tabs and the Explore "Rows" selector pick a single grain (totals
+only / breakdown only) instead of summing a total together with its own parts.
 
 **Cross-language canonical keys.** Non-VLOP reports are filed in any official EU
 language, so the same template row arrives as different text (`Décisions
@@ -263,8 +265,8 @@ FROM/joins and the registry of:
 - **Dimensions** (text, `EQ`/`IN`): always `service_name`, `platform`; plus
   per-table `category_code`/`category_label`, `section`, `indicator`, `scope`,
   `surface`, or `qualitative_text` (t11); plus the derived `scope_is_total`/
-  `category_is_total` grain flags and the language-neutral `section_key`/
-  `indicator_key`/`scope_key` canonical labels.
+  `category_is_total`/`surface_is_total` grain flags and the language-neutral
+  `section_key`/`indicator_key`/`scope_key` canonical labels.
 - **Measures** (numeric, `EQ`/`IN`/`GT`/`GTE`/`LT`/`LTE`): per-table count
   columns (e.g. t4 `notices`/`tf_notices`/…, t7–t10 `value`). t11 has none.
 - **Aggregates**: `SUM`/`COUNT`/`AVG`/`MIN`/`MAX` over a measure, with an alias.

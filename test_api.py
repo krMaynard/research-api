@@ -1499,6 +1499,35 @@ class TestExplore:
         d = client.post("/api/explore", json=q).json()
         assert any("median" in w.lower() for w in d.get("warnings", []))
 
+    def test_surface_is_total_grain_filterable(self):
+        # t6/t7/t8 carry a cross-surface 'All' aggregate beside the per-surface
+        # rows (Core/Ads/…). surface_is_total lets a query pick a single grain so
+        # a SUM doesn't add the 'All' total to its own parts.
+        all_only = client.post("/api/explore", json={
+            "table": "t6_own_initiative_tos", "group_by": ["surface"],
+            "aggregates": [{"function": "SUM", "field_name": "measures", "alias": "n"}],
+            "query": {"and": [{"operation": "EQ", "field_name": "surface_is_total",
+                               "field_values": ["1"]}]}, "max_count": 50}).json()
+        si = all_only["columns"].index("surface")
+        assert {row[si] for row in all_only["rows"]} == {"All"}
+        breakdown = client.post("/api/explore", json={
+            "table": "t6_own_initiative_tos", "group_by": ["surface"],
+            "aggregates": [{"function": "SUM", "field_name": "measures", "alias": "n"}],
+            "query": {"and": [{"operation": "EQ", "field_name": "surface_is_total",
+                               "field_values": ["0"]}]}, "max_count": 50}).json()
+        bi = breakdown["columns"].index("surface")
+        assert "All" not in {row[bi] for row in breakdown["rows"]}
+
+    def test_explore_warns_on_surface_double_count_grain(self):
+        # Aggregating t6 without pinning surface_is_total may double-count the
+        # cross-surface 'All' total with its per-surface breakdown.
+        q = {"table": "t6_own_initiative_tos", "group_by": ["service_name"],
+             "query": {"and": [{"operation": "EQ", "field_name": "category_is_total", "field_values": ["1"]},
+                               {"operation": "EQ", "field_name": "report_tier", "field_values": ["vlop"]}]},
+             "aggregates": [{"function": "SUM", "field_name": "measures", "alias": "n"}]}
+        d = client.post("/api/explore", json=q).json()
+        assert any("surface_is_total" in w for w in d.get("warnings", []))
+
     def test_explore_no_warning_when_grain_pinned(self):
         # Pinning both the category total grain and the report tier → no advisories.
         q = {"table": "t4_notices", "group_by": ["service_name"],

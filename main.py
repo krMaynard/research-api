@@ -937,6 +937,10 @@ _CAT_DIMS = {"category_code": "c.code", "category_label": "c.label",
 # span reports filed in different EU languages; the plain dim keeps the original-
 # language text for display.
 _SCOPE_DIMS = {"scope": "sc.name", "scope_is_total": "sc.is_total", "scope_key": "sc.key"}
+# Surface dims, incl. the is_total flag (1 for the cross-surface "All" aggregate,
+# which sums Core + Ads + the per-target breakdowns) so a query can pick a single
+# grain instead of summing the "All" row together with the per-surface rows.
+_SURF_DIMS = {"surface": "su.name", "surface_is_total": "su.is_total"}
 _SEC_DIMS = {"section": "se.name", "section_key": "se.key"}
 _IND_DIMS = {"indicator": "i.name", "indicator_key": "i.key"}
 
@@ -981,19 +985,19 @@ TABLES: dict[str, TableSpec] = {
     "t6_own_initiative_tos": TableSpec(
         "Own-initiative actions on ToS violations, by category × restriction type × surface.",
         f"FROM t6_own_initiative_tos f {_J_RPT} {_J_SVC} {_J_CAT} {_J_SURF}",
-        {**_RPT_DIMS, **_SVC, **_CAT_DIMS, "surface": "su.name"},
+        {**_RPT_DIMS, **_SVC, **_CAT_DIMS, **_SURF_DIMS},
         dict(_OWN_INIT_MEASURES),
     ),
     "t7_appeals_recidivism": TableSpec(
         "Appeals & recidivism (internal complaints, out-of-court disputes, repeat-offender suspensions), by section × indicator × scope × surface.",
         f"FROM t7_appeals_recidivism f {_J_RPT} {_J_SVC} {_J_SEC} {_J_IND} {_J_SCOPE} {_J_SURF}",
-        {**_RPT_DIMS, **_SVC, **_SEC_DIMS, **_IND_DIMS, **_SCOPE_DIMS, "surface": "su.name"},
+        {**_RPT_DIMS, **_SVC, **_SEC_DIMS, **_IND_DIMS, **_SCOPE_DIMS, **_SURF_DIMS},
         {"value": "f.value"},
     ),
     "t8_automated_means": TableSpec(
         "Use of automated means for content moderation, by section × indicator × scope × surface.",
         f"FROM t8_automated_means f {_J_RPT} {_J_SVC} {_J_SEC} {_J_IND} {_J_SCOPE} {_J_SURF}",
-        {**_RPT_DIMS, **_SVC, **_SEC_DIMS, **_IND_DIMS, **_SCOPE_DIMS, "surface": "su.name"},
+        {**_RPT_DIMS, **_SVC, **_SEC_DIMS, **_IND_DIMS, **_SCOPE_DIMS, **_SURF_DIMS},
         {"value": "f.value"},
     ),
     "t9_human_resources": TableSpec(
@@ -2757,7 +2761,7 @@ def _leg_warnings(
         return []
     out: list[str] = []
     pinned = _filter_fields(query) | set(group_by or [])
-    for flag in ("category_is_total", "scope_is_total"):
+    for flag in ("category_is_total", "scope_is_total", "surface_is_total"):
         if flag in spec.dimensions and flag not in pinned:
             out.append(
                 f"'{table}' carries a reported total row alongside its breakdown along "
@@ -3166,7 +3170,8 @@ FIELD_HELP: dict[str, str] = {
     "indicator": "The specific metric reported within a section.",
     "scope": "A mixed breakdown dimension: depending on the indicator it may be a member-state code, an outcome ('Decisions upheld'/'reversed'), 'Total number', or 'Median time'. These are NOT mutually exclusive — pin a single value (or scope_is_total=1) before aggregating.",
     "scope_is_total": "1 = the reported total row of the scope dimension; 0 = a breakdown row. Pin one to avoid double-counting.",
-    "surface": "The platform surface/area the figure applies to (e.g. by language).",
+    "surface": "The platform surface/area the figure applies to ('All' = across all surfaces, 'Core' = the core service, 'Ads' = advertising, plus per-target breakdowns). 'All' is the cross-surface total — don't sum it with the per-surface rows.",
+    "surface_is_total": "1 = the cross-surface 'All' aggregate row; 0 = a per-surface breakdown (Core/Ads/…). Pin one to avoid double-counting the total with its parts.",
     "section_key": "Language-neutral canonical label for `section`, so a filter spans reports filed in other EU languages.",
     "indicator_key": "Language-neutral canonical label for `indicator`.",
     "scope_key": "Language-neutral canonical label for `scope`.",
