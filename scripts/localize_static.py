@@ -1734,14 +1734,14 @@ COMMON["ja"] = [
 ]
 PAGES["ja"] = {}
 PAGES["ja"]["home.html"] = [
-    (r'''Platform transparency data, made useful. Independent analysis and queryable APIs for regulatory disclosures from the world's largest online platforms.''',
-     r'''プラットフォームの透明性データを、役立つかたちに。世界最大級のオンラインプラットフォームによる規制関連の開示について、独立した分析とクエリ可能な API を提供します。'''),
+    (r'''Platform transparency data, made useful. Interactive dashboards and a structured query API for the EU Digital Services Act transparency reports and Google government content-removal requests.''',
+     r'''プラットフォームの透明性データを、役立つかたちに。EU デジタルサービス法（DSA）の透明性レポートと Google の政府コンテンツ削除要請を対象とする、インタラクティブなダッシュボードと構造化クエリ API。'''),
     (r'''<span class="hero-eyebrow">Platform transparency</span>''',
      r'''<span class="hero-eyebrow">プラットフォームの透明性</span>'''),
     (r'''Platform transparency data,<br>made useful.''',
      r'''プラットフォームの透明性データを、<br>役立つかたちに。'''),
-    (r'''<p>Independent analysis and queryable APIs for regulatory disclosures from the world's largest online platforms.</p>''',
-     r'''<p>世界最大級のオンラインプラットフォームによる規制関連の開示について、独立した分析とクエリ可能な API を提供します。</p>'''),
+    (r'''<p>Interactive dashboards and a structured query API for the EU Digital Services Act transparency reports and Google government content-removal requests.</p>''',
+     r'''<p>EU デジタルサービス法（DSA）の透明性レポートと Google の政府コンテンツ削除要請を対象とする、インタラクティブなダッシュボードと構造化クエリ API。</p>'''),
     (r'''Explore the data''',
      r'''データを探索'''),
     (r'''>API reference</a>''',
@@ -3211,14 +3211,14 @@ COMMON["ko"] = [
 ]
 PAGES["ko"] = {}
 PAGES["ko"]["home.html"] = [
-    (r'''Platform transparency data, made useful. Independent analysis and queryable APIs for regulatory disclosures from the world's largest online platforms.''',
-     r'''플랫폼 투명성 데이터를 유용하게. 세계 최대 온라인 플랫폼의 규제 공시 자료에 대한 독립적 분석과 쿼리 가능한 API.'''),
+    (r'''Platform transparency data, made useful. Interactive dashboards and a structured query API for the EU Digital Services Act transparency reports and Google government content-removal requests.''',
+     r'''플랫폼 투명성 데이터를 유용하게. EU 디지털 서비스법(DSA) 투명성 보고서와 Google 정부 콘텐츠 삭제 요청을 위한 대화형 대시보드와 구조화된 쿼리 API.'''),
     (r'''<span class="hero-eyebrow">Platform transparency</span>''',
      r'''<span class="hero-eyebrow">플랫폼 투명성</span>'''),
     (r'''Platform transparency data,<br>made useful.''',
      r'''플랫폼 투명성 데이터를,<br>유용하게.'''),
-    (r'''<p>Independent analysis and queryable APIs for regulatory disclosures from the world's largest online platforms.</p>''',
-     r'''<p>세계 최대 온라인 플랫폼의 규제 공시 자료에 대한 독립적 분석과 쿼리 가능한 API.</p>'''),
+    (r'''<p>Interactive dashboards and a structured query API for the EU Digital Services Act transparency reports and Google government content-removal requests.</p>''',
+     r'''<p>EU 디지털 서비스법(DSA) 투명성 보고서와 Google 정부 콘텐츠 삭제 요청을 위한 대화형 대시보드와 구조화된 쿼리 API.</p>'''),
     (r'''Explore the data''',
      r'''데이터 탐색'''),
     (r'''>API reference</a>''',
