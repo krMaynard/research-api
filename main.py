@@ -3156,7 +3156,7 @@ FIELD_HELP: dict[str, str] = {
     "report_period": "Reporting period covered by the report.",
     "report_period_start": "Start date of the reporting period (YYYY-MM-DD).",
     "report_period_end": "End date of the reporting period (YYYY-MM-DD).",
-    "report_tier": "'vlop' = designated Very Large platform; other tiers are non-VLOP filers using the harmonised template.",
+    "report_tier": "'vlop' = a designated Very Large Online Platform or Search Engine (VLOP/VLOSE — search engines such as Bing and Google Search file under this same tier); other tiers (online-platform / hosting / intermediary) are non-VLOP filers using the harmonised template.",
     # ── DSA t4 categories (two overlapping taxonomies + a total) ──
     "category_code": "DSA category code. STATEMENT_CATEGORY_* are the primary categories; KEYWORD_* are a parallel, finer taxonomy that overlaps them — do not sum both. 'TOTAL' is the reported grand total.",
     "category_label": "Human-readable label for category_code. 'All the entries' is the reported grand-total row.",
