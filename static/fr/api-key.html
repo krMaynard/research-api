@@ -615,7 +615,7 @@ $("#copy").addEventListener("click", async () => {
   const b = $("#copy"); const t = b.textContent;
   let ok = true;
   try { await navigator.clipboard.writeText(apiKey || ""); } catch (_) { ok = false; }
-  const msg = ok ? "Copied!" : "Appuyez sur Ctrl-C pour copier";
+  const msg = ok ? "Copié !" : "Appuyez sur Ctrl-C pour copier";
   b.textContent = msg;
   $("#copied-status").textContent = msg;   // announce to screen readers
   setTimeout(() => (b.textContent = t), 1500);
