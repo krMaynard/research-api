@@ -50,6 +50,11 @@ _DEFAULT_APPLE_SOURCE = os.getenv(
 _DEFAULT_GITHUB_SOURCE = os.getenv(
     "SEED_GITHUB_SOURCE_JSON", os.path.join(HERE, "data", "github-transparency.json")
 )
+# Snap Transparency dataset — vendored in-repo (from the sibling data repo's
+# snap-transparency/build_snap.py).
+_DEFAULT_SNAP_SOURCE = os.getenv(
+    "SEED_SNAP_SOURCE_JSON", os.path.join(HERE, "data", "snap-transparency.json")
+)
 
 
 def _category_label(code: str, labels: dict[str, str] | None) -> str:
@@ -275,6 +280,20 @@ CREATE TABLE github_metrics (
     count_high  INTEGER
 );
 CREATE INDEX idx_gh_dataset ON github_metrics(dataset);
+
+-- Snap (Snapchat) Transparency Report: Snap publishes its data already in a
+-- tidy-long shape, so it maps onto one fact table — one row per measured value.
+-- `value` is REAL (counts plus a few medians). Dims stored inline.
+CREATE TABLE snap_metrics (
+    period         TEXT NOT NULL,   -- e.g. '2024-H1'
+    section        TEXT NOT NULL,   -- report section (Ads Moderation, Appeals, …)
+    category       TEXT NOT NULL,   -- in-section breakdown (Country, Global, …)
+    sub_category_1 TEXT NOT NULL,
+    sub_category_2 TEXT NOT NULL,
+    metric         TEXT NOT NULL,   -- the measured quantity
+    value          REAL
+);
+CREATE INDEX idx_snap_section ON snap_metrics(section);
 
 -- Non-VLOP DSA report-location catalogue: where other online platforms publish
 -- their Art. 15/24 transparency reports. One row per report URL.
@@ -642,6 +661,34 @@ def build_github_db(data: dict[str, Any], db_path: str) -> int:
         conn.close()
 
 
+def build_snap_db(data: dict[str, Any], db_path: str) -> int:
+    """Populate the snap_metrics table in an existing DB at db_path.
+
+    The DB must already contain the table (created by SCHEMA). The dataset is the
+    tidy-long snap-transparency.json (`columns` header + `rows` in column order).
+    Returns the fact-row count.
+    """
+    expected_cols = ["period", "section", "category", "sub_category_1",
+                     "sub_category_2", "metric", "value"]
+    if data.get("columns") != expected_cols:
+        raise ValueError(f"snap dataset columns {data.get('columns')} "
+                         f"don't match the expected order {expected_cols}")
+    rows = data.get("rows")
+    if rows is None:
+        raise ValueError("snap dataset is missing 'rows'")
+    conn = sqlite3.connect(db_path)
+    try:
+        with conn:
+            conn.executemany(
+                "INSERT INTO snap_metrics (period, section, category, "
+                "sub_category_1, sub_category_2, metric, value) VALUES (?,?,?,?,?,?,?)",
+                rows,
+            )
+        return len(rows)
+    finally:
+        conn.close()
+
+
 def build_report_locations(rows: list[dict[str, str]], db_path: str) -> int:
     """Populate the report_locations table in an existing DB at db_path.
 
@@ -703,6 +750,8 @@ def main() -> None:
                         help="Path to apple-transparency.json")
     parser.add_argument("--github-source", default=_DEFAULT_GITHUB_SOURCE,
                         help="Path to github-transparency.json")
+    parser.add_argument("--snap-source", default=_DEFAULT_SNAP_SOURCE,
+                        help="Path to snap-transparency.json")
     args = parser.parse_args()
 
     with open(args.source, "r", encoding="utf-8") as f:
@@ -765,6 +814,15 @@ def main() -> None:
               f"{len({r[2] for r in gh_data['rows']})} datasets")
     else:
         print(f"  (skipping GitHub transparency — not found: {args.github_source})")
+
+    if os.path.isfile(args.snap_source):
+        with open(args.snap_source, "r", encoding="utf-8") as f:
+            snap_data = json.load(f)
+        snap_rows = build_snap_db(snap_data, args.db)
+        print(f"  snap transparency: {snap_rows} metric rows across "
+              f"{len({r[0] for r in snap_data['rows']})} periods")
+    else:
+        print(f"  (skipping Snap transparency — not found: {args.snap_source})")
 
     # Append the non-VLOP harmonised-template reports into the same star schema
     # (from the vendored snapshot, or the sibling repo's extracted CSVs in dev).

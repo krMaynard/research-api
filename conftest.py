@@ -112,6 +112,24 @@ _GITHUB_FIXTURE = {
 }
 seed.build_github_db(_GITHUB_FIXTURE, _DB)
 
+# A small slice of the Snap Transparency dataset (snap-transparency.json shape).
+# [period, section, category, sub_category_1, sub_category_2, metric, value]
+_SNAP_FIXTURE = {
+    "columns": ["period", "section", "category", "sub_category_1",
+                "sub_category_2", "metric", "value"],
+    "rows": [
+        ["2024-H1", "Ads Moderation", "Global", "", "", "total_ads_removed", 10711],
+        ["2024-H1", "Overview of Our T&S Enforcements", "Country", "Afghanistan",
+         "Drugs", "total_enforcements", 27],
+        # a median metric — must not be summed
+        ["2024-H1", "Overview of Our T&S Enforcements", "Country", "Afghanistan",
+         "Child Sexual Exploitation", "median_turnaround_time_minutes", 51.68],
+        ["2024-H2", "Governmental Content & Account Removal Requests", "Global",
+         "", "", "total_requests", 42],
+    ],
+}
+seed.build_snap_db(_SNAP_FIXTURE, _DB)
+
 # A small slice of the non-VLOP report-locations catalogue (report-locations.csv).
 _RL_FIXTURE = [
     # Reddit deliberately omits the optional columns (company / harmonised_template /

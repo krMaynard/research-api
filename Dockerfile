@@ -23,7 +23,7 @@ COPY static/ ./static/
 COPY data/ ./data/
 
 # Build the read-only SQLite DB into the image.
-RUN python seed.py --source data/vlop-dsa.json --gr-source data/google-government-removals.json --apple-source data/apple-transparency.json --github-source data/github-transparency.json --db "$DB_PATH"
+RUN python seed.py --source data/vlop-dsa.json --gr-source data/google-government-removals.json --apple-source data/apple-transparency.json --github-source data/github-transparency.json --snap-source data/snap-transparency.json --db "$DB_PATH"
 
 # Run as a non-root user. The DB is opened mode=ro and the app writes nothing
 # under /app, so we deliberately leave /app root-owned and only world-readable —

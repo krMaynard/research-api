@@ -1106,6 +1106,21 @@ TABLES: dict[str, TableSpec] = {
             "count_high": "f.count_high",
         },
     ),
+    "snap_metrics": TableSpec(
+        "Snap (Snapchat) Transparency Report — Trust & Safety enforcements, ads moderation, appeals, CSEA, DMCA/trademark notices, governmental content & account removal requests, information requests (incl. US national-security), bilateral data-access requests, and a regional/country overview. A tidy-long table: one row per measured value, identified by period × section × category × sub_category_1 × sub_category_2 × metric.",
+        "FROM snap_metrics f",
+        {
+            "period":         "f.period",
+            "section":        "f.section",
+            "category":       "f.category",
+            "sub_category_1": "f.sub_category_1",
+            "sub_category_2": "f.sub_category_2",
+            "metric":         "f.metric",
+        },
+        {
+            "value": "f.value",
+        },
+    ),
 }
 
 # operation → SQL comparator (numeric fields only)
@@ -2974,6 +2989,34 @@ def _leg_warnings(
                 f"{agg.function}({agg.field_name}) aggregates a median across rows, which "
                 f"is not statistically meaningful — read it per row instead."
             )
+    # snap_metrics is tidy-long: its single generic `value` column mixes counts
+    # and medians across non-comparable sections, so the name-keyed
+    # NON_ADDITIVE_MEASURES check above can't catch a summed median here.
+    if table == "snap_metrics" and any(
+        a.function in ("SUM", "AVG") and a.field_name == "value" for a in aggregates
+    ):
+        if "section" not in pinned:
+            out.append(
+                "'snap_metrics' spans multiple sections whose metrics aren't comparable; "
+                "this aggregate pins no 'section', so it may combine unrelated measures. "
+                "Filter or group by 'section'."
+            )
+        if "metric" not in pinned:
+            out.append(
+                "'snap_metrics' stores counts and medians in one 'value' column; this "
+                "aggregate pins no 'metric', so a median may be summed with counts. "
+                "Filter or group by 'metric'."
+            )
+        else:
+            metric_values = {
+                v for c in (*(query.and_ or ()), *(query.or_ or ()), *(query.not_ or ()))
+                if c.field_name == "metric" for v in c.field_values
+            }
+            if any(isinstance(v, str) and "median" in v.lower() for v in metric_values):
+                out.append(
+                    "snap_metrics SUM/AVG over a 'median_*' metric isn't statistically "
+                    "meaningful — read it per row instead."
+                )
     return out
 
 
@@ -3404,6 +3447,10 @@ FIELD_HELP: dict[str, str] = {
     "count_high": "Upper bound of the reported value (github_metrics); equals count_low for exact counts.",
     "year": "Calendar year of the github_metrics row.",
     "iso2": "Requesting government's ISO-3166 alpha-2 code (country-keyed github_metrics datasets).",
+    # ── Snap transparency (tidy-long snap_metrics) — `section` and `value` reuse
+    # the generic DSA help above; only these two are Snap-specific. ──
+    "sub_category_1": "First sub-breakdown within a snap_metrics section (e.g. a country, or a violation category).",
+    "sub_category_2": "Second sub-breakdown within a snap_metrics section (e.g. the violation category when sub_category_1 is a country).",
     # ── measures: DSA ──
     "notices": "Article 16 notices of allegedly illegal content received (Table 4).",
     "tf_notices": "Of those notices, the count submitted by trusted flaggers.",
