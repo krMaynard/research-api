@@ -2450,6 +2450,16 @@ class TestIndiaTable:
         d = client.post("/api/explore", json=q).json()
         assert any("unit" in w for w in d.get("warnings", []))
 
+    def test_india_warns_on_mixed_section_aggregation(self):
+        # Summing `value` without pinning `section` mixes unrelated measures
+        # (pin `unit` so only the section advisory is under test).
+        q = {"table": "india_metrics", "group_by": ["platform"],
+             "query": {"and": [{"operation": "EQ", "field_name": "unit",
+                                "field_values": ["count"]}]},
+             "aggregates": [{"function": "SUM", "field_name": "value", "alias": "v"}]}
+        d = client.post("/api/explore", json=q).json()
+        assert any("section" in w for w in d.get("warnings", []))
+
     def test_vendored_india_dataset_shape(self):
         import json
         import pathlib
