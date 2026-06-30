@@ -132,6 +132,9 @@ COMMON = {
         ('''      Report locations
     </a>''', '''      Ubicaciones de informes
     </a>'''),
+        ('''      NY ToS reports
+    </a>''', '''      Informes ToS de NY
+    </a>'''),
         ('''      MCP server
     </a>''', '''      Servidor MCP
     </a>'''),
@@ -174,6 +177,9 @@ COMMON = {
         ('''Government Removals''', '''Retraits gouvernementaux'''),
         ('''      Report locations
     </a>''', '''      Emplacements des rapports
+    </a>'''),
+        ('''      NY ToS reports
+    </a>''', '''      Rapports CGU de NY
     </a>'''),
         ('''      MCP server
     </a>''', '''      Serveur MCP
@@ -218,6 +224,9 @@ COMMON = {
         ('''      Report locations
     </a>''', '''      Berichtsstandorte
     </a>'''),
+        ('''      NY ToS reports
+    </a>''', '''      NY-ToS-Berichte
+    </a>'''),
         ('''      MCP server
     </a>''', '''      MCP-Server
     </a>'''),
@@ -260,6 +269,9 @@ COMMON = {
         ('''Government Removals''', '''Rimozioni governative'''),
         ('''      Report locations
     </a>''', '''      Posizioni dei report
+    </a>'''),
+        ('''      NY ToS reports
+    </a>''', '''      Report ToS di NY
     </a>'''),
         ('''      MCP server
     </a>''', '''      Server MCP
@@ -1750,6 +1762,9 @@ COMMON["ja"] = [
     (r'''      Report locations
     </a>''', r'''      レポートの掲載先
     </a>'''),
+    (r'''      NY ToS reports
+    </a>''', r'''      NY 利用規約報告
+    </a>'''),
     (r'''      MCP server
     </a>''', r'''      MCP サーバー
     </a>'''),
@@ -2489,6 +2504,9 @@ COMMON["zh"] = [
     (r'''      Report locations
     </a>''', r'''      报告位置
     </a>'''),
+    (r'''      NY ToS reports
+    </a>''', r'''      纽约服务条款报告
+    </a>'''),
     (r'''      MCP server
     </a>''', r'''      MCP 服务器
     </a>'''),
@@ -3226,6 +3244,9 @@ COMMON["ko"] = [
      r'''정부 삭제 요청'''),
     (r'''      Report locations
     </a>''', r'''      보고서 위치
+    </a>'''),
+    (r'''      NY ToS reports
+    </a>''', r'''      뉴욕 약관 보고서
     </a>'''),
     (r'''      MCP server
     </a>''', r'''      MCP 서버
@@ -4652,7 +4673,6 @@ _NY_TOS = {
          "<p><strong>Acceso</strong> — si el PDF de la presentación se puede descargar públicamente: <em>public</em> = servido desde el directorio abierto de la Fiscalía; <em>auth-required</em> = servido desde un directorio con inicio de sesión, por lo que se cataloga solo con su enlace de origen.</p>"),
         ("<p><strong>Report</strong> — the filing on the AG site. <strong>Archived</strong> — a snapshot of the PDF mirrored in this project's open-data repository (public filings only), in case the live link moves.</p>",
          "<p><strong>Informe</strong> — la presentación en el sitio de la Fiscalía. <strong>Archivado</strong> — una copia del PDF alojada en el repositorio de datos abiertos de este proyecto (solo presentaciones públicas), por si el enlace original cambia.</p>"),
-        ("      NY ToS reports\n    </a>", "      Informes ToS de NY\n    </a>"),
         ("<label>Period <select", "<label>Período <select"),
         ("<label>Access <select", "<label>Acceso <select"),
         ("<label>Search <input", "<label>Buscar <input"),
@@ -4695,7 +4715,6 @@ _NY_TOS = {
          "<p><strong>Accès</strong> — si le PDF du dépôt est téléchargeable publiquement : <em>public</em> = servi depuis le répertoire ouvert du procureur général ; <em>auth-required</em> = servi depuis un répertoire protégé par identification, il n’est donc catalogué qu’avec son lien source.</p>"),
         ("<p><strong>Report</strong> — the filing on the AG site. <strong>Archived</strong> — a snapshot of the PDF mirrored in this project's open-data repository (public filings only), in case the live link moves.</p>",
          "<p><strong>Rapport</strong> — le dépôt sur le site du procureur général. <strong>Archivé</strong> — une copie du PDF hébergée dans le dépôt de données ouvertes de ce projet (dépôts publics uniquement), au cas où le lien original change.</p>"),
-        ("      NY ToS reports\n    </a>", "      Rapports CGU de NY\n    </a>"),
         ("<label>Period <select", "<label>Période <select"),
         ("<label>Access <select", "<label>Accès <select"),
         ("<label>Search <input", "<label>Rechercher <input"),
@@ -4738,7 +4757,6 @@ _NY_TOS = {
          "<p><strong>Zugang</strong> — ob die PDF der Einreichung öffentlich herunterladbar ist: <em>public</em> = aus dem offenen Verzeichnis des Generalstaatsanwalts bereitgestellt; <em>auth-required</em> = aus einem anmeldepflichtigen Verzeichnis bereitgestellt, daher nur mit Quelllink katalogisiert.</p>"),
         ("<p><strong>Report</strong> — the filing on the AG site. <strong>Archived</strong> — a snapshot of the PDF mirrored in this project's open-data repository (public filings only), in case the live link moves.</p>",
          "<p><strong>Bericht</strong> — die Einreichung auf der Website des Generalstaatsanwalts. <strong>Archiviert</strong> — eine Kopie der PDF, gespiegelt im Open-Data-Repository dieses Projekts (nur öffentliche Einreichungen), falls der Originallink umzieht.</p>"),
-        ("      NY ToS reports\n    </a>", "      NY-ToS-Berichte\n    </a>"),
         ("<label>Period <select", "<label>Zeitraum <select"),
         ("<label>Access <select", "<label>Zugang <select"),
         ("<label>Search <input", "<label>Suche <input"),
@@ -4781,7 +4799,6 @@ _NY_TOS = {
          "<p><strong>Accesso</strong> — se il PDF della presentazione è scaricabile pubblicamente: <em>public</em> = servito dalla directory aperta del procuratore generale; <em>auth-required</em> = servito da una directory protetta da login, quindi catalogato solo con il collegamento alla fonte.</p>"),
         ("<p><strong>Report</strong> — the filing on the AG site. <strong>Archived</strong> — a snapshot of the PDF mirrored in this project's open-data repository (public filings only), in case the live link moves.</p>",
          "<p><strong>Report</strong> — la presentazione sul sito del procuratore generale. <strong>Archiviato</strong> — un’istantanea del PDF replicata nel repository di dati aperti di questo progetto (solo presentazioni pubbliche), nel caso in cui il collegamento originale venga spostato.</p>"),
-        ("      NY ToS reports\n    </a>", "      Report ToS di NY\n    </a>"),
         ("<label>Period <select", "<label>Periodo <select"),
         ("<label>Access <select", "<label>Accesso <select"),
         ("<label>Search <input", "<label>Cerca <input"),
@@ -4824,7 +4841,6 @@ _NY_TOS = {
          "<p><strong>アクセス</strong> — 提出書類の PDF を公開でダウンロードできるかどうか： <em>public</em> ＝司法長官の公開ディレクトリから提供、 <em>auth-required</em> ＝ログインが必要なディレクトリから提供されるため、出典リンクのみでカタログ化。</p>"),
         ("<p><strong>Report</strong> — the filing on the AG site. <strong>Archived</strong> — a snapshot of the PDF mirrored in this project's open-data repository (public filings only), in case the live link moves.</p>",
          "<p><strong>報告書</strong> — 司法長官サイト上の提出書類。 <strong>アーカイブ</strong> — ライブリンクが移動した場合に備え、本プロジェクトのオープンデータリポジトリにミラーした PDF のスナップショット（公開提出分のみ）。</p>"),
-        ("      NY ToS reports\n    </a>", "      NY 利用規約報告\n    </a>"),
         ("<label>Period <select", "<label>対象期間 <select"),
         ("<label>Access <select", "<label>アクセス <select"),
         ("<label>Search <input", "<label>検索 <input"),
@@ -4867,7 +4883,6 @@ _NY_TOS = {
          "<p><strong>访问</strong> — 提交文件的 PDF 是否可公开下载：<em>public</em> ＝来自总检察长的公开目录；<em>auth-required</em> ＝来自需登录的目录，因此仅以其来源链接收录。</p>"),
         ("<p><strong>Report</strong> — the filing on the AG site. <strong>Archived</strong> — a snapshot of the PDF mirrored in this project's open-data repository (public filings only), in case the live link moves.</p>",
          "<p><strong>报告</strong> — 总检察长网站上的提交文件。<strong>存档</strong> — 镜像保存在本项目开放数据仓库中的 PDF 快照（仅限公开提交），以备实时链接失效。</p>"),
-        ("      NY ToS reports\n    </a>", "      纽约服务条款报告\n    </a>"),
         ("<label>Period <select", "<label>周期 <select"),
         ("<label>Access <select", "<label>访问 <select"),
         ("<label>Search <input", "<label>搜索 <input"),
@@ -4910,7 +4925,6 @@ _NY_TOS = {
          "<p><strong>접근</strong> — 제출물의 PDF를 공개적으로 내려받을 수 있는지 여부: <em>public</em> ＝법무장관의 공개 디렉터리에서 제공; <em>auth-required</em> ＝로그인이 필요한 디렉터리에서 제공되므로 출처 링크만으로 목록화됨.</p>"),
         ("<p><strong>Report</strong> — the filing on the AG site. <strong>Archived</strong> — a snapshot of the PDF mirrored in this project's open-data repository (public filings only), in case the live link moves.</p>",
          "<p><strong>보고서</strong> — 법무장관 사이트의 제출물. <strong>아카이브</strong> — 실시간 링크가 이동할 경우에 대비해 이 프로젝트의 오픈 데이터 저장소에 미러링한 PDF의 스냅샷(공개 제출물만 해당).</p>"),
-        ("      NY ToS reports\n    </a>", "      뉴욕 약관 보고서\n    </a>"),
         ("<label>Period <select", "<label>기간 <select"),
         ("<label>Access <select", "<label>접근 <select"),
         ("<label>Search <input", "<label>검색 <input"),
